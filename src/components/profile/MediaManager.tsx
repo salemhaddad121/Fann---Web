@@ -11,6 +11,7 @@ import {
   uploadMedia,
   setPrimaryMedia,
   deleteMedia,
+  MediaUploadError,
 } from "@/lib/media-api";
 import type { MediaItem } from "@/types/artists";
 
@@ -83,7 +84,15 @@ export function MediaManager({
         : [...media, item];
       onChange(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      if (err instanceof MediaUploadError && err.likelyCorsIssue) {
+        // This specific case (fetch to S3 rejected outright, not just a
+        // non-2xx response) almost always means the bucket's CORS policy
+        // isn't set up for this origin yet — a config issue for whoever
+        // manages the AWS account, not something retrying will fix.
+        setError(err.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      }
     } finally {
       setUploading(false);
     }

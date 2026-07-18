@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { searchArtists, getCategories } from "@/lib/artists-api";
-import { searchPlanners } from "@/lib/planners-api";
+import { searchPlanners, getEventTypes } from "@/lib/planners-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { PublicHeader } from "@/components/search/PublicHeader";
@@ -197,6 +197,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
 function PlannerDirectory() {
   const [rawQuery, setRawQuery] = useState("");
   const [query, setQuery] = useState("");
+  const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [filters, setFilters] = useState<PlannerFiltersState>({});
   const [page, setPage] = useState(1);
@@ -214,6 +215,21 @@ function PlannerDirectory() {
     }, 400);
     return () => clearTimeout(t);
   }, [rawQuery]);
+
+  // Load the event-type chip row once.
+  useEffect(() => {
+    let cancelled = false;
+    getEventTypes()
+      .then((types) => {
+        if (!cancelled) setEventTypes(types);
+      })
+      .catch(() => {
+        // Non-critical — search still works without the chip row.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The actual search request.
   useEffect(() => {
@@ -259,6 +275,7 @@ function PlannerDirectory() {
       <PlannerFilters
         query={rawQuery}
         onQueryChange={setRawQuery}
+        eventTypes={eventTypes}
         selectedEventTypes={selectedEventTypes}
         onToggleEventType={toggleEventType}
         filters={filters}

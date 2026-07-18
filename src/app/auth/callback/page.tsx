@@ -1,42 +1,33 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Banner } from "@/components/auth/Banner";
-import { setTokens } from "@/lib/tokens";
 import { useAuth } from "@/lib/auth-context";
 
-function CallbackInner() {
-  const searchParams = useSearchParams();
+export default function AuthCallbackPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
-
-  const accessToken = searchParams.get("accessToken");
-  const refreshToken = searchParams.get("refreshToken");
-  const [error] = useState<string | null>(
-    !accessToken || !refreshToken ? "Sign-in didn't complete. Please try again." : null,
-  );
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!accessToken || !refreshToken) return;
-    setTokens(accessToken, refreshToken);
+    // By the time this page loads, the backend's redirect has already set
+    // the accessToken/refreshToken cookies (see google/apple callback in
+    // auth.controller.ts) — there's nothing in the URL to read anymore.
+    // We just ask who that cookie belongs to.
     refreshUser().then((user) => {
-      router.replace(user ? "/dashboard" : "/auth/login");
+      if (user) {
+        router.replace("/dashboard");
+      } else {
+        setError("Sign-in didn't complete. Please try again.");
+      }
     });
-  }, [accessToken, refreshToken, refreshUser, router]);
+  }, [refreshUser, router]);
 
   return (
     <AuthShell title="Signing you in…">
       {error ? <Banner kind="error">{error}</Banner> : <p className="text-sm text-muted">One moment.</p>}
     </AuthShell>
-  );
-}
-
-export default function AuthCallbackPage() {
-  return (
-    <Suspense fallback={null}>
-      <CallbackInner />
-    </Suspense>
   );
 }

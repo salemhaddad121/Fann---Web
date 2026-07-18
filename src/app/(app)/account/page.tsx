@@ -3,8 +3,7 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { changePassword, deleteAccount } from "@/lib/account-api";
-import { clearTokens } from "@/lib/tokens";
+import { changePassword, changeEmail, deleteAccount } from "@/lib/account-api";
 import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
@@ -95,6 +94,63 @@ function ChangePasswordForm() {
   );
 }
 
+function ChangeEmailForm() {
+  const { refreshUser } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
+
+    setSaving(true);
+    try {
+      const { message } = await changeEmail(currentPassword, newEmail);
+      setSuccessMessage(message);
+      setCurrentPassword("");
+      setNewEmail("");
+      // Pull the fresh user record so the pending-email note below
+      // appears right away, without waiting for the next page load.
+      await refreshUser();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't change your email.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <Banner kind="error">{error}</Banner>}
+      {successMessage && <Banner kind="success">{successMessage}</Banner>}
+
+      <FormField
+        label="New email address"
+        type="email"
+        autoComplete="email"
+        value={newEmail}
+        onChange={(e) => setNewEmail(e.target.value)}
+      />
+      <FormField
+        label="Current password"
+        type="password"
+        autoComplete="current-password"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+        placeholder="Leave blank if you signed up with Google/Apple"
+      />
+
+      <Button type="submit" loading={saving}>
+        Update email
+      </Button>
+    </form>
+  );
+}
+
 function DeleteAccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
@@ -107,10 +163,10 @@ function DeleteAccountSection() {
     setDeleting(true);
     try {
       await deleteAccount(password);
-      clearTokens();
       // Hard navigation, not router.push — forces AuthProvider to fully
-      // re-check (and find no) tokens, rather than carrying over any
-      // stale in-memory user state from before the deletion.
+      // re-check via GET /auth/me (which will now 401, since the account
+      // is soft-deleted and the backend already cleared the auth cookies)
+      // rather than carrying over any stale in-memory user state.
       window.location.href = "/search";
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Couldn't delete your account.");
@@ -186,6 +242,12 @@ export default function AccountPage() {
               ) : undefined
             }
           />
+          {user.pendingEmail && (
+            <p className="text-[11px] text-faint -mt-1.5 mb-1">
+              Pending confirmation for <span className="font-medium text-muted">{user.pendingEmail}</span> —
+              check that inbox for the verification link.
+            </p>
+          )}
           <Row
             label="Phone"
             value={user.phone ? String(user.phone) : "Not added"}
@@ -208,6 +270,11 @@ export default function AccountPage() {
           <Row label="Role" value={user.role[0].toUpperCase() + user.role.slice(1)} />
           {user.accountCode && <Row label="Account code" value={String(user.accountCode)} />}
           {memberSince && <Row label="Member since" value={memberSince} />}
+        </div>
+
+        <p className="text-xs font-bold text-ink mb-2">Change email</p>
+        <div className="mb-6">
+          <ChangeEmailForm />
         </div>
 
         <p className="text-xs font-bold text-ink mb-2">Change password</p>

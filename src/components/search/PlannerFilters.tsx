@@ -3,15 +3,10 @@
 import { useState } from "react";
 import type { SearchPlannersParams } from "@/types/planners";
 
-// Unlike artist categories, event types aren't backed by a reference table —
-// planner_profiles.event_types is just a free-text JSONB array each planner
-// fills in themselves. This is a curated common-values list for the chip
-// row, not something fetched from the backend.
-const COMMON_EVENT_TYPES = ["Wedding", "Corporate", "Festival", "Birthday", "Concert", "Private Party"];
-
 interface Props {
   query: string;
   onQueryChange: (q: string) => void;
+  eventTypes: string[];
   selectedEventTypes: string[];
   onToggleEventType: (type: string) => void;
   filters: Pick<SearchPlannersParams, "city" | "country" | "sort">;
@@ -21,6 +16,7 @@ interface Props {
 export function PlannerFilters({
   query,
   onQueryChange,
+  eventTypes,
   selectedEventTypes,
   onToggleEventType,
   filters,
@@ -55,31 +51,33 @@ export function PlannerFilters({
         </button>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
-        <button
-          onClick={() => selectedEventTypes.forEach(onToggleEventType)}
-          className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
-            selectedEventTypes.length === 0
-              ? "bg-[#E0F2FE] text-sky border-[#38BDF8] font-semibold"
-              : "border-hairline text-muted"
-          }`}
-        >
-          All event types
-        </button>
-        {COMMON_EVENT_TYPES.map((type) => (
+      {eventTypes.length > 0 && (
+        <div className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
           <button
-            key={type}
-            onClick={() => onToggleEventType(type)}
+            onClick={() => selectedEventTypes.forEach(onToggleEventType)}
             className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
-              selectedEventTypes.includes(type)
+              selectedEventTypes.length === 0
                 ? "bg-[#E0F2FE] text-sky border-[#38BDF8] font-semibold"
                 : "border-hairline text-muted"
             }`}
           >
-            {type}
+            All event types
           </button>
-        ))}
-      </div>
+          {eventTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => onToggleEventType(type)}
+              className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
+                selectedEventTypes.includes(type)
+                  ? "bg-[#E0F2FE] text-sky border-[#38BDF8] font-semibold"
+                  : "border-hairline text-muted"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      )}
 
       {panelOpen && (
         <div className="px-4 pb-4 pt-1 grid grid-cols-2 gap-3 border-t border-hairline">

@@ -14,15 +14,13 @@ export interface SafeUser {
   accountCode?: string;
   createdAt?: string;
   status: "active" | "pending_review" | "suspended" | "banned";
+  // Set while an email change is awaiting confirmation — see
+  // requestEmailChange/verifyEmail in the backend's auth.service.ts.
+  pendingEmail?: string | null;
   [key: string]: unknown;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface LoginResponse extends AuthTokens {
+export interface LoginResponse {
   user: SafeUser;
 }
 

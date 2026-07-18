@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { clearTokens, getAccessToken, setTokens } from "@/lib/tokens";
 import type { LoginResponse, RegisterPayload, RegisterResponse, SafeUser } from "@/types/auth";
 
 interface AuthContextValue {
@@ -24,19 +23,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // On first load, if a token is already in storage (e.g. page refresh),
-  // ask the API who that belongs to via GET /auth/me.
+  // On first load, ask the API who the ambient httpOnly cookie (if any)
+  // belongs to via GET /auth/me. Unlike the old localStorage version, this
+  // can't be skipped client-side first — JS can't read an httpOnly cookie,
+  // so there's no way to know locally whether a session exists without
+  // asking the server. A 401 here just means "not logged in," not an error.
   useEffect(() => {
     async function bootstrap() {
-      if (!getAccessToken()) {
-        setIsLoading(false);
-        return;
-      }
       try {
         const me = await apiFetch<SafeUser>("/auth/me");
         setUser(me);
       } catch {
-        clearTokens();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -50,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { email, password },
       auth: false,
     });
-    setTokens(data.accessToken, data.refreshToken);
     setUser(data.user);
     return data.user;
   }
@@ -69,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // even if the network call fails, still clear local state
     }
-    clearTokens();
     setUser(null);
     router.push("/login");
   }

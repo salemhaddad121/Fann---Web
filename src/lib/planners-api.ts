@@ -29,6 +29,13 @@ export async function getPlanner(id: string): Promise<PlannerDetail> {
   return apiFetch<PlannerDetail>(`/planners/${id}`, { auth: false });
 }
 
+// Distinct event types actually in use by active planners — powers the
+// search chip row (previously a static hardcoded list, since event_types
+// has no reference table the way artist categories do).
+export async function getEventTypes(): Promise<string[]> {
+  return apiFetch<string[]>("/planners/event-types", { auth: false });
+}
+
 // ----------------------------------------------------------------
 // Own profile (requires login)
 // ----------------------------------------------------------------

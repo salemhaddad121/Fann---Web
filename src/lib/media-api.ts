@@ -72,6 +72,22 @@ export async function deleteMedia(id: string): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/media/${id}`, { method: "DELETE" });
 }
 
+export class MediaUploadError extends Error {
+  // true: fetch() itself threw — the browser blocked the request before it
+  // ever reached S3, almost always because the bucket's CORS policy
+  // doesn't allow this origin/method yet (occasionally a genuine network
+  // drop, which looks identical from JS's perspective — browsers don't
+  // expose the real reason for a failed cross-origin request).
+  // false: fetch() resolved with a non-2xx status — CORS was fine (the
+  // browser let the response through), S3 itself rejected the upload for
+  // an unrelated reason (e.g. an expired presigned URL).
+  likelyCorsIssue: boolean;
+  constructor(message: string, likelyCorsIssue: boolean) {
+    super(message);
+    this.likelyCorsIssue = likelyCorsIssue;
+  }
+}
+
 // Full flow: presign -> PUT the raw bytes straight to S3 -> confirm.
 // The presigned URL points at S3 directly, not our API — this fetch call
 // never goes through apiFetch (no auth header, no /api/v1 prefix).
@@ -87,13 +103,21 @@ export async function uploadMedia(
     durationSec,
   });
 
-  const putResponse = await fetch(presignedUrl, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
-  });
+  let putResponse: Response;
+  try {
+    putResponse = await fetch(presignedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+  } catch {
+    throw new MediaUploadError(
+      "Couldn't reach storage to upload this file. This usually means the S3 bucket's CORS settings need to be updated — see docs/s3-cors-setup.md in the backend repo.",
+      true,
+    );
+  }
   if (!putResponse.ok) {
-    throw new Error("The upload to storage failed. Please try again.");
+    throw new MediaUploadError("The upload to storage failed. Please try again.", false);
   }
 
   return confirmMedia({

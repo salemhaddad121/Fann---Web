@@ -15,7 +15,8 @@ src/
       forgot-password/page.tsx POST /auth/forgot-password
       reset-password/page.tsx  POST /auth/reset-password       (emailed link lands here)
       verify-phone/page.tsx    POST /auth/send-otp, /auth/verify-otp (WhatsApp OTP)
-      callback/page.tsx        Captures tokens after Google/Apple login redirect
+      callback/page.tsx        Lands here after Google/Apple OAuth — cookies are already set by
+                                 then, this just asks GET /auth/me who they belong to
     (app)/                      Route GROUP — folder name in parens is invisible in the URL.
       layout.tsx                Auth-gates every page below + wraps it in <AppShell>
       dashboard/page.tsx         → /dashboard   (placeholder "you're logged in" home)
@@ -46,13 +47,14 @@ src/
     bookings/                   StatusBadge, ProposeBookingForm, ReviewForm
     admin/                      UserStatusBadge, Pagination, tabs/ (Users, Documents, Payments, Flags, Categories, Reviews, Audit)
   lib/
-    api.ts                       fetch wrapper — attaches the access token, retries once on 401 via /auth/refresh
+    api.ts                       fetch wrapper — sends/receives the httpOnly auth cookies
+                                   (`credentials: "include"`), retries once on 401 via /auth/refresh
     auth-context.tsx             React context holding the logged-in user; every page reads/writes through this
-    tokens.ts                    Where tokens are stored (see note in the file)
     nav-config.ts                Per-role bottom-nav items (artist vs planner vs admin)
     use-nav-badges.ts            Polls real unread counts for the Messages/notification badges
     use-party-directory.ts       Best-effort user_id → name/avatar lookup (see "Bookings" gap below)
-    artists-api.ts, planners-api.ts   Search, detail, own-profile get/update, availability CRUD
+    artists-api.ts, planners-api.ts   Search, detail, own-profile get/update, availability CRUD;
+                                       planners-api.ts also has getEventTypes() for the chip row
     bookings-api.ts               Bookings CRUD — list/create/respond/cancel
     reviews-api.ts                Public review lists + submission (note the user-id vs profile-id gotcha inside)
     messaging-api.ts              Conversations + messages — list/create/send/read
@@ -60,7 +62,7 @@ src/
     notification-style.ts         Icon/color per notification type
     admin-api.ts                  Every /admin/* endpoint — stats, users, documents, payments, flags, categories, reviews, audit log
     media-api.ts                   Presign/upload-to-S3/confirm flow + set-primary/delete
-    account-api.ts                 changePassword(), deleteAccount()
+    account-api.ts                 changePassword(), changeEmail(), deleteAccount()
     saved-api.ts                   Saved-artists list/save/unsave for planners
     users-api.ts                   getUserPublicInfo() — GET /users/:id/public-info
     use-public-info-map.ts         Batched, deduped version for lists (bookings)
@@ -91,10 +93,10 @@ behind it.
 - **One place for API calls.** `lib/api.ts` is the only file that calls `fetch` against the
   backend. Every page goes through it, so if something about the backend changes (a header,
   the retry logic), there's one spot to fix.
-- **Token storage.** The backend hands back `accessToken` + `refreshToken` as plain JSON
-  (not cookies), so for now both live in `localStorage` — simple to reason about while you're
-  still learning. `lib/tokens.ts` has a comment on the tradeoff and what a more locked-down
-  version would look like later.
+- **Auth cookies, not localStorage.** The backend sets `accessToken`/`refreshToken` as httpOnly
+  cookies now (see "Auth: httpOnly cookies" below for the full migration) — there's nothing for
+  this frontend to store or attach client-side anymore. `lib/api.ts` just sends
+  `credentials: "include"` on every request and lets the browser handle the rest.
 - **OTP is phone *verification*, not passwordless login.** `/auth/send-otp` and
   `/auth/verify-otp` both require you to already be logged in — so the flow is
   register → verify email → log in → optionally verify phone, not "log in with WhatsApp code."
@@ -116,10 +118,46 @@ behind it.
 4. To test with a seeded user: any of the 11 seeded accounts, password `Fann@dev2025`.
    (Check `migrations/002_fann_seed_data.sql` for the seeded emails.)
 
+**A small gotcha fixed along the way:** `.gitignore`'s `.env*` pattern was also excluding
+`.env.local.example` itself — the template step 2 above tells you to copy. It's fixed now
+(`!.env.local.example` added), but if you ever find this repo missing that file again, that's why.
+
 Two things that need real credentials before they'll work end-to-end:
 - **Google/Apple login** — needs `GOOGLE_CLIENT_ID`/`APPLE_*` set in the backend's `.env`.
 - **WhatsApp OTP** — needs the Meta-approved template (see backend README's "known gaps").
   Until then, `/auth/verify-phone` will show whatever error the backend returns.
+
+## Auth: httpOnly cookies
+
+Auth tokens used to be plain JSON in the login response, stored in `localStorage` and attached
+manually as an `Authorization: Bearer` header (see `lib/tokens.ts`, now deleted). That's been
+migrated to httpOnly cookies set directly by the backend — a real security improvement, not a
+refactor for its own sake: a token sitting in `localStorage` is readable by any JS that runs on
+the page, including an XSS payload; an httpOnly cookie isn't readable by JS at all, so an XSS bug
+elsewhere in the app can no longer walk off with a live session token.
+
+**What changed here, concretely:**
+- `lib/api.ts` sends `credentials: "include"` instead of an `Authorization` header, and no longer
+  reads or writes any token value — there's nothing left to read, since httpOnly cookies aren't
+  visible to JS by design.
+- `AuthProvider`'s bootstrap check can no longer short-circuit locally ("no token in storage, skip
+  the network call") — that was only possible because JS could see the token before. Now it always
+  calls `GET /auth/me` on first load and lets a 401 mean "not logged in." Slightly more network
+  chatter on first paint, in exchange for a real security property.
+- `/auth/callback` (the OAuth landing page) no longer reads `accessToken`/`refreshToken` from the
+  URL — the backend sets the cookies directly on the OAuth redirect now, so this page just asks
+  `GET /auth/me` who that cookie belongs to. (Tokens in a redirect URL were a real, if minor, leak
+  vector of their own — they end up in browser history and server access logs.)
+- `lib/tokens.ts` is gone entirely; nothing replaces it, since there's nothing left to manage
+  client-side.
+
+**One behavior change worth knowing if you're testing this:** logging in from a REST client like
+Postman/Insomnia now requires cookie jar support enabled (most have it), since the tokens don't
+come back in the response body anymore.
+
+See the backend README's matching section for the `SameSite`/CSRF reasoning behind this — it's a
+backend-side decision, but it constrains what topology this frontend can be deployed under (same
+parent domain as the API, not a fully unrelated one) unless that gets revisited later.
 
 ## Public search/browse
 
@@ -142,11 +180,12 @@ Both directions are wired to real data now:
 | `/search` | Artists | `GET /planners` (added specifically for this) |
 
 `/search` includes debounced name/keyword search, a filter panel, and pagination against the
-real `meta.total`/`meta.pages` for both directions. One asymmetry worth knowing: the artist side's
-category chips come from `GET /categories` (a real reference table), but the planner side's
-event-type chips (Wedding, Corporate, Festival, etc.) are a **curated static list** in
-`PlannerFilters.tsx` — `planner_profiles.event_types` is free-text JSONB with no backing reference
-table, so there's no endpoint to fetch a canonical list from.
+real `meta.total`/`meta.pages` for both directions. Both sides' chip rows are now backed by real
+data: the artist side's category chips come from `GET /categories` (a reference table), and the
+planner side's event-type chips come from the new `GET /planners/event-types` (distinct values
+actually in use across `planner_profiles.event_types`, which is free-text JSONB with no reference
+table of its own — this was a curated static list before). Both chip rows hide themselves
+gracefully if the list comes back empty, rather than showing an empty row.
 
 `/artists/[id]` and `/planners/[id]` now use the full profile layout — see below.
 
@@ -337,9 +376,12 @@ style.
   artist/planner split — is already covered by the Total Artists/Total Planners cards on `/admin`,
   so a whole separate page for just that felt thin. Building the rest would mean fabricating
   numbers, which I didn't want to do even for a screen that's "just for admins."
-- **Flags show their target plainly, not as a link.** `flags.target_id` is polymorphic — a user id
-  for profile flags, a message id for message flags, per the schema comment — so deep-linking
-  would need type-aware resolution. Shown as a labeled, truncated ID instead of guessing.
+- **Flags now link to the profile for `profile`-type reports.** `flags.target_id` is polymorphic —
+  a user id for profile flags, a message/conversation id for the other two — so for `profile`
+  flags specifically, `target_id` is resolved via `GET /users/:id/public-info` (the same directory
+  hook Bookings and Messages already use) to a real name and a link to `/artists/[id]` or
+  `/planners/[id]`. `message`/`conversation` flags are still shown as a plain labeled id — those
+  genuinely don't map to a single obvious profile to send someone to.
 - Payment amount-mismatch detection (the mockup shows a flagged "$120, expected $240" row) isn't
   real either — `payments` has no "expected amount" column to compare against; the admin judges
   the reference code and amount manually.
@@ -385,26 +427,39 @@ before the round trip:** photos ≤10MB, videos ≤250MB and ≤60 seconds, 20 i
 Video duration is read in-browser (loading the file into a hidden `<video>` element and reading
 `.duration`) since the backend requires it up front, at both presign and confirm.
 
-**One thing I can't verify from here:** the presigned URL uploads go straight from the browser to
-S3, which means the S3 bucket needs CORS configured to allow `PUT` from your frontend's origin —
-that's an AWS console setting, not something in this codebase. If uploads fail with an opaque
-network/CORS error rather than a clear validation message, that's the first thing to check.
+**S3 bucket CORS is documented, not fixable from here:** the presigned URL uploads go straight
+from the browser to S3, so the bucket needs CORS configured to allow `PUT` from the frontend's
+origin — that's an AWS console setting, outside this codebase either way. The exact policy JSON
+to paste in is now written up in the backend repo's `docs/s3-cors-setup.md`. On this side,
+`uploadMedia()` (`lib/media-api.ts`) now distinguishes the two failure modes that used to look
+identical: `fetch()` to S3 rejecting outright (almost always the CORS case — the browser blocked
+the request before it reached S3) versus a resolved-but-non-2xx response (CORS was fine, S3
+rejected it for some other reason, e.g. an expired presigned URL). `MediaManager.tsx` shows the
+CORS-specific message, pointing at that doc, instead of a generic "upload failed."
 
 ## Account settings
 
 `/account` is real now. Before building it, I checked what the backend could actually support —
 worth documenting since it shapes what's on the page:
-- **No self-service email change, and no logged-in password change existed.** Only
+- **No self-service email or logged-in password change existed at first.** Only
   forgot/reset-password (for a logged-out user) and phone OTP verification were ever built.
 - **No account deletion endpoint exists at all.**
 
-So I added one small, contained backend endpoint — `PATCH /auth/password` (current password
-verified via bcrypt before allowing the change) — since "change your password while logged in"
-is basic enough functionality that building the page without it felt wrong. I did **not** add
-account deletion: unlike password change, that's a genuinely consequential, hard-to-reverse
-operation (what happens to their bookings, reviews, messages?) that deserves an explicit product
-decision, not something to just wire up unprompted. The page says plainly that it isn't available
-yet and to contact support.
+So I added two small, contained backend endpoints — `PATCH /auth/password` (current password
+verified via bcrypt before allowing the change) and `PATCH /auth/email` — since both are basic
+enough functionality that building the page without them felt wrong. I did **not** add account
+deletion at the time: unlike password/email change, that's a genuinely consequential,
+hard-to-reverse operation (what happens to their bookings, reviews, messages?) that deserved an
+explicit product decision, not something to wire up unprompted. (It's since been added — see
+"Account deletion" below — once that decision was made.)
+
+**Email change doesn't take effect immediately.** `PATCH /auth/email` requires the current
+password (mirroring password change), checks the new address isn't already claimed by another
+account, and re-sends the *existing* verification-email flow — but to the new address, not the
+current one — rather than trusting it right away. The current email keeps working for login the
+entire time this is pending. Confirming via that link (the same `/auth/verify-email` page used at
+signup) is what actually swaps the address over. The account page shows a "pending confirmation
+for X — check that inbox" note whenever a change is outstanding, and clears once confirmed.
 
 **Two more bugs fixed while building this** (same shape as the `pending`/`pending_review` one
 from the live-status banner): `SafeUser` in `types/auth.ts` declared `phoneVerified`/
@@ -476,14 +531,15 @@ new tracking infrastructure, no fabricated numbers.
 Neither project had any test infrastructure at all. Both now do — a real, working foundation, not
 exhaustive coverage:
 
-**Backend** (`npm test`, Jest): 44 tests across 6 suites. DTO validation (password strength regex,
+**Backend** (`npm test`, Jest): 53 tests across 8 suites. DTO validation (password strength regex,
 review score bounds), and service-level unit tests against a hand-rolled Knex mock
 (`src/test-utils/knex-mock.ts`) for the business logic most worth protecting: booking
 status-transition guards, the review mutual-blind window and unlock-on-pair logic, the
-new-message notification dedup, and the flag-resolution paths added this session. One config note:
-`tsconfig.spec.json` sets `isolatedModules: true` so tests aren't blocked by the 25 pre-existing
-type errors elsewhere in the codebase (the same ones that don't block `start:dev` either) —
-that's a separate, already-tracked issue, not something silently expanded into scope here.
+new-message notification dedup, the flag-resolution paths, the planner event-types endpoint, and
+the email-change flow (`requestEmailChange`/`verifyEmail`'s forked behavior). The 25 pre-existing
+type errors that used to require `isolatedModules: true` as a workaround are fixed now (see the
+backend README) — tests type-check against the real `tsconfig.json` directly, one less moving
+part.
 
 **Frontend** (`npm test`, Vitest): 24 tests across 3 files, covering the pure utility functions
 that are cheap to test and easy to get subtly wrong — the calendar grid math, relative-time/
@@ -497,7 +553,7 @@ unprompted alongside four other features.
 ## Next up
 
 The original roadmap, plus every gap found along the way, plus the five items raised after that,
-are all built now:
+are all built now — plus a further round covering security-hardening and a few remaining gaps:
 1. ~~A logged-in shell~~ ✅
 2. ~~Public search/browse~~ ✅ — both directions
 3. ~~Artist/booker profile pages~~ ✅ — view + edit, both roles
@@ -514,10 +570,14 @@ are all built now:
 14. ~~Account deletion~~ ✅
 15. ~~Real analytics~~ ✅
 16. ~~Tests~~ ✅ — foundation, not exhaustive coverage
+17. ~~Auth tokens migrated to httpOnly cookies~~ ✅ — see "Auth: httpOnly cookies" above
+18. ~~Planner event-type chips backed by a real endpoint~~ ✅ — no longer a static list
+19. ~~S3 CORS documented + CORS-specific upload error handling~~ ✅
+20. ~~Self-service email change~~ ✅ — see "Account settings" above
+21. ~~Admin Flags link to the profile for `profile`-type reports~~ ✅
 
 What's left is genuinely open-ended at this point, not missing screens:
 - Expanding test coverage — component tests, integration/e2e, a real test database.
-- The 25 pre-existing TypeScript strict-null-check errors that block `npm run build` (production
-  build) on the backend — `start:dev` is unaffected, so this has never blocked actual development,
-  but it's still there.
+- Applying the S3 CORS policy in the actual AWS console (`docs/s3-cors-setup.md` in the backend
+  repo has the exact JSON) — that's an account-access step, not something fixable from either repo.
 - Whatever surfaces from actually using this day to day.
