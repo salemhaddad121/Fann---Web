@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/*
+  Aynu brand tokens — carried over from the existing app mockups
+  (design/screens/*.html) so the new web auth flow feels like the
+  same product, not a different site bolted on.
+*/
+:root {
+  --ink: #0b1d51;      /* primary text, brand panel background */
+  --indigo: #2b52e8;   /* primary action / artist accent */
+  --sky: #0284c7;      /* planner accent */
+  --mist: #f4f7ff;     /* soft fill background */
+  --hairline: #e2eaf5; /* borders */
+  --muted: #4b5a7a;    /* secondary text */
+  --faint: #8a9bc0;    /* placeholder / tertiary text */
+  --danger: #7f1d1d;
+  --danger-bg: #fef2f2;
+  --danger-border: #fca5a5;
+  --success: #166534;
+  --success-bg: #dcfce7;
+
+  /* System font stacks — no external fetch required, matches the
+     stack already used in design/screens/*.html. The display stack
+     leans on whatever serif ships with the OS (Georgia on
+     Windows/macOS, a serif fallback elsewhere) to give headlines a
+     bit of editorial contrast against the sans body text. */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", ui-serif, serif;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-indigo: var(--indigo);
+  --color-sky: var(--sky);
+  --color-mist: var(--mist);
+  --color-hairline: var(--hairline);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Six-box OTP input, lifted from design/screens/10_account_settings.html
+   so phone verification looks identical to the pattern already used
+   elsewhere in the product. */
+.otp-box {
+  border: 0.5px solid var(--hairline);
+  background: var(--mist);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  outline: none;
+}
+.otp-box:focus {
+  border-color: var(--indigo);
+  background: #ffffff;
+}

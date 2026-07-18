@@ -1,0 +1,191 @@
+import Link from "next/link";
+import { badgeColor } from "@/lib/badge-colors";
+import { MediaStrip } from "@/components/profile/MediaStrip";
+import { SocialLinks } from "@/components/profile/SocialLinks";
+import { ReviewList } from "@/components/profile/ReviewList";
+import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
+import type { ArtistDetail } from "@/types/artists";
+import type { Review } from "@/types/reviews";
+import type { UserStatus } from "@/types/admin";
+
+function isUnavailableToday(artist: ArtistDetail): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  return artist.availability.some((b) => b.start_date <= today && b.end_date >= today);
+}
+
+function formatRange(start: string, end: string): string {
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${new Date(start).toLocaleDateString(undefined, opts)} – ${new Date(end).toLocaleDateString(undefined, opts)}`;
+}
+
+export function ArtistProfileView({
+  artist,
+  reviews,
+  isOwnProfile = false,
+  accountStatus,
+}: {
+  artist: ArtistDetail;
+  reviews: Review[];
+  isOwnProfile?: boolean;
+  accountStatus?: UserStatus;
+}) {
+  const primaryCategory = artist.categories[0];
+  const unavailableToday = isUnavailableToday(artist);
+  const photos = artist.media.filter((m) => m.media_type === "photo");
+  const videos = artist.media.filter((m) => m.media_type === "video");
+
+  return (
+    <div className="max-w-lg mx-auto pb-6">
+      {isOwnProfile && accountStatus && <LiveStatusBanner role="artist" status={accountStatus} />}
+      {/* Hero */}
+      <div className="grid grid-cols-2 gap-2 p-4">
+        {[0, 1].map((i) => {
+          const photo = photos[i];
+          return (
+            <div key={i} className="rounded-2xl overflow-hidden h-36 border border-hairline bg-mist">
+              {photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo.cdn_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[#C5D3EE]">
+                  <i className="ti ti-microphone text-3xl" />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Identity */}
+      <div className="px-4 pb-4">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-xl font-bold text-ink">{artist.display_name}</span>
+              {artist.is_verified && <i className="ti ti-rosette-discount-check text-indigo text-lg" />}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted flex-wrap">
+              {primaryCategory && (
+                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-2xl ${badgeColor(primaryCategory.slug)}`}>
+                  {primaryCategory.name}
+                </span>
+              )}
+              {artist.location_city && (
+                <span className="flex items-center gap-1">
+                  <i className="ti ti-map-pin text-xs" />
+                  {artist.location_city}
+                  {artist.location_country ? `, ${artist.location_country}` : ""}
+                </span>
+              )}
+            </div>
+          </div>
+          <span
+            className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-2xl border ${
+              unavailableToday
+                ? "border-hairline text-faint"
+                : "border-[#86EFAC] text-success"
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${unavailableToday ? "bg-faint" : "bg-[#22C55E]"}`} />
+            {unavailableToday ? "Booked today" : "Available"}
+          </span>
+        </div>
+
+        {/* Stats */}
+        <div className="flex border border-hairline rounded-xl overflow-hidden">
+          <Stat icon="ti-star" value={artist.avg_rating != null ? Number(artist.avg_rating).toFixed(1) : "New"} label="Rating" />
+          <Stat icon="ti-users" value={String(artist.review_count)} label="Reviews" />
+          <Stat
+            icon="ti-currency-dollar"
+            value={artist.base_price_usd != null ? `$${Number(artist.base_price_usd).toLocaleString()}` : "—"}
+            label="From"
+            last
+          />
+        </div>
+      </div>
+
+      {(photos.length > 0 || videos.length > 0) && (
+        <Section title="Media">
+          <MediaStrip media={artist.media} />
+        </Section>
+      )}
+
+      {artist.bio && (
+        <Section title={`About ${artist.display_name.split(" ")[0]}`}>
+          <p className="text-[13px] text-muted leading-relaxed">{artist.bio}</p>
+        </Section>
+      )}
+
+      {artist.categories.length > 0 && (
+        <Section title="Categories">
+          <div className="flex flex-wrap gap-1.5">
+            {artist.categories.map((c) => (
+              <span key={c.id} className="text-xs px-3 py-1 rounded-2xl border border-hairline text-muted">
+                {c.name}
+              </span>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section
+        title="Availability"
+        action={
+          isOwnProfile ? (
+            <Link href="/calendar" className="text-xs font-semibold text-indigo">
+              Manage →
+            </Link>
+          ) : undefined
+        }
+      >
+        {artist.availability.length === 0 ? (
+          <p className="text-sm text-success flex items-center gap-1.5">
+            <i className="ti ti-circle-check" /> No blocked dates coming up
+          </p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {artist.availability.map((b) => (
+              <div key={b.id} className="flex items-center gap-2 text-sm text-muted">
+                <i className="ti ti-calendar-x text-faint" />
+                {formatRange(b.start_date, b.end_date)}
+                {b.note && <span className="text-faint">· {b.note}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {artist.social_links && Object.keys(artist.social_links).length > 0 && (
+        <Section title="Connect">
+          <SocialLinks links={artist.social_links} />
+        </Section>
+      )}
+
+      <Section title={`Reviews (${reviews.length})`}>
+        <ReviewList reviews={reviews} />
+      </Section>
+    </div>
+  );
+}
+
+function Stat({ icon, value, label, last }: { icon: string; value: string; label: string; last?: boolean }) {
+  return (
+    <div className={`flex-1 py-2.5 text-center ${last ? "" : "border-r border-hairline"}`}>
+      <i className={`ti ${icon} text-base text-indigo block mb-1`} />
+      <div className="text-base font-bold text-ink">{value}</div>
+      <div className="text-[10px] text-faint">{label}</div>
+    </div>
+  );
+}
+
+function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="px-4 pt-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[13px] font-bold text-ink">{title}</h2>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
