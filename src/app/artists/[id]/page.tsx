@@ -9,6 +9,7 @@ import { getArtistReviews } from "@/lib/reviews-api";
 import { startConversation } from "@/lib/messaging-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
+import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
 import type { ArtistDetail } from "@/types/artists";
@@ -187,16 +188,19 @@ export default function ArtistDetailPage() {
 
   if (user) {
     return (
-      <AppShell user={user}>
+      <AppShell user={user} background="artist">
         <Content id={params.id} />
       </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <PublicHeader />
-      <Content id={params.id} />
+    <div className="min-h-screen relative">
+      <PageBackground role="artist" />
+      <div className="relative z-10">
+        <PublicHeader />
+        <Content id={params.id} />
+      </div>
     </div>
   );
 }

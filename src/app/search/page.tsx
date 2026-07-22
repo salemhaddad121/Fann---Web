@@ -6,6 +6,7 @@ import { searchArtists, getCategories } from "@/lib/artists-api";
 import { searchPlanners, getEventTypes } from "@/lib/planners-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
+import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { PlannerFilters } from "@/components/search/PlannerFilters";
@@ -336,7 +337,7 @@ export default function SearchPage() {
   // Artists use this to find bookers — now real, via GET /planners.
   if (user?.role === "artist") {
     return (
-      <AppShell user={user}>
+      <AppShell user={user} background="planner">
         <PlannerDirectory />
       </AppShell>
     );
@@ -344,16 +345,19 @@ export default function SearchPage() {
 
   if (user) {
     return (
-      <AppShell user={user}>
+      <AppShell user={user} background="artist">
         <ArtistDirectory isPlanner={user.role === "planner"} />
       </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <PublicHeader />
-      <ArtistDirectory isPlanner={false} />
+    <div className="min-h-screen relative">
+      <PageBackground role="artist" />
+      <div className="relative z-10">
+        <PublicHeader />
+        <ArtistDirectory isPlanner={false} />
+      </div>
     </div>
   );
 }

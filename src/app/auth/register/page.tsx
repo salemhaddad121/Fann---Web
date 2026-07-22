@@ -53,7 +53,11 @@ export default function RegisterPage() {
 
   if (submitted) {
     return (
-      <AuthShell title="Check your email" subtitle="One more step before you're in.">
+      <AuthShell
+        title="Check your email"
+        subtitle="One more step before you're in."
+        background={role === "planner" ? "planner" : "artist"}
+      >
         <Banner kind="success">
           We&apos;ve sent a verification link to <strong>{email}</strong>. Open it to activate your
           account, then come back and log in.
@@ -69,6 +73,7 @@ export default function RegisterPage() {
     <AuthShell
       title="Create your account"
       subtitle="Join Aynu as an artist or an event planner."
+      background={role === "planner" ? "planner" : "artist"}
       footer={
         <>
           Already have an account?{" "}

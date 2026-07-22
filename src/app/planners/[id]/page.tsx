@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { getPlanner } from "@/lib/planners-api";
 import { getPlannerReviews } from "@/lib/reviews-api";
 import { AppShell } from "@/components/shell/AppShell";
+import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { PlannerProfileView } from "@/components/profile/PlannerProfileView";
 import type { PlannerDetail } from "@/types/planners";
@@ -95,16 +96,19 @@ export default function PlannerDetailPage() {
 
   if (user) {
     return (
-      <AppShell user={user}>
+      <AppShell user={user} background="planner">
         <Content id={params.id} />
       </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <PublicHeader />
-      <Content id={params.id} />
+    <div className="min-h-screen relative">
+      <PageBackground role="planner" />
+      <div className="relative z-10">
+        <PublicHeader />
+        <Content id={params.id} />
+      </div>
     </div>
   );
 }

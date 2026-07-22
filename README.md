@@ -116,7 +116,7 @@ behind it.
    ```
 3. Open `http://localhost:3000`. You'll land on `/auth/login`.
 4. To test with a seeded user: any of the 11 seeded accounts, password `Fann@dev2025`.
-   (Check `migrations/002_fann_seed_data.sql` for the seeded emails.)
+   (Check `migrations/009_fann_seed_data.sql` for the seeded emails.)
 
 **A small gotcha fixed along the way:** `.gitignore`'s `.env*` pattern was also excluding
 `.env.local.example` itself — the template step 2 above tells you to copy. It's fixed now
@@ -124,6 +124,8 @@ behind it.
 
 Two things that need real credentials before they'll work end-to-end:
 - **Google/Apple login** — needs `GOOGLE_CLIENT_ID`/`APPLE_*` set in the backend's `.env`.
+  Without them the backend still boots normally and everything else works; those two routes just
+  answer 503, and the buttons surface that message rather than hanging.
 - **WhatsApp OTP** — needs the Meta-approved template (see backend README's "known gaps").
   Until then, `/auth/verify-phone` will show whatever error the backend returns.
 
@@ -581,3 +583,14 @@ What's left is genuinely open-ended at this point, not missing screens:
 - Applying the S3 CORS policy in the actual AWS console (`docs/s3-cors-setup.md` in the backend
   repo has the exact JSON) — that's an account-access step, not something fixable from either repo.
 - Whatever surfaces from actually using this day to day.
+
+## Do not run `npm audit fix --force` in this repo
+
+`npm audit` reports 2 moderate advisories against `postcss 8.4.31`. That copy of postcss is
+vendored *inside* Next.js, so it isn't ours to bump — and `--force` "resolves" it by downgrading
+`next` from **16.2.10 to 9.3.3**, seven major versions back, which is dramatically worse than the
+advisory it closes. 16.2.10 is the current Next release, so there is no clean fix today.
+
+Leave these open and re-check when Next ships a patched postcss. (Backend dependencies were a
+different story — those were real, reachable, and are now at zero; see the backend README's
+audit section.)
