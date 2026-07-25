@@ -42,11 +42,14 @@ export function AuthShell({
 
         <div className="z-10 max-w-sm">
           <p className="font-display text-3xl font-medium leading-tight mb-4">
-            Book Lebanon&apos;s live talent, without the group chat chaos.
+            {background === "planner"
+              ? "Search and Manage all your live talent needs in one place"
+              : "Promote yourself to all event organizers"}
           </p>
           <p className="text-[#93ADE8] text-sm leading-relaxed">
-            DJs, bands, photographers and MCs — searchable, available, and
-            bookable in one place.
+            {background === "planner"
+              ? "DJs, bands, photographers, hosts and much more — searchable, available, and bookable in one place."
+              : "Event Planners, Venues, Restaurants, Wedding Planners and much more all in one place."}
           </p>
         </div>
 
