@@ -28,12 +28,22 @@ export function buildMonthGrid(year: number, month: number): CalendarCell[] {
   return cells;
 }
 
-export function isBlocked(dateKey: string, blocks: AvailabilityBlock[]): boolean {
-  return blocks.some((b) => b.start_date <= dateKey && dateKey <= b.end_date);
+// The API returns DATE columns as full ISO timestamps ("2026-08-13T00:00:00.000Z")
+// because node-postgres hydrates them into JS Date objects before serialisation.
+// Everything below compares and formats on plain "YYYY-MM-DD" keys, so normalise
+// at the boundary rather than in every caller.
+export function normalizeDateKey(value: string): string {
+  return value.slice(0, 10);
 }
 
-export function formatDateLong(dateKey: string): string {
-  const [y, m, d] = dateKey.split("-").map(Number);
+export function isBlocked(dateKey: string, blocks: AvailabilityBlock[]): boolean {
+  return blocks.some(
+    (b) => normalizeDateKey(b.start_date) <= dateKey && dateKey <= normalizeDateKey(b.end_date),
+  );
+}
+
+export function formatDateLong(rawDate: string): string {
+  const [y, m, d] = normalizeDateKey(rawDate).split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
@@ -42,6 +52,6 @@ export function formatDateLong(dateKey: string): string {
 }
 
 export function formatBlockRange(startKey: string, endKey: string): string {
-  if (startKey === endKey) return formatDateLong(startKey);
+  if (normalizeDateKey(startKey) === normalizeDateKey(endKey)) return formatDateLong(startKey);
   return `${formatDateLong(startKey)} – ${formatDateLong(endKey)}`;
 }
