@@ -33,7 +33,9 @@ export function ArtistCard({
       href={`/artists/${artist.id}`}
       className="bg-white border border-hairline rounded-[14px] overflow-hidden flex flex-col"
     >
-      <div className="relative w-full pt-[64%] bg-mist">
+      {/* Portrait 5:6-ish frame. The name banner below is a fixed ~93px tall,
+          so on the old 64% (landscape) frame it swallowed 89% of the photo. */}
+      <div className="relative w-full pt-[120%] bg-mist">
         {artist.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element -- external CDN URLs, no next.config domain list set up yet
           <img
