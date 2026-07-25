@@ -1,4 +1,4 @@
-# Aynu Web — Frontend
+# Fann Web — Frontend
 
 Next.js (App Router) + TypeScript + Tailwind. This first slice covers the
 **auth flow**, wired to the real `fann-api` backend.

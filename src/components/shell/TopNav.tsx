@@ -18,7 +18,7 @@ export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNo
     <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-white border-b border-hairline">
       <Link href={user.role === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2">
         <span className="font-display text-base font-bold text-ink">
-          ayn<span className="text-indigo">u</span>
+          fan<span className="text-indigo">n</span>
         </span>
         {user.role === "admin" && (
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]">
