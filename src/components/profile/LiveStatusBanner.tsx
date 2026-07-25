@@ -29,11 +29,11 @@ const COPY: Record<Exclude<UserStatus, "active">, Record<Role, { heading: string
   banned: {
     artist: {
       heading: "Account Banned",
-      body: "Your account has been banned. Your profile is no longer visible on Aynu.",
+      body: "Your account has been banned. Your profile is no longer visible on Fann.",
     },
     planner: {
       heading: "Account Banned",
-      body: "Your account has been banned. Your profile is no longer visible on Aynu.",
+      body: "Your account has been banned. Your profile is no longer visible on Fann.",
     },
   },
 };
