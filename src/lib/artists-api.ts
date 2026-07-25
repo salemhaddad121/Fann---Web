@@ -49,6 +49,17 @@ export async function getMyArtistProfile(): Promise<ArtistDetail> {
   return apiFetch<ArtistDetail>("/artists/me");
 }
 
+export interface BookerTypeBreakdown {
+  total: number;
+  breakdown: { type: string; count: number; pct: number }[];
+}
+
+// "Who books you, by type" — this artist's bookings grouped by the booker's
+// booker_type (Venue, Event Planner, …), most-frequent first.
+export async function getMyBookerTypes(): Promise<BookerTypeBreakdown> {
+  return apiFetch<BookerTypeBreakdown>("/artists/me/booker-types");
+}
+
 export async function updateMyArtistProfile(payload: UpdateArtistProfilePayload): Promise<ArtistDetail> {
   return apiFetch<ArtistDetail>("/artists/me", { method: "PUT", body: payload });
 }

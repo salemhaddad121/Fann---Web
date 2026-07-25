@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/auth/Button";
+import { ArtistDashboard } from "@/components/dashboard/ArtistDashboard";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -22,6 +23,8 @@ export default function DashboardPage() {
   }, [user, router]);
 
   if (!user || user.role === "admin") return null;
+
+  if (user.role === "artist") return <ArtistDashboard name={user.email.split("@")[0]} />;
 
   return (
     <div className="p-4">
@@ -60,7 +63,7 @@ export default function DashboardPage() {
           <div>
             <div className="text-sm font-semibold text-ink">My bookings</div>
             <div className="text-xs text-faint">
-              {user.role === "artist" ? "Requests, upcoming, past" : "Track what you've proposed"}
+              {"Track what you've proposed"}
             </div>
           </div>
         </div>
