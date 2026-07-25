@@ -37,6 +37,9 @@ export function PlannerCard({ planner }: { planner: PlannerCardType }) {
         {planner.company_name && (
           <div className="text-[10px] text-faint truncate">{planner.company_name}</div>
         )}
+        {planner.booker_type && (
+          <div className="text-[10px] font-semibold text-sky truncate">{planner.booker_type}</div>
+        )}
         {planner.location_city && (
           <div className="text-[10px] text-muted flex items-center gap-1">
             <i className="ti ti-map-pin text-[10px]" />
