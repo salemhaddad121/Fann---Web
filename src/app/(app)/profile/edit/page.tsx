@@ -9,6 +9,7 @@ import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
 import { ChipInput } from "@/components/profile/ChipInput";
+import { BOOKER_TYPES } from "@/types/planners";
 import { MediaManager } from "@/components/profile/MediaManager";
 import { ComingSoon } from "@/components/shell/ComingSoon";
 import type { CategoryGroup, MediaItem } from "@/types/artists";
@@ -190,6 +191,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [eventTypes, setEventTypes] = useState<string[]>([]);
+  const [bookerType, setBookerType] = useState("");
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
   const [media, setMedia] = useState<MediaItem[]>([]);
 
@@ -204,6 +206,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
         setCity(profile.location_city ?? "");
         setCountry(profile.location_country ?? "");
         setEventTypes(profile.event_types ?? []);
+        setBookerType(profile.booker_type ?? "");
         setSocialLinks(profile.social_links ?? {});
         setMedia(profile.media ?? []);
         setLoaded(true);
@@ -226,6 +229,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
         locationCity: city,
         locationCountry: country,
         eventTypes,
+        bookerType: bookerType || undefined,
         socialLinks: Object.fromEntries(Object.entries(socialLinks).filter(([, v]) => v)),
       });
       router.push("/profile");
@@ -257,6 +261,22 @@ function PlannerEditForm({ accent }: { accent: string }) {
         <FormField label="City" value={city} onChange={(e) => setCity(e.target.value)} />
         <FormField label="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
       </div>
+
+      <label className="block mb-4">
+        <span className="block text-xs font-semibold text-ink mb-1.5">Type of booker</span>
+        <select
+          value={bookerType}
+          onChange={(e) => setBookerType(e.target.value)}
+          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-sky bg-white"
+        >
+          <option value="">Select a type…</option>
+          {BOOKER_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <ChipInput label="Events you host" values={eventTypes} onChange={setEventTypes} placeholder="e.g. Wedding" />
 

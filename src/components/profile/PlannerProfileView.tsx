@@ -38,6 +38,11 @@ export function PlannerProfileView({
       <div className="px-4 pb-4">
         <div className="text-xl font-bold text-ink mb-0.5">{planner.display_name}</div>
         {planner.company_name && <p className="text-sm text-faint mb-1.5">{planner.company_name}</p>}
+        {planner.booker_type && (
+          <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-mist text-sky mb-2">
+            {planner.booker_type}
+          </span>
+        )}
         {planner.location_city && (
           <p className="text-xs text-muted flex items-center gap-1 mb-3">
             <i className="ti ti-map-pin text-xs" />

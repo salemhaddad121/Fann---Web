@@ -8,6 +8,7 @@ export interface UpdatePlannerProfilePayload {
   locationCity?: string;
   locationCountry?: string;
   eventTypes?: string[];
+  bookerType?: string;
   socialLinks?: Record<string, string>;
 }
 
