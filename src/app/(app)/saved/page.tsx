@@ -55,7 +55,7 @@ function SavedList() {
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-2">Saved</h1>
-      <div className="grid grid-cols-2 gap-2.5 px-4 pb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
         {artists.map((artist) => (
           <ArtistCard key={artist.id} artist={artist} isSaved onToggleSave={() => handleRemove(artist.id)} />
         ))}
