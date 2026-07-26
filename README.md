@@ -107,6 +107,26 @@ behind it.
 
 ## Running it locally
 
+### Option A — Docker (whole stack, no local Node needed)
+
+The `fann-api` repo carries a `docker-compose.yml` that builds and runs
+**both** repos plus Postgres and Redis. Clone the two repos side by side and
+run everything from there:
+
+```bash
+# <parent>/fann-api  +  <parent>/Fann---Web  side by side
+cd ../fann-api
+docker compose up -d --build
+```
+
+Web lands on `http://localhost:3000`, talking to the API on
+`http://localhost:4000/api/v1`. This repo's `Dockerfile` bakes
+`NEXT_PUBLIC_API_URL` in at **build** time (Next.js inlines `NEXT_PUBLIC_*`
+into the client bundle), so point it elsewhere with a build arg, not a
+runtime env var.
+
+### Option B — natively (Node ≥ 20 required — the build refuses Node 18)
+
 1. Make sure the backend (`fann-api`) is running — by default on `http://localhost:4000`.
 2. In this folder:
    ```bash
