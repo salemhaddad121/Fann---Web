@@ -3,13 +3,48 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { getAdminUser, updateAdminUserStatus } from "@/lib/admin-api";
+import { getAdminUser, updateAdminUserStatus, resetAdminUserPassword } from "@/lib/admin-api";
 import { UserStatusBadge } from "@/components/admin/UserStatusBadge";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { ComingSoon } from "@/components/shell/ComingSoon";
 import { Button } from "@/components/auth/Button";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import type { AdminUserDetail, UserStatus } from "@/types/admin";
+
+// Every action on this page is confirmed before it runs. `status` actions
+// change what the user can do with their account; `reset-password` replaces
+// their credentials outright — none of them should fire on a stray click.
+type PendingAction =
+  | { kind: "status"; status: UserStatus }
+  | { kind: "reset-password" };
+
+const STATUS_COPY: Record<UserStatus, { title: string; body: string; confirmLabel: string; destructive: boolean }> = {
+  active: {
+    title: "Approve this user?",
+    body: "They'll be able to sign in and use their account, and they'll be notified.",
+    confirmLabel: "Approve",
+    destructive: false,
+  },
+  suspended: {
+    title: "Suspend this user?",
+    body: "They'll lose access until you reactivate them, and they'll be notified.",
+    confirmLabel: "Suspend",
+    destructive: true,
+  },
+  banned: {
+    title: "Reject this user?",
+    body: "They'll lose access to the platform and be notified. You can reactivate them later.",
+    confirmLabel: "Reject",
+    destructive: true,
+  },
+  pending_review: {
+    title: "Move back to pending?",
+    body: "The account will await review again.",
+    confirmLabel: "Confirm",
+    destructive: false,
+  },
+};
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -25,6 +60,8 @@ function AdminUserDetailContent({ id }: { id: string }) {
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<PendingAction | null>(null);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,13 +77,22 @@ function AdminUserDetailContent({ id }: { id: string }) {
     };
   }, [id]);
 
-  async function handleStatus(next: UserStatus) {
+  async function runPending() {
+    if (!pending) return;
     setBusy(true);
+    setError(null);
     try {
-      await updateAdminUserStatus(id, next);
-      setDetail((prev) => (prev ? { ...prev, status: next } : prev));
+      if (pending.kind === "status") {
+        await updateAdminUserStatus(id, pending.status);
+        setDetail((prev) => (prev ? { ...prev, status: pending.status } : prev));
+      } else {
+        const { temporaryPassword } = await resetAdminUserPassword(id);
+        setTempPassword(temporaryPassword);
+      }
+      setPending(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update this user.");
+      setPending(null);
+      setError(err instanceof Error ? err.message : "Couldn't complete that action.");
     } finally {
       setBusy(false);
     }
@@ -125,36 +171,115 @@ function AdminUserDetailContent({ id }: { id: string }) {
 
         {error && <p className="text-sm text-danger mb-3">{error}</p>}
 
+        {tempPassword && (
+          <div className="mb-4 border border-[#86EFAC] bg-[#F0FDF4] rounded-xl p-3.5">
+            <p className="text-xs font-semibold text-[#166534] mb-1.5">
+              Temporary password — shown once
+            </p>
+            <p className="font-mono text-base font-bold text-ink tracking-wide break-all">
+              {tempPassword}
+            </p>
+            <p className="text-[11px] text-[#166534] mt-2 leading-relaxed">
+              Give this to {name} over a channel you trust. It isn&apos;t stored anywhere, so it
+              can&apos;t be shown again — you&apos;d have to reset once more. Ask them to change it
+              from Account settings after signing in.
+            </p>
+            <button
+              onClick={() => setTempPassword(null)}
+              className="mt-2.5 text-xs font-semibold text-[#166534] underline"
+            >
+              Done — hide it
+            </button>
+          </div>
+        )}
+
         {detail.role !== "admin" && (
           <div className="flex flex-wrap gap-2">
             {detail.status === "pending_review" && (
               <>
-                <Button disabled={busy} onClick={() => handleStatus("active")} className="w-auto px-4">
+                <Button
+                  disabled={busy}
+                  onClick={() => setPending({ kind: "status", status: "active" })}
+                  className="w-auto px-4"
+                >
                   Approve
                 </Button>
-                <Button variant="ghost" disabled={busy} onClick={() => handleStatus("banned")} className="w-auto px-4">
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setPending({ kind: "status", status: "banned" })}
+                  className="w-auto px-4"
+                >
                   Reject
                 </Button>
               </>
             )}
             {detail.status === "active" && (
-              <Button variant="ghost" disabled={busy} onClick={() => handleStatus("suspended")} className="w-auto px-4">
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => setPending({ kind: "status", status: "suspended" })}
+                className="w-auto px-4"
+              >
                 Suspend
               </Button>
             )}
             {detail.status === "suspended" && (
-              <Button disabled={busy} onClick={() => handleStatus("active")} className="w-auto px-4">
+              <Button
+                disabled={busy}
+                onClick={() => setPending({ kind: "status", status: "active" })}
+                className="w-auto px-4"
+              >
                 Reactivate
               </Button>
             )}
             {(detail.status === "active" || detail.status === "suspended") && (
-              <Button variant="ghost" disabled={busy} onClick={() => handleStatus("banned")} className="w-auto px-4">
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => setPending({ kind: "status", status: "banned" })}
+                className="w-auto px-4"
+              >
                 Ban
               </Button>
             )}
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={() => setPending({ kind: "reset-password" })}
+              className="w-auto px-4"
+            >
+              Reset password
+            </Button>
           </div>
         )}
       </div>
+
+      {pending && (
+        <ConfirmDialog
+          title={pending.kind === "status" ? STATUS_COPY[pending.status].title : "Reset this password?"}
+          body={
+            pending.kind === "status" ? (
+              <>
+                <strong className="text-ink">{name}</strong> — {STATUS_COPY[pending.status].body}
+              </>
+            ) : (
+              <>
+                A new temporary password will be generated for{" "}
+                <strong className="text-ink">{name}</strong> and shown to you once. Their current
+                password stops working immediately.
+              </>
+            )
+          }
+          confirmLabel={
+            pending.kind === "status" ? STATUS_COPY[pending.status].confirmLabel : "Reset password"
+          }
+          destructive={pending.kind === "status" ? STATUS_COPY[pending.status].destructive : true}
+          busy={busy}
+          onConfirm={runPending}
+          onCancel={() => setPending(null)}
+        />
+      )}
     </div>
   );
 }

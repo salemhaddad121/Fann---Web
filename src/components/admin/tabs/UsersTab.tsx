@@ -2,15 +2,26 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { listAdminUsers, updateAdminUserStatus } from "@/lib/admin-api";
+import { listAdminUsers } from "@/lib/admin-api";
 import { UserStatusBadge } from "@/components/admin/UserStatusBadge";
 import { Pagination } from "@/components/admin/Pagination";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
-import type { AdminUserRow, UserStatus } from "@/types/admin";
+import type { AdminUserRow } from "@/types/admin";
 
 const ROLE_OPTIONS = ["", "artist", "planner", "admin"] as const;
-const STATUS_OPTIONS = ["", "pending_review", "active", "suspended", "banned"] as const;
+
+// Value is what the API filters on; label is what the admin reads. 'banned'
+// shows as "Rejected" (see UserStatusBadge) and 'deleted' is a pseudo-status
+// the API maps onto deleted_at rather than users.status.
+const STATUS_OPTIONS = [
+  { value: "", label: "All statuses" },
+  { value: "active", label: "Active" },
+  { value: "suspended", label: "Suspended" },
+  { value: "pending_review", label: "Pending" },
+  { value: "banned", label: "Rejected" },
+  { value: "deleted", label: "Deleted" },
+] as const;
 
 export function UsersTab() {
   const [rows, setRows] = useState<AdminUserRow[] | null>(null);
@@ -19,7 +30,6 @@ export function UsersTab() {
   const [q, setQ] = useState("");
   const [role, setRole] = useState<string>("");
   const [status, setStatus] = useState<string>("");
-  const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,18 +47,6 @@ export function UsersTab() {
       cancelled = true;
     };
   }, [q, role, status, page]);
-
-  async function handleStatus(userId: string, next: UserStatus) {
-    setBusyId(userId);
-    try {
-      await updateAdminUserStatus(userId, next);
-      setRows((prev) => (prev ? prev.map((r) => (r.id === userId ? { ...r, status: next } : r)) : prev));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't update that user.");
-    } finally {
-      setBusyId(null);
-    }
-  }
 
   return (
     <div>
@@ -89,8 +87,8 @@ export function UsersTab() {
             className="flex-1 rounded-[10px] border border-hairline px-2.5 py-2 text-xs bg-white"
           >
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s ? s.replace("_", " ") : "All statuses"}
+              <option key={s.value} value={s.value}>
+                {s.label}
               </option>
             ))}
           </select>
@@ -123,45 +121,11 @@ export function UsersTab() {
                     </div>
                   </div>
                 </Link>
+                {/* Status only — not a control. Approve/reject/suspend and
+                    everything else now live on the user's detail page, so
+                    there is one place to act and no duplicated toggles. */}
                 <UserStatusBadge status={u.status} deletedAt={u.deleted_at} />
-                <div className="flex gap-1.5 shrink-0">
-                  {u.status === "pending_review" && (
-                    <>
-                      <button
-                        disabled={busyId === u.id}
-                        onClick={() => handleStatus(u.id, "active")}
-                        className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] disabled:opacity-50"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        disabled={busyId === u.id}
-                        onClick={() => handleStatus(u.id, "banned")}
-                        className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#FEF2F2] text-[#7F1D1D] border border-[#FCA5A5] disabled:opacity-50"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-                  {u.status === "active" && u.role !== "admin" && (
-                    <button
-                      disabled={busyId === u.id}
-                      onClick={() => handleStatus(u.id, "suspended")}
-                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#FEF3C7] text-[#92400E] border border-[#FCD34D] disabled:opacity-50"
-                    >
-                      Suspend
-                    </button>
-                  )}
-                  {u.status === "suspended" && (
-                    <button
-                      disabled={busyId === u.id}
-                      onClick={() => handleStatus(u.id, "active")}
-                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#DCFCE7] text-[#166534] border border-[#86EFAC] disabled:opacity-50"
-                    >
-                      Reactivate
-                    </button>
-                  )}
-                </div>
+                <i className="ti ti-chevron-right text-faint text-sm shrink-0" />
               </div>
             );
           })}

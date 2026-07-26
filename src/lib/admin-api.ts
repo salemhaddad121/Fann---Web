@@ -63,6 +63,19 @@ export async function updateAdminUserStatus(
   });
 }
 
+// Returns a one-time temporary password. It is not stored in plaintext
+// anywhere, so this is the only chance to read it — the UI shows it once and
+// the admin has to reset again if it's lost.
+export async function resetAdminUserPassword(
+  id: string,
+  note?: string,
+): Promise<{ temporaryPassword: string }> {
+  return apiFetch<{ temporaryPassword: string }>(`/admin/users/${id}/reset-password`, {
+    method: "POST",
+    body: { note },
+  });
+}
+
 // ---------------- ID documents ----------------
 export async function listPendingDocuments(page = 1): Promise<PaginatedResponse<AdminIdDocument>> {
   return apiFetch<PaginatedResponse<AdminIdDocument>>(`/admin/id-documents?page=${page}&limit=30`);
