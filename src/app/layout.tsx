@@ -3,9 +3,9 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
-  title: "Aynu — Book Lebanon's live talent",
+  title: "Fann — Book Lebanon's live talent",
   description:
-    "Aynu connects event planners with DJs, bands, photographers and MCs across Lebanon.",
+    "Fann connects event planners with DJs, bands, photographers and MCs across Lebanon.",
 };
 
 export default function RootLayout({

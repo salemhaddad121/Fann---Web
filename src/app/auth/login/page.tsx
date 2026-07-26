@@ -37,10 +37,10 @@ export default function LoginPage() {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Log in to your Aynu account."
+      subtitle="Log in to your Fann account."
       footer={
         <>
-          New to Aynu?{" "}
+          New to Fann?{" "}
           <Link href="/auth/register" className="font-semibold text-indigo">
             Create an account
           </Link>

@@ -37,28 +37,31 @@ export function AuthShell({
         }}
       >
         <Link href="/" className="font-display text-2xl font-bold tracking-tight z-10">
-          ayn<span className="text-[#93ADE8]">u</span>
+          fan<span className="text-[#93ADE8]">n</span>
         </Link>
 
         <div className="z-10 max-w-sm">
           <p className="font-display text-3xl font-medium leading-tight mb-4">
-            Book Lebanon&apos;s live talent, without the group chat chaos.
+            {background === "planner"
+              ? "Search and Manage all your live talent needs in one place"
+              : "Promote yourself to all event organizers"}
           </p>
           <p className="text-[#93ADE8] text-sm leading-relaxed">
-            DJs, bands, photographers and MCs — searchable, available, and
-            bookable in one place.
+            {background === "planner"
+              ? "DJs, bands, photographers, hosts and much more — searchable, available, and bookable in one place."
+              : "Event Planners, Venues, Restaurants, Wedding Planners and much more all in one place."}
           </p>
         </div>
 
         <Waveform className="absolute bottom-0 right-0 opacity-90" />
-        <p className="z-10 text-xs text-[#6B84C4]">© {new Date().getFullYear()} Aynu</p>
+        <p className="z-10 text-xs text-[#6B84C4]">© {new Date().getFullYear()} Fann</p>
       </div>
 
       {/* Form panel */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-10">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8 font-display text-xl font-bold text-ink">
-            ayn<span className="text-indigo">u</span>
+            fan<span className="text-indigo">n</span>
           </div>
 
           <h1 className="font-display text-2xl font-bold text-ink mb-1">{title}</h1>

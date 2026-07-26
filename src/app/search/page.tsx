@@ -335,9 +335,15 @@ export default function SearchPage() {
   if (isLoading) return null;
 
   // Artists use this to find bookers — now real, via GET /planners.
+  //
+  // No `background` override on either branch: the backdrop follows the
+  // logged-in role (AppShell's default), same as every other page. It used
+  // to follow the directory being browsed instead, which meant an artist
+  // searching bookers saw the booker artwork and vice versa — the inverse
+  // of what the rest of the app does.
   if (user?.role === "artist") {
     return (
-      <AppShell user={user} background="planner">
+      <AppShell user={user}>
         <PlannerDirectory />
       </AppShell>
     );
@@ -345,7 +351,7 @@ export default function SearchPage() {
 
   if (user) {
     return (
-      <AppShell user={user} background="artist">
+      <AppShell user={user}>
         <ArtistDirectory isPlanner={user.role === "planner"} />
       </AppShell>
     );

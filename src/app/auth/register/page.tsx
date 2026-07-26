@@ -72,7 +72,7 @@ export default function RegisterPage() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Join Aynu as an artist or an event planner."
+      subtitle="Join Fann as an artist or an event planner."
       background={role === "planner" ? "planner" : "artist"}
       footer={
         <>

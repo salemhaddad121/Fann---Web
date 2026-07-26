@@ -9,6 +9,7 @@ export interface PlannerCard {
   location_city: string | null;
   location_country: string | null;
   event_types: string[];
+  booker_type: string | null;
   social_links: Record<string, string> | null;
   thumbnail_url: string | null;
   created_at: string;
@@ -40,3 +41,14 @@ export interface SearchPlannersParams {
   sort?: "newest" | "name_asc";
   page?: number;
 }
+
+// The fixed booker types (mirrors the backend `booker_type` enum). One per booker.
+export const BOOKER_TYPES = [
+  "Event Planner",
+  "Venue",
+  "Restaurant",
+  "Bar",
+  "Wedding Planner",
+  "University",
+  "Other",
+];

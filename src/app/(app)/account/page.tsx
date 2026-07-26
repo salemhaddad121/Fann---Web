@@ -282,10 +282,16 @@ export default function AccountPage() {
           <ChangePasswordForm />
         </div>
 
-        <p className="text-xs font-bold text-ink mb-2">Delete account</p>
-        <div className="mb-6">
-          <DeleteAccountSection />
-        </div>
+        {/* Admins have no self-service delete — the destructive section is
+            hidden for them (artists and planners still see it). */}
+        {user.role !== "admin" && (
+          <>
+            <p className="text-xs font-bold text-ink mb-2">Delete account</p>
+            <div className="mb-6">
+              <DeleteAccountSection />
+            </div>
+          </>
+        )}
 
         <Button variant="ghost" onClick={logout}>
           Log out
