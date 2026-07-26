@@ -122,7 +122,10 @@ interface PresignResponse {
   s3Key: string;
 }
 
-async function presignMedia(payload: {
+// Exported so the Uppy uploader can drive the same two steps: Uppy owns the
+// PUT itself, so it needs presign and confirm separately rather than the
+// all-in-one uploadMedia() below.
+export async function presignMedia(payload: {
   mediaType: MediaType;
   filename: string;
   fileSizeBytes: number;
@@ -131,7 +134,7 @@ async function presignMedia(payload: {
   return apiFetch<PresignResponse>("/media/presign", { method: "POST", body: payload });
 }
 
-async function confirmMedia(payload: {
+export async function confirmMedia(payload: {
   s3Key: string;
   mediaType: MediaType;
   fileSizeBytes: number;

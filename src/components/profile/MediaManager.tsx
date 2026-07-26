@@ -1,30 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
-  ACCEPTED_MIME_TYPES,
-  MAX_PHOTO_BYTES,
-  MAX_VIDEO_BYTES,
   MAX_VIDEO_SECONDS,
   MIN_PHOTO_SHORT_SIDE,
   MIN_VIDEO_SHORT_SIDE,
-  mediaTypeFromMime,
-  probeVideo,
-  probeImage,
-  checkResolution,
-  uploadMedia,
   setPrimaryMedia,
   deleteMedia,
-  MediaUploadError,
 } from "@/lib/media-api";
+import { UppyMediaUploader } from "@/components/profile/UppyMediaUploader";
 import type { MediaItem } from "@/types/artists";
 
 const MAX_ITEMS = 20;
 
-function formatMb(bytes: number) {
-  return `${Math.round(bytes / 1024 / 1024)}MB`;
-}
-
+// Owns the gallery — listing, choosing the primary photo, deleting. Adding
+// files is delegated to UppyMediaUploader, which handles selection, cropping
+// and the presign/PUT/confirm round trip.
 export function MediaManager({
   media,
   onChange,
@@ -32,96 +23,17 @@ export function MediaManager({
   media: MediaItem[];
   onChange: (next: MediaItem[]) => void;
 }) {
-  const [uploading, setUploading] = useState(false);
+  const [uploaderOpen, setUploaderOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-selecting the same file later
-    if (!file) return;
-
-    setError(null);
-
-    if (media.length >= MAX_ITEMS) {
-      setError(`You can have up to ${MAX_ITEMS} media items — remove one first.`);
-      return;
-    }
-
-    const mediaType = mediaTypeFromMime(file.type);
-    if (!mediaType) {
-      setError("Unsupported file type. Use JPG, PNG, WEBP, MP4, or MOV.");
-      return;
-    }
-
-    if (mediaType === "photo" && file.size > MAX_PHOTO_BYTES) {
-      setError(`Photos must be ${formatMb(MAX_PHOTO_BYTES)} or smaller.`);
-      return;
-    }
-    if (mediaType === "video" && file.size > MAX_VIDEO_BYTES) {
-      setError(`Videos must be ${formatMb(MAX_VIDEO_BYTES)} or smaller.`);
-      return;
-    }
-
-    // Probe the file in the browser before requesting a presigned URL, so a
-    // file that breaks a limit costs nothing — no upload, no round trip.
-    let durationSec: number | undefined;
-    if (mediaType === "video") {
-      let probe;
-      try {
-        probe = await probeVideo(file);
-      } catch {
-        setError("Couldn't read that video file. Try a different one.");
-        return;
-      }
-      durationSec = probe.durationSec;
-      if (durationSec > MAX_VIDEO_SECONDS) {
-        setError(`Videos must be ${MAX_VIDEO_SECONDS} seconds or shorter (this one is ${durationSec}s).`);
-        return;
-      }
-      const resolutionError = checkResolution("video", probe.width, probe.height);
-      if (resolutionError) {
-        setError(resolutionError);
-        return;
-      }
-    } else {
-      let dims;
-      try {
-        dims = await probeImage(file);
-      } catch {
-        setError("Couldn't read that image file. Try a different one.");
-        return;
-      }
-      const resolutionError = checkResolution("photo", dims.width, dims.height);
-      if (resolutionError) {
-        setError(resolutionError);
-        return;
-      }
-    }
-
-    setUploading(true);
-    try {
-      const item = await uploadMedia(file, mediaType, durationSec);
-      // A first uploaded photo is auto-marked primary by the backend —
-      // reflect that locally too instead of waiting on a refetch.
-      const next = item.is_primary
-        ? [item, ...media.map((m) => ({ ...m, is_primary: false }))]
-        : [...media, item];
-      onChange(next);
-    } catch (err) {
-      if (err instanceof MediaUploadError && err.likelyCorsIssue) {
-        // This specific case (fetch to S3 rejected outright, not just a
-        // non-2xx response) almost always means the bucket's CORS policy
-        // isn't set up for this origin yet — a config issue for whoever
-        // manages the AWS account, not something retrying will fix.
-        setError(err.message);
-      } else {
-        setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
-      }
-    } finally {
-      setUploading(false);
-    }
+  function handleUploaded(items: MediaItem[]) {
+    // The backend marks the first photo on a profile as primary. Reflect
+    // whatever it decided rather than guessing, so the badge doesn't lie
+    // until the next refetch.
+    const next = [...media, ...items];
+    const promoted = items.find((i) => i.is_primary);
+    onChange(promoted ? next.map((m) => ({ ...m, is_primary: m.id === promoted.id })) : next);
   }
 
   async function handleSetPrimary(id: string) {
@@ -209,29 +121,23 @@ export function MediaManager({
         {media.length < MAX_ITEMS && (
           <button
             type="button"
-            disabled={uploading}
-            onClick={() => inputRef.current?.click()}
-            className="aspect-square rounded-xl border border-dashed border-hairline flex flex-col items-center justify-center gap-1 text-faint disabled:opacity-50"
+            onClick={() => setUploaderOpen(true)}
+            className="aspect-square rounded-xl border border-dashed border-hairline flex flex-col items-center justify-center gap-1 text-faint"
           >
-            {uploading ? (
-              <span className="h-4 w-4 rounded-full border-2 border-hairline border-t-indigo animate-spin" />
-            ) : (
-              <>
-                <i className="ti ti-plus text-lg" />
-                <span className="text-[10px]">Add</span>
-              </>
-            )}
+            <i className="ti ti-plus text-lg" />
+            <span className="text-[10px]">Add</span>
           </button>
         )}
       </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPTED_MIME_TYPES}
-        onChange={handleFileSelected}
-        className="hidden"
-      />
+      {uploaderOpen && (
+        <UppyMediaUploader
+          remainingSlots={MAX_ITEMS - media.length}
+          onUploaded={handleUploaded}
+          onClose={() => setUploaderOpen(false)}
+        />
+      )}
+
       <p className="text-[11px] text-faint mt-1.5">
         JPG/PNG/WEBP up to 10MB, at least {MIN_PHOTO_SHORT_SIDE}px on the short side. MP4/MOV up to
         250MB and {MAX_VIDEO_SECONDS} seconds, at least {MIN_VIDEO_SHORT_SIDE}p.
