@@ -14,6 +14,7 @@ import type {
   GeographyRow,
   BookedCategoryRow,
   BookerTypeRow,
+  EngagementStats,
   UserStatus,
   PaginatedResponse,
 } from "@/types/admin";
@@ -40,6 +41,10 @@ export async function getTopBookedCategories(): Promise<BookedCategoryRow[]> {
 
 export async function getTopBookerTypes(): Promise<BookerTypeRow[]> {
   return apiFetch<BookerTypeRow[]>("/admin/analytics/booker-types");
+}
+
+export async function getEngagement(): Promise<EngagementStats> {
+  return apiFetch<EngagementStats>("/admin/analytics/engagement");
 }
 
 // ---------------- Users ----------------
