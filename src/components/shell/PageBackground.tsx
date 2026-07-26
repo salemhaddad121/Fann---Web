@@ -14,19 +14,38 @@
 // unaffected; the deliberate tradeoff is that the little text sitting
 // directly on the wash (e.g. the dashboard greeting) has less contrast over
 // busier areas of the artwork.
-const BACKGROUND_IMAGE: Record<"artist" | "planner", string> = {
-  artist: "/backgrounds/artist-bg.webp",
-  planner: "/backgrounds/booker-bg.webp",
+// Two crops per role. The desktop artwork is landscape (1586x992) and the
+// mobile artwork is portrait (941x1672); `bg-cover` on a phone-shaped
+// viewport would otherwise crop roughly two thirds off the sides of the
+// landscape art, which is what was happening before the mobile crops were
+// wired up. Swap happens at Tailwind's `sm` (640px).
+const BACKGROUND_IMAGE: Record<"artist" | "planner", { mobile: string; desktop: string }> = {
+  artist: {
+    mobile: "/backgrounds/artist-bg-mobile.webp",
+    desktop: "/backgrounds/artist-bg.webp",
+  },
+  planner: {
+    mobile: "/backgrounds/booker-bg-mobile.webp",
+    desktop: "/backgrounds/booker-bg.webp",
+  },
 };
 
+const WHITE_WASH = "linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25))";
+
 export function PageBackground({ role }: { role: "artist" | "planner" }) {
+  const art = BACKGROUND_IMAGE[role];
   return (
-    <div
-      aria-hidden
-      className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)), url(${BACKGROUND_IMAGE[role]})`,
-      }}
-    />
+    <>
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat sm:hidden"
+        style={{ backgroundImage: `${WHITE_WASH}, url(${art.mobile})` }}
+      />
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat hidden sm:block"
+        style={{ backgroundImage: `${WHITE_WASH}, url(${art.desktop})` }}
+      />
+    </>
   );
 }

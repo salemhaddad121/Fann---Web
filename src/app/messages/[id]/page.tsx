@@ -11,6 +11,7 @@ import { createBooking } from "@/lib/bookings-api";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import { MessageList } from "@/components/messaging/MessageList";
+import { PageBackground } from "@/components/shell/PageBackground";
 import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
 import type { Message } from "@/types/messaging";
 
@@ -147,6 +148,10 @@ export default function ThreadPage() {
 
   return (
     <div className="h-screen flex flex-col max-w-lg mx-auto bg-white relative">
+      {/* This page sits outside the (app) route group, so it gets no shell —
+          the backdrop has to be rendered here directly. The thread column is
+          opaque white, so the artwork only shows in the margins beside it. */}
+      <PageBackground role={isPlanner ? "planner" : "artist"} />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline shrink-0">
         <button onClick={() => router.push("/messages")} className="text-muted" aria-label="Back to messages">
           <i className="ti ti-arrow-left text-lg" />
