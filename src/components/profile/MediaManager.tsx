@@ -6,8 +6,12 @@ import {
   MAX_PHOTO_BYTES,
   MAX_VIDEO_BYTES,
   MAX_VIDEO_SECONDS,
+  MIN_PHOTO_SHORT_SIDE,
+  MIN_VIDEO_SHORT_SIDE,
   mediaTypeFromMime,
-  getVideoDurationSeconds,
+  probeVideo,
+  probeImage,
+  checkResolution,
   uploadMedia,
   setPrimaryMedia,
   deleteMedia,
@@ -60,16 +64,38 @@ export function MediaManager({
       return;
     }
 
+    // Probe the file in the browser before requesting a presigned URL, so a
+    // file that breaks a limit costs nothing — no upload, no round trip.
     let durationSec: number | undefined;
     if (mediaType === "video") {
+      let probe;
       try {
-        durationSec = await getVideoDurationSeconds(file);
+        probe = await probeVideo(file);
       } catch {
         setError("Couldn't read that video file. Try a different one.");
         return;
       }
+      durationSec = probe.durationSec;
       if (durationSec > MAX_VIDEO_SECONDS) {
         setError(`Videos must be ${MAX_VIDEO_SECONDS} seconds or shorter (this one is ${durationSec}s).`);
+        return;
+      }
+      const resolutionError = checkResolution("video", probe.width, probe.height);
+      if (resolutionError) {
+        setError(resolutionError);
+        return;
+      }
+    } else {
+      let dims;
+      try {
+        dims = await probeImage(file);
+      } catch {
+        setError("Couldn't read that image file. Try a different one.");
+        return;
+      }
+      const resolutionError = checkResolution("photo", dims.width, dims.height);
+      if (resolutionError) {
+        setError(resolutionError);
         return;
       }
     }
@@ -207,7 +233,8 @@ export function MediaManager({
         className="hidden"
       />
       <p className="text-[11px] text-faint mt-1.5">
-        JPG/PNG/WEBP up to 10MB, or MP4/MOV up to 250MB and 60 seconds.
+        JPG/PNG/WEBP up to 10MB, at least {MIN_PHOTO_SHORT_SIDE}px on the short side. MP4/MOV up to
+        250MB and {MAX_VIDEO_SECONDS} seconds, at least {MIN_VIDEO_SHORT_SIDE}p.
       </p>
     </div>
   );
