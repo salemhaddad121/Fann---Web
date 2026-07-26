@@ -12,6 +12,8 @@ import type {
   AdminStats,
   SignupTrendPoint,
   GeographyRow,
+  BookedCategoryRow,
+  BookerTypeRow,
   UserStatus,
   PaginatedResponse,
 } from "@/types/admin";
@@ -30,6 +32,14 @@ export async function getSignupTrend(days = 30): Promise<SignupTrendPoint[]> {
 
 export async function getGeographyBreakdown(): Promise<GeographyRow[]> {
   return apiFetch<GeographyRow[]>("/admin/analytics/geography");
+}
+
+export async function getTopBookedCategories(): Promise<BookedCategoryRow[]> {
+  return apiFetch<BookedCategoryRow[]>("/admin/analytics/booked-categories");
+}
+
+export async function getTopBookerTypes(): Promise<BookerTypeRow[]> {
+  return apiFetch<BookerTypeRow[]>("/admin/analytics/booker-types");
 }
 
 // ---------------- Users ----------------

@@ -129,6 +129,20 @@ export interface GeographyRow {
   count: number;
 }
 
+// Confirmed bookings only (accepted + completed). Note an artist can hold
+// several categories, so one booking counts toward each of them — these
+// answer "how many bookings involved this category" and will not sum to
+// the total booking count.
+export interface BookedCategoryRow {
+  category: string;
+  count: number;
+}
+
+export interface BookerTypeRow {
+  bookerType: string;
+  count: number;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: { total: number; page: number; limit: number; pages: number };
