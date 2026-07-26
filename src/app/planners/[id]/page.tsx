@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useRequireAuth } from "@/lib/use-require-auth";
 import { getPlanner } from "@/lib/planners-api";
 import { getPlannerReviews } from "@/lib/reviews-api";
 import { AppShell } from "@/components/shell/AppShell";
-import { PageBackground } from "@/components/shell/PageBackground";
-import { PublicHeader } from "@/components/search/PublicHeader";
 import { PlannerProfileView } from "@/components/profile/PlannerProfileView";
 import type { PlannerDetail } from "@/types/planners";
 import type { Review } from "@/types/reviews";
@@ -90,25 +89,13 @@ function Content({ id }: { id: string }) {
 
 export default function PlannerDetailPage() {
   const params = useParams<{ id: string }>();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useRequireAuth();
 
-  if (isLoading) return null;
-
-  if (user) {
-    return (
-      <AppShell user={user} background="planner">
-        <Content id={params.id} />
-      </AppShell>
-    );
-  }
+  if (isLoading || !user) return null;
 
   return (
-    <div className="min-h-screen relative">
-      <PageBackground role="planner" />
-      <div className="relative z-10">
-        <PublicHeader />
-        <Content id={params.id} />
-      </div>
-    </div>
+    <AppShell user={user} background="planner">
+      <Content id={params.id} />
+    </AppShell>
   );
 }

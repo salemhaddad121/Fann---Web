@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useRequireAuth } from "@/lib/use-require-auth";
 import { getArtist } from "@/lib/artists-api";
 import { getArtistReviews } from "@/lib/reviews-api";
 import { startConversation } from "@/lib/messaging-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
-import { PageBackground } from "@/components/shell/PageBackground";
-import { PublicHeader } from "@/components/search/PublicHeader";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
 import type { ArtistDetail } from "@/types/artists";
 import type { Review } from "@/types/reviews";
@@ -24,22 +23,10 @@ function MessageCta({ artist }: { artist: ArtistDetail }) {
 
   // Only planners can start a conversation with an artist — the backend
   // 403s anyone else (see messaging.service.ts createConversation()).
-  // Anonymous visitors get a login prompt; artists/admins get nothing,
-  // since there's no valid messaging action for them here.
-  if (!user) {
-    return (
-      <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
-        <Link
-          href="/auth/login"
-          className="flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] border-[1.5px] border-ink text-sm font-semibold text-ink"
-        >
-          Log in to message {artist.display_name}
-        </Link>
-      </div>
-    );
-  }
-
-  if (user.role !== "planner") return null;
+  // Artists and admins get nothing, since there's no valid messaging action
+  // for them here. There is no anonymous case any more: this page requires
+  // a session, so the old "log in to message" prompt was unreachable.
+  if (user?.role !== "planner") return null;
 
   async function handleMessage() {
     setError(null);
@@ -182,25 +169,13 @@ function Content({ id }: { id: string }) {
 
 export default function ArtistDetailPage() {
   const params = useParams<{ id: string }>();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useRequireAuth();
 
-  if (isLoading) return null;
-
-  if (user) {
-    return (
-      <AppShell user={user} background="artist">
-        <Content id={params.id} />
-      </AppShell>
-    );
-  }
+  if (isLoading || !user) return null;
 
   return (
-    <div className="min-h-screen relative">
-      <PageBackground role="artist" />
-      <div className="relative z-10">
-        <PublicHeader />
-        <Content id={params.id} />
-      </div>
-    </div>
+    <AppShell user={user} background="artist">
+      <Content id={params.id} />
+    </AppShell>
   );
 }
