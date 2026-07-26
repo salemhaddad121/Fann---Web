@@ -159,7 +159,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2.5 px-4 pb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
         {results.map((artist) => (
           <ArtistCard
             key={artist.id}
@@ -298,7 +298,7 @@ function PlannerDirectory() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2.5 px-4 pb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
         {results.map((planner) => (
           <PlannerCard key={planner.id} planner={planner} />
         ))}
