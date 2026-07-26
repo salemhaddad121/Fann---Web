@@ -7,11 +7,15 @@ const STYLES: Record<UserStatus, string> = {
   banned: "bg-[#FEF2F2] text-[#7F1D1D]",
 };
 
+// `banned` is shown as "Rejected". The database has no separate rejected
+// state — both the Reject action on a pending signup and the Ban action on
+// an existing user write `banned` — and "Rejected" is the wording the admin
+// screens use throughout.
 const LABELS: Record<UserStatus, string> = {
   pending_review: "Pending",
   active: "Active",
   suspended: "Suspended",
-  banned: "Banned",
+  banned: "Rejected",
 };
 
 export function UserStatusBadge({ status, deletedAt }: { status: UserStatus; deletedAt?: string | null }) {

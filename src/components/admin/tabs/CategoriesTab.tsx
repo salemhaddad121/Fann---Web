@@ -10,6 +10,7 @@ import {
   deleteCategory,
 } from "@/lib/admin-api";
 import { Button } from "@/components/auth/Button";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import type { AdminCategoryGroup, AdminCategory } from "@/types/admin";
 
 export function CategoriesTab() {
@@ -20,6 +21,12 @@ export function CategoriesTab() {
   const [addingCategoryTo, setAddingCategoryTo] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [busy, setBusy] = useState(false);
+  // Deleting a group or a category is irreversible, so both go through a
+  // confirmation step. Holding the pending target here keeps the dialog a
+  // pure render of state rather than an imperative window.confirm().
+  const [pendingDelete, setPendingDelete] = useState<
+    { kind: "group" | "category"; id: string; name: string } | null
+  >(null);
 
   function load() {
     Promise.all([listAdminCategoryGroups(), listAdminCategories()])
@@ -47,13 +54,22 @@ export function CategoriesTab() {
     }
   }
 
-  async function handleDeleteGroup(id: string) {
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    const { kind, id } = pendingDelete;
     setBusy(true);
     try {
-      await deleteCategoryGroup(id);
+      if (kind === "group") await deleteCategoryGroup(id);
+      else await deleteCategory(id);
+      setPendingDelete(null);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete that group.");
+      setPendingDelete(null);
+      setError(
+        err instanceof Error
+          ? err.message
+          : `Couldn't delete that ${kind === "group" ? "group" : "category"}.`,
+      );
     } finally {
       setBusy(false);
     }
@@ -74,17 +90,6 @@ export function CategoriesTab() {
     }
   }
 
-  async function handleDeleteCategory(id: string) {
-    setBusy(true);
-    try {
-      await deleteCategory(id);
-      load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete that category.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   if (error) return <p className="px-4 py-4 text-sm text-danger">{error}</p>;
   if (!groups || !categories) return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
@@ -116,7 +121,7 @@ export function CategoriesTab() {
                 </div>
                 <button
                   disabled={busy || g.category_count > 0}
-                  onClick={() => handleDeleteGroup(g.id)}
+                  onClick={() => setPendingDelete({ kind: "group", id: g.id, name: g.name })}
                   title={g.category_count > 0 ? "Remove or reassign its categories first" : "Delete group"}
                   className="text-faint disabled:opacity-30"
                 >
@@ -134,7 +139,7 @@ export function CategoriesTab() {
                     <span className="text-faint">({c.artist_count})</span>
                     <button
                       disabled={busy || c.artist_count > 0}
-                      onClick={() => handleDeleteCategory(c.id)}
+                      onClick={() => setPendingDelete({ kind: "category", id: c.id, name: c.name })}
                       title={c.artist_count > 0 ? "Still in use — can't delete" : "Delete category"}
                       className="disabled:opacity-30"
                     >
@@ -182,6 +187,23 @@ export function CategoriesTab() {
           );
         })}
       </div>
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title={pendingDelete.kind === "group" ? "Delete this group?" : "Delete this category?"}
+          body={
+            <>
+              <strong className="text-ink">{pendingDelete.name}</strong> will be permanently
+              removed. This can&apos;t be undone.
+            </>
+          }
+          confirmLabel="Delete"
+          destructive
+          busy={busy}
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
     </div>
   );
 }
