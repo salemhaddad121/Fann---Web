@@ -55,7 +55,9 @@ function SavedList() {
   return (
     <div className="max-w-lg mx-auto">
       <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-2">Saved</h1>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
+      {/* Stops at 3 columns, unlike /search: this page keeps its max-w-lg
+          (512px) cap, where a 4th or 5th column would leave ~90px cards. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 px-4 pb-6">
         {artists.map((artist) => (
           <ArtistCard key={artist.id} artist={artist} isSaved onToggleSave={() => handleRemove(artist.id)} />
         ))}
