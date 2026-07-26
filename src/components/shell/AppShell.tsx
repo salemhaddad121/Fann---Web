@@ -13,6 +13,7 @@ export function AppShell({
   user,
   children,
   background,
+  chrome = "full",
 }: {
   user: SafeUser;
   children: ReactNode;
@@ -22,10 +23,15 @@ export function AppShell({
   // page) pass this explicitly instead, so it stays tied to whose profile
   // is being viewed rather than who's currently logged in.
   background?: "artist" | "planner";
+  // "sidebar-only" keeps the desktop sidebar but drops the mobile top and
+  // bottom bars. For full-height pages that own the bottom of the screen —
+  // the message thread's composer sits exactly where BottomNav would.
+  chrome?: "full" | "sidebar-only";
 }) {
   const navItems = getNavItems(user.role);
   const { unreadMessages, unreadNotifications } = useNavBadges(user.role);
   const hasNav = navItems.length > 0;
+  const showMobileNav = chrome === "full";
   const resolvedBackground = background ?? (user.role === "planner" ? "planner" : "artist");
 
   return (
@@ -44,11 +50,13 @@ export function AppShell({
 
         <div className="flex-1 min-w-0">
           {/* Top bar: mobile-only when there's a sidebar; always for admin (no sidebar) */}
-          <div className={hasNav ? "lg:hidden" : ""}>
-            <TopNav user={user} unreadNotifications={unreadNotifications} />
-          </div>
-          <main className={hasNav ? "pb-20 lg:pb-6" : ""}>{children}</main>
-          {hasNav && (
+          {showMobileNav && (
+            <div className={hasNav ? "lg:hidden" : ""}>
+              <TopNav user={user} unreadNotifications={unreadNotifications} />
+            </div>
+          )}
+          <main className={hasNav && showMobileNav ? "pb-20 lg:pb-6" : ""}>{children}</main>
+          {hasNav && showMobileNav && (
             <div className="lg:hidden">
               <BottomNav items={navItems} role={user.role} unreadMessages={unreadMessages} />
             </div>

@@ -11,7 +11,7 @@ import { createBooking } from "@/lib/bookings-api";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import { MessageList } from "@/components/messaging/MessageList";
-import { PageBackground } from "@/components/shell/PageBackground";
+import { AppShell } from "@/components/shell/AppShell";
 import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
 import type { Message } from "@/types/messaging";
 
@@ -123,12 +123,14 @@ export default function ThreadPage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center gap-3">
-        <p className="text-sm text-danger">This conversation isn&apos;t available.</p>
-        <Link href="/messages" className="text-sm font-semibold text-indigo">
-          ← Back to messages
-        </Link>
-      </div>
+      <AppShell user={user} chrome="sidebar-only">
+        <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center gap-3">
+          <p className="text-sm text-danger">This conversation isn&apos;t available.</p>
+          <Link href="/messages" className="text-sm font-semibold text-indigo">
+            ← Back to messages
+          </Link>
+        </div>
+      </AppShell>
     );
   }
 
@@ -147,98 +149,101 @@ export default function ThreadPage() {
     : null;
 
   return (
-    <div className="h-screen flex flex-col max-w-lg mx-auto bg-white relative">
-      {/* This page sits outside the (app) route group, so it gets no shell —
-          the backdrop has to be rendered here directly. The thread column is
-          opaque white, so the artwork only shows in the margins beside it. */}
-      <PageBackground role={isPlanner ? "planner" : "artist"} />
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline shrink-0">
-        <button onClick={() => router.push("/messages")} className="text-muted" aria-label="Back to messages">
-          <i className="ti ti-arrow-left text-lg" />
-        </button>
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${badgeColor(name)}`}
-        >
-          {otherParty?.thumbnailUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={otherParty.thumbnailUrl} alt="" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            initialsFromName(name)
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          {profileHref ? (
-            <Link href={profileHref} className="text-sm font-semibold text-ink truncate hover:underline">
-              {name}
-            </Link>
-          ) : (
-            <div className="text-sm font-semibold text-ink truncate">{name}</div>
-          )}
-        </div>
-        {isPlanner && (
-          <button
-            onClick={() => setProposeOpen(true)}
-            className="flex items-center gap-1 text-xs font-semibold text-sky border border-[#38BDF8] bg-[#E0F2FE] px-2.5 py-1.5 rounded-lg shrink-0"
-          >
-            <i className="ti ti-calendar-plus text-sm" /> Propose booking
+    // Stays outside the (app) route group on purpose: that group's layout
+    // applies the full chrome, and this page must not get the mobile
+    // BottomNav — the composer already owns the bottom of the screen. It
+    // renders the shell itself instead, so it picks up the desktop sidebar
+    // (and the backdrop) without the mobile bars.
+    <AppShell user={user} chrome="sidebar-only">
+      <div className="h-screen flex flex-col max-w-lg mx-auto bg-white relative">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline shrink-0">
+          <button onClick={() => router.push("/messages")} className="text-muted" aria-label="Back to messages">
+            <i className="ti ti-arrow-left text-lg" />
           </button>
-        )}
-      </div>
-
-      {proposeNotice && (
-        <div className="mx-4 mt-2 px-3.5 py-2 rounded-[10px] bg-ink text-white text-xs text-center shrink-0">
-          {proposeNotice}{" "}
-          <Link href="/bookings" className="underline font-semibold">
-            View
-          </Link>
-        </div>
-      )}
-
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-3">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center text-center px-6 py-10">
-            <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white mb-3 ${accent}`}
-            >
-              {initialsFromName(name)}
-            </div>
-            <p className="text-sm font-bold text-ink mb-1">{name}</p>
-            <p className="text-xs text-faint max-w-[240px] leading-relaxed">
-              This is the start of your conversation. Introduce yourself and what you can offer.
-            </p>
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${badgeColor(name)}`}
+          >
+            {otherParty?.thumbnailUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={otherParty.thumbnailUrl} alt="" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              initialsFromName(name)
+            )}
           </div>
-        ) : (
-          <MessageList messages={messages} currentUserId={user.id} accent={accent} accentText={accentText} />
+          <div className="flex-1 min-w-0">
+            {profileHref ? (
+              <Link href={profileHref} className="text-sm font-semibold text-ink truncate hover:underline">
+                {name}
+              </Link>
+            ) : (
+              <div className="text-sm font-semibold text-ink truncate">{name}</div>
+            )}
+          </div>
+          {isPlanner && (
+            <button
+              onClick={() => setProposeOpen(true)}
+              className="flex items-center gap-1 text-xs font-semibold text-sky border border-[#38BDF8] bg-[#E0F2FE] px-2.5 py-1.5 rounded-lg shrink-0"
+            >
+              <i className="ti ti-calendar-plus text-sm" /> Propose booking
+            </button>
+          )}
+        </div>
+
+        {proposeNotice && (
+          <div className="mx-4 mt-2 px-3.5 py-2 rounded-[10px] bg-ink text-white text-xs text-center shrink-0">
+            {proposeNotice}{" "}
+            <Link href="/bookings" className="underline font-semibold">
+              View
+            </Link>
+          </div>
+        )}
+
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-3">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center text-center px-6 py-10">
+              <div
+                className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold text-white mb-3 ${accent}`}
+              >
+                {initialsFromName(name)}
+              </div>
+              <p className="text-sm font-bold text-ink mb-1">{name}</p>
+              <p className="text-xs text-faint max-w-[240px] leading-relaxed">
+                This is the start of your conversation. Introduce yourself and what you can offer.
+              </p>
+            </div>
+          ) : (
+            <MessageList messages={messages} currentUserId={user.id} accent={accent} accentText={accentText} />
+          )}
+        </div>
+
+        <div className="flex items-end gap-2 px-3.5 py-2.5 border-t border-hairline shrink-0">
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            rows={1}
+            placeholder="Write a message…"
+            className="flex-1 resize-none rounded-3xl border border-hairline bg-mist px-4 py-2.5 text-sm outline-none focus:border-indigo max-h-20"
+          />
+          <button
+            onClick={handleSend}
+            disabled={sending || !draft.trim()}
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 disabled:opacity-50 ${accent}`}
+            aria-label="Send message"
+          >
+            <i className="ti ti-send text-base" />
+          </button>
+        </div>
+
+        {proposeOpen && (
+          <ProposeBookingForm onCancel={() => setProposeOpen(false)} onSubmit={handleProposeBooking} />
         )}
       </div>
-
-      <div className="flex items-end gap-2 px-3.5 py-2.5 border-t border-hairline shrink-0">
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          rows={1}
-          placeholder="Write a message…"
-          className="flex-1 resize-none rounded-3xl border border-hairline bg-mist px-4 py-2.5 text-sm outline-none focus:border-indigo max-h-20"
-        />
-        <button
-          onClick={handleSend}
-          disabled={sending || !draft.trim()}
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 disabled:opacity-50 ${accent}`}
-          aria-label="Send message"
-        >
-          <i className="ti ti-send text-base" />
-        </button>
-      </div>
-
-      {proposeOpen && (
-        <ProposeBookingForm onCancel={() => setProposeOpen(false)} onSubmit={handleProposeBooking} />
-      )}
-    </div>
+    </AppShell>
   );
 }
