@@ -3,21 +3,21 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 export default function RootPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
+  // Logged-out visitors now get the marketing landing page here rather than
+  // being bounced into /search. Logged-in users still go straight to their
+  // own home.
   useEffect(() => {
-    if (isLoading) return;
-    if (!user) {
-      router.replace("/search");
-    } else if (user.role === "admin") {
-      router.replace("/admin");
-    } else {
-      router.replace("/dashboard");
-    }
+    if (isLoading || !user) return;
+    router.replace(user.role === "admin" ? "/admin" : "/dashboard");
   }, [isLoading, user, router]);
 
-  return null;
+  if (isLoading || user) return null;
+
+  return <LandingPage />;
 }

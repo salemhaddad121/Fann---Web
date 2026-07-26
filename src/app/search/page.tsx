@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useRequireAuth } from "@/lib/use-require-auth";
 import { searchArtists, getCategories } from "@/lib/artists-api";
 import { searchPlanners, getEventTypes } from "@/lib/planners-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
-import { PageBackground } from "@/components/shell/PageBackground";
-import { PublicHeader } from "@/components/search/PublicHeader";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { PlannerFilters } from "@/components/search/PlannerFilters";
 import { ArtistCard } from "@/components/search/ArtistCard";
@@ -330,9 +328,9 @@ function PlannerDirectory() {
 }
 
 export default function SearchPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useRequireAuth();
 
-  if (isLoading) return null;
+  if (isLoading || !user) return null;
 
   // Artists use this to find bookers — now real, via GET /planners.
   //
@@ -349,21 +347,9 @@ export default function SearchPage() {
     );
   }
 
-  if (user) {
-    return (
-      <AppShell user={user}>
-        <ArtistDirectory isPlanner={user.role === "planner"} />
-      </AppShell>
-    );
-  }
-
   return (
-    <div className="min-h-screen relative">
-      <PageBackground role="artist" />
-      <div className="relative z-10">
-        <PublicHeader />
-        <ArtistDirectory isPlanner={false} />
-      </div>
-    </div>
+    <AppShell user={user}>
+      <ArtistDirectory isPlanner={user.role === "planner"} />
+    </AppShell>
   );
 }

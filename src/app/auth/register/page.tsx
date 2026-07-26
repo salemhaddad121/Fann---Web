@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { Suspense, useState, FormEvent } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
@@ -13,9 +14,13 @@ import type { RegisterPayload } from "@/types/auth";
 
 const PASSWORD_HINT = "At least 8 characters, with an uppercase letter, a lowercase letter, and a number.";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const { register } = useAuth();
-  const [role, setRole] = useState<RegisterPayload["role"]>("artist");
+  // The landing page's two JOIN NOW buttons link here with ?role=artist or
+  // ?role=planner so each side starts on the right toggle. Anything else
+  // falls back to artist, as before.
+  const initialRole = useSearchParams().get("role") === "planner" ? "planner" : "artist";
+  const [role, setRole] = useState<RegisterPayload["role"]>(initialRole);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -125,5 +130,13 @@ export default function RegisterPage() {
         </Button>
       </form>
     </AuthShell>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   );
 }
