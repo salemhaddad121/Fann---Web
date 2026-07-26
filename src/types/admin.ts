@@ -138,6 +138,21 @@ export interface BookedCategoryRow {
   count: number;
 }
 
+// Average FOREGROUND time per active day, per role. Users with no activity
+// in the window are excluded rather than counted as zero — this measures
+// how long engaged people stay, not how many people show up.
+export interface EngagementRow {
+  role: string;
+  avgMsPerActiveDay: number;
+  users: number;
+}
+
+export interface EngagementStats {
+  windowDays: number;
+  overall: EngagementRow[];
+  search: EngagementRow[];
+}
+
 export interface BookerTypeRow {
   bookerType: string;
   count: number;

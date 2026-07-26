@@ -5,6 +5,7 @@ import { TopNav } from "@/components/shell/TopNav";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { Sidebar } from "@/components/shell/Sidebar";
 import { PageBackground } from "@/components/shell/PageBackground";
+import { PageTiming } from "@/components/shell/PageTiming";
 import { getNavItems } from "@/lib/nav-config";
 import { useNavBadges } from "@/lib/use-nav-badges";
 import type { SafeUser } from "@/types/auth";
@@ -37,6 +38,9 @@ export function AppShell({
   return (
     <div className="min-h-screen relative">
       <PageBackground role={resolvedBackground} />
+      {/* Engagement telemetry — logged-in pages only, so every event has a
+          role attached. Renders nothing. */}
+      <PageTiming />
       <div className="relative z-10 lg:flex lg:items-start">
         {/* Desktop sidebar — replaces the top + bottom nav at lg+ */}
         {hasNav && (
