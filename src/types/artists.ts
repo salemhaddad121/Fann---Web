@@ -58,8 +58,13 @@ export interface AvailabilityBlock {
 }
 
 export interface ArtistDetail extends ArtistCard {
+  // avg_rating/review_count are still returned by the API and still
+  // maintained by the reviews service, but nothing user-facing renders them
+  // any more — the profile shows bookings_count instead.
   avg_rating: string | number | null;
   review_count: number;
+  // Completed bookings only. Optional so an older API response still types.
+  bookings_count?: number;
   media: MediaItem[];
   availability: AvailabilityBlock[];
 }

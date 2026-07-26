@@ -2,10 +2,8 @@ import Link from "next/link";
 import { badgeColor } from "@/lib/badge-colors";
 import { MediaStrip } from "@/components/profile/MediaStrip";
 import { SocialLinks } from "@/components/profile/SocialLinks";
-import { ReviewList } from "@/components/profile/ReviewList";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
 import type { ArtistDetail } from "@/types/artists";
-import type { Review } from "@/types/reviews";
 import type { UserStatus } from "@/types/admin";
 
 function isUnavailableToday(artist: ArtistDetail): boolean {
@@ -20,12 +18,10 @@ function formatRange(start: string, end: string): string {
 
 export function ArtistProfileView({
   artist,
-  reviews,
   isOwnProfile = false,
   accountStatus,
 }: {
   artist: ArtistDetail;
-  reviews: Review[];
   isOwnProfile?: boolean;
   accountStatus?: UserStatus;
 }) {
@@ -91,10 +87,14 @@ export function ArtistProfileView({
           </span>
         </div>
 
-        {/* Stats */}
+        {/* Stats — the star rating and review count were removed in favour of
+            a plain count of completed bookings. */}
         <div className="flex border border-hairline rounded-xl overflow-hidden">
-          <Stat icon="ti-star" value={artist.avg_rating != null ? Number(artist.avg_rating).toFixed(1) : "New"} label="Rating" />
-          <Stat icon="ti-users" value={String(artist.review_count)} label="Reviews" />
+          <Stat
+            icon="ti-calendar-check"
+            value={String(artist.bookings_count ?? 0)}
+            label={artist.bookings_count === 1 ? "Booking" : "Bookings"}
+          />
           <Stat
             icon="ti-currency-dollar"
             value={artist.base_price_usd != null ? `$${Number(artist.base_price_usd).toLocaleString()}` : "—"}
@@ -161,9 +161,6 @@ export function ArtistProfileView({
         </Section>
       )}
 
-      <Section title={`Reviews (${reviews.length})`}>
-        <ReviewList reviews={reviews} />
-      </Section>
     </div>
   );
 }

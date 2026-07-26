@@ -1,19 +1,15 @@
 import { SocialLinks } from "@/components/profile/SocialLinks";
-import { ReviewList } from "@/components/profile/ReviewList";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
 import { MediaStrip } from "@/components/profile/MediaStrip";
 import type { PlannerDetail } from "@/types/planners";
-import type { Review } from "@/types/reviews";
 import type { UserStatus } from "@/types/admin";
 
 export function PlannerProfileView({
   planner,
-  reviews,
   isOwnProfile = false,
   accountStatus,
 }: {
   planner: PlannerDetail;
-  reviews: Review[];
   isOwnProfile?: boolean;
   accountStatus?: UserStatus;
 }) {
@@ -51,14 +47,6 @@ export function PlannerProfileView({
           </p>
         )}
 
-        <div className="flex border border-hairline rounded-xl overflow-hidden">
-          <Stat
-            icon="ti-star"
-            value={planner.avg_rating != null ? Number(planner.avg_rating).toFixed(1) : "New"}
-            label="Rating"
-          />
-          <Stat icon="ti-users" value={String(planner.review_count)} label="Reviews" last />
-        </div>
       </div>
 
       {planner.media.length > 0 && (
@@ -91,22 +79,10 @@ export function PlannerProfileView({
         </Section>
       )}
 
-      <Section title={`Reviews (${reviews.length})`}>
-        <ReviewList reviews={reviews} />
-      </Section>
     </div>
   );
 }
 
-function Stat({ icon, value, label, last }: { icon: string; value: string; label: string; last?: boolean }) {
-  return (
-    <div className={`flex-1 py-2.5 text-center ${last ? "" : "border-r border-hairline"}`}>
-      <i className={`ti ${icon} text-base text-sky block mb-1`} />
-      <div className="text-base font-bold text-ink">{value}</div>
-      <div className="text-[10px] text-faint">{label}</div>
-    </div>
-  );
-}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

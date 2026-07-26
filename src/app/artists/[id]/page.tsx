@@ -6,13 +6,11 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { getArtist } from "@/lib/artists-api";
-import { getArtistReviews } from "@/lib/reviews-api";
 import { startConversation } from "@/lib/messaging-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
 import type { ArtistDetail } from "@/types/artists";
-import type { Review } from "@/types/reviews";
 import { ApiError } from "@/lib/api";
 
 function MessageCta({ artist }: { artist: ArtistDetail }) {
@@ -58,7 +56,6 @@ function Content({ id }: { id: string }) {
   const { user } = useAuth();
   const router = useRouter();
   const [artist, setArtist] = useState<ArtistDetail | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
@@ -66,12 +63,8 @@ function Content({ id }: { id: string }) {
   useEffect(() => {
     let cancelled = false;
     getArtist(id)
-      .then(async (data) => {
-        if (cancelled) return;
-        setArtist(data);
-        // Reviews are keyed by the artist's user id, not the profile id in `id`.
-        const r = await getArtistReviews(data.user_id).catch(() => []);
-        if (!cancelled) setReviews(r);
+      .then((data) => {
+        if (!cancelled) setArtist(data);
       })
       .catch((err) => {
         if (!cancelled) {
@@ -146,7 +139,6 @@ function Content({ id }: { id: string }) {
 
       <ArtistProfileView
         artist={artist}
-        reviews={reviews}
         isOwnProfile={isOwnProfile}
         accountStatus={isOwnProfile ? user?.status : undefined}
       />

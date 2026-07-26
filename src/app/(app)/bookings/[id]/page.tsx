@@ -5,10 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { getBooking, respondToBooking, cancelBooking } from "@/lib/bookings-api";
-import { submitReview } from "@/lib/reviews-api";
 import { usePublicInfoMap } from "@/lib/use-public-info-map";
 import { StatusBadge } from "@/components/bookings/StatusBadge";
-import { ReviewForm } from "@/components/bookings/ReviewForm";
 import { Button } from "@/components/auth/Button";
 import { formatDateLong } from "@/lib/calendar";
 import type { Booking } from "@/types/bookings";
@@ -36,7 +34,6 @@ export default function BookingDetailPage() {
   const [busy, setBusy] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelNote, setCancelNote] = useState("");
-  const [reviewState, setReviewState] = useState<"idle" | "open" | "done" | "already">("idle");
 
   const otherId =
     booking && user ? (user.role === "artist" ? booking.planner_id : booking.artist_id) : null;
@@ -92,26 +89,6 @@ export default function BookingDetailPage() {
       setActionError(err instanceof Error ? err.message : "Couldn't cancel the booking.");
     } finally {
       setBusy(false);
-    }
-  }
-
-  async function handleReviewSubmit(scores: {
-    overallScore: number;
-    scoreCommunication: number;
-    scoreProfessionalism: number;
-    scorePunctuality: number;
-    scoreQuality: number;
-    body?: string;
-  }) {
-    try {
-      await submitReview({ bookingId: booking!.id, ...scores });
-      setReviewState("done");
-    } catch (err) {
-      if (err instanceof Error && /already submitted/i.test(err.message)) {
-        setReviewState("already");
-        return;
-      }
-      throw err;
     }
   }
 
@@ -216,28 +193,6 @@ export default function BookingDetailPage() {
           </>
         )}
 
-        {/* Completed: leave a review */}
-        {booking.status === "completed" && (
-          <div className="mt-2">
-            {reviewState === "done" && (
-              <div className="bg-success-bg border border-[#86EFAC] rounded-xl p-3.5 text-sm text-success">
-                Review submitted. It&apos;ll be published once the other party reviews too, or
-                after 7 days.
-              </div>
-            )}
-            {reviewState === "already" && (
-              <div className="bg-mist border border-hairline rounded-xl p-3.5 text-sm text-muted">
-                You&apos;ve already reviewed this booking.
-              </div>
-            )}
-            {reviewState === "open" && (
-              <ReviewForm onSubmit={handleReviewSubmit} onCancel={() => setReviewState("idle")} />
-            )}
-            {reviewState === "idle" && (
-              <Button onClick={() => setReviewState("open")}>Leave a review</Button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

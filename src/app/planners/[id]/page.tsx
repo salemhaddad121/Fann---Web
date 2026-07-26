@@ -6,30 +6,23 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { getPlanner } from "@/lib/planners-api";
-import { getPlannerReviews } from "@/lib/reviews-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { PlannerProfileView } from "@/components/profile/PlannerProfileView";
 import type { PlannerDetail } from "@/types/planners";
-import type { Review } from "@/types/reviews";
 import { ApiError } from "@/lib/api";
 
 function Content({ id }: { id: string }) {
   const { user } = useAuth();
   const router = useRouter();
   const [planner, setPlanner] = useState<PlannerDetail | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     getPlanner(id)
-      .then(async (data) => {
-        if (cancelled) return;
-        setPlanner(data);
-        // Reviews are keyed by the planner's user id, not the profile id in `id`.
-        const r = await getPlannerReviews(data.user_id).catch(() => []);
-        if (!cancelled) setReviews(r);
+      .then((data) => {
+        if (!cancelled) setPlanner(data);
       })
       .catch((err) => {
         if (!cancelled) {
@@ -68,7 +61,6 @@ function Content({ id }: { id: string }) {
 
       <PlannerProfileView
         planner={planner}
-        reviews={reviews}
         isOwnProfile={isOwnProfile}
         accountStatus={isOwnProfile ? user?.status : undefined}
       />
