@@ -16,6 +16,12 @@ function formatRange(start: string, end: string): string {
   return `${new Date(start).toLocaleDateString(undefined, opts)} – ${new Date(end).toLocaleDateString(undefined, opts)}`;
 }
 
+// joined_at is a TIMESTAMP, so it arrives as a full ISO string rather
+// than the bare "YYYY-MM-DD" the DATE columns give us.
+function formatJoined(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
 export function ArtistProfileView({
   artist,
   isOwnProfile = false,
@@ -102,6 +108,12 @@ export function ArtistProfileView({
             last
           />
         </div>
+
+        {artist.joined_at && (
+          <p className="mt-2 text-[10px] text-faint text-center">
+            Date joined {formatJoined(artist.joined_at)}
+          </p>
+        )}
       </div>
 
       {(photos.length > 0 || videos.length > 0) && (
