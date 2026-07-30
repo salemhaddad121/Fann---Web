@@ -16,10 +16,14 @@ export function ArtistProfileView({
   artist,
   isOwnProfile = false,
   accountStatus,
+  onPickDate,
 }: {
   artist: ArtistDetail;
   isOwnProfile?: boolean;
   accountStatus?: UserStatus;
+  // Passed only for a planner viewing someone else's profile — makes the
+  // availability calendar clickable to start a booking request.
+  onPickDate?: (dateKey: string) => void;
 }) {
   const primaryCategory = artist.categories[0];
   const unavailableToday = isUnavailableToday(artist);
@@ -138,8 +142,13 @@ export function ArtistProfileView({
             same grid the artist blocks dates on, with their unavailable
             days highlighted. The -mx-4 undoes Section's padding, since
             CalendarGrid brings its own. */}
+        {onPickDate && (
+          <p className="text-xs text-muted mb-1">
+            Tap an available date to request a booking.
+          </p>
+        )}
         <div className="-mx-4">
-          <AvailabilityCalendar blocks={artist.availability} />
+          <AvailabilityCalendar blocks={artist.availability} onPickDate={onPickDate} />
         </div>
       </Section>
 
