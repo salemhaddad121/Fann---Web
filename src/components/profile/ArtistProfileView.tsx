@@ -3,17 +3,13 @@ import { badgeColor } from "@/lib/badge-colors";
 import { MediaStrip } from "@/components/profile/MediaStrip";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
+import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar";
 import type { ArtistDetail } from "@/types/artists";
 import type { UserStatus } from "@/types/admin";
 
 function isUnavailableToday(artist: ArtistDetail): boolean {
   const today = new Date().toISOString().slice(0, 10);
   return artist.availability.some((b) => b.start_date <= today && b.end_date >= today);
-}
-
-function formatRange(start: string, end: string): string {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${new Date(start).toLocaleDateString(undefined, opts)} – ${new Date(end).toLocaleDateString(undefined, opts)}`;
 }
 
 export function ArtistProfileView({
@@ -138,21 +134,13 @@ export function ArtistProfileView({
           ) : undefined
         }
       >
-        {artist.availability.length === 0 ? (
-          <p className="text-sm text-success flex items-center gap-1.5">
-            <i className="ti ti-circle-check" /> No blocked dates coming up
-          </p>
-        ) : (
-          <div className="flex flex-col gap-1.5">
-            {artist.availability.map((b) => (
-              <div key={b.id} className="flex items-center gap-2 text-sm text-muted">
-                <i className="ti ti-calendar-x text-faint" />
-                {formatRange(b.start_date, b.end_date)}
-                {b.note && <span className="text-faint">· {b.note}</span>}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* The calendar replaces the old list of blocked date ranges —
+            same grid the artist blocks dates on, with their unavailable
+            days highlighted. The -mx-4 undoes Section's padding, since
+            CalendarGrid brings its own. */}
+        <div className="-mx-4">
+          <AvailabilityCalendar blocks={artist.availability} />
+        </div>
       </Section>
 
       {artist.social_links && Object.keys(artist.social_links).length > 0 && (
