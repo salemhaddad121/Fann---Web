@@ -6,10 +6,53 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { getPlanner } from "@/lib/planners-api";
+import { requestConversation } from "@/lib/messaging-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { PlannerProfileView } from "@/components/profile/PlannerProfileView";
 import type { PlannerDetail } from "@/types/planners";
 import { ApiError } from "@/lib/api";
+
+// Artists only. A thread an artist opens is a request the planner has to
+// accept, so this deliberately doesn't jump straight into the thread the
+// way the planner-side Message button does — there may be nothing to
+// show yet, and the wording should set the expectation.
+function MessageRequestCta({ planner }: { planner: PlannerDetail }) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (user?.role !== "artist") return null;
+
+  async function handleRequest() {
+    setError(null);
+    setSending(true);
+    try {
+      const conversation = await requestConversation(planner.user_id);
+      router.push(`/messages/${conversation.id}`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't send that message request.");
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+      {error && <p className="text-xs text-danger mb-2">{error}</p>}
+      <button
+        onClick={handleRequest}
+        disabled={sending}
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] border-[1.5px] border-ink text-sm font-semibold text-ink disabled:opacity-60"
+      >
+        <i className="ti ti-message-circle text-sm" />
+        {sending ? "Sending…" : "Message"}
+      </button>
+      <p className="mt-1.5 text-[11px] text-faint text-center">
+        They&apos;ll need to accept before they can reply.
+      </p>
+    </div>
+  );
+}
 
 function Content({ id }: { id: string }) {
   const { user } = useAuth();
@@ -65,7 +108,7 @@ function Content({ id }: { id: string }) {
         accountStatus={isOwnProfile ? user?.status : undefined}
       />
 
-      {isOwnProfile && (
+      {isOwnProfile ? (
         <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
           <Link
             href="/profile/edit"
@@ -74,6 +117,8 @@ function Content({ id }: { id: string }) {
             <i className="ti ti-pencil text-sm" /> Edit profile
           </Link>
         </div>
+      ) : (
+        <MessageRequestCta planner={planner} />
       )}
     </div>
   );

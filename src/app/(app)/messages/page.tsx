@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { listConversations } from "@/lib/messaging-api";
+import { listConversations, respondToRequest } from "@/lib/messaging-api";
 import { formatRelativeTime, initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import type { ConversationSummary } from "@/types/messaging";
@@ -17,6 +17,7 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,10 +42,35 @@ export default function MessagesPage() {
     };
   }, []);
 
+  async function respond(conversationId: string, decision: "accepted" | "declined") {
+    setBusyId(conversationId);
+    try {
+      await respondToRequest(conversationId, decision);
+      // Accepted threads move into the main list; declined ones are
+      // filtered out server-side, so a reload settles both cases.
+      const fresh = await listConversations();
+      setConversations(fresh);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't respond to that request.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   if (error) return <p className="px-4 py-10 text-sm text-danger">{error}</p>;
   if (!conversations) return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
 
+  // A pending thread the *other* side opened is an incoming request. For a
+  // planner that means an artist reached out; the artist who sent it sees
+  // their own pending thread in the normal list instead, since there's
+  // nothing for them to action.
+  const isIncomingRequest = (c: ConversationSummary) =>
+    c.status === "pending" && c.initiated_by !== user?.id;
+
+  const requests = conversations.filter(isIncomingRequest);
+
   const filtered = conversations.filter((c) => {
+    if (isIncomingRequest(c)) return false;
     if (filter === "unread" && c.unreadCount === 0) return false;
     if (!query.trim()) return true;
     const q = query.toLowerCase();
@@ -85,6 +111,55 @@ export default function MessagesPage() {
         ))}
       </div>
 
+      {requests.length > 0 && (
+        <div className="border-b border-hairline">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint px-4 pt-4 pb-2">
+            Message requests
+          </p>
+          {requests.map((c) => {
+            const name = c.other_display_name ?? "Unknown";
+            return (
+              <div key={c.id} className="px-4 pb-3.5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className={`w-[46px] h-[46px] rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${badgeColor(name)}`}
+                  >
+                    {c.other_thumbnail_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.other_thumbnail_url} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      initialsFromName(name)
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="block text-[13px] font-semibold text-ink truncate">{name}</span>
+                    <p className="text-xs text-muted truncate">
+                      {c.last_message_body ?? "Wants to message you"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => respond(c.id, "declined")}
+                    disabled={busyId === c.id}
+                    className="flex-1 py-2 rounded-[10px] border border-hairline text-xs font-semibold text-muted disabled:opacity-60"
+                  >
+                    Decline
+                  </button>
+                  <button
+                    onClick={() => respond(c.id, "accepted")}
+                    disabled={busyId === c.id}
+                    className="flex-1 py-2 rounded-[10px] bg-ink text-white text-xs font-semibold disabled:opacity-60"
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {conversations.length === 0 ? (
         <div className="flex flex-col items-center text-center px-8 py-16">
           <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-xl text-faint mb-4">
@@ -96,7 +171,11 @@ export default function MessagesPage() {
           </p>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="px-4 py-10 text-sm text-muted text-center">No conversations match.</p>
+        /* Requests aren't conversations yet, so "no conversations" is the
+           honest message even when the list above isn't empty. */
+        <p className="px-4 py-10 text-sm text-muted text-center">
+          {requests.length > 0 ? "No conversations yet." : "No conversations match."}
+        </p>
       ) : (
         <div>
           {filtered.map((c) => {
@@ -122,7 +201,13 @@ export default function MessagesPage() {
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <span className="text-[13px] font-semibold text-ink truncate">{name}</span>
                     <span className="text-[11px] text-faint shrink-0">
-                      {c.last_message_at ? formatRelativeTime(c.last_message_at) : ""}
+                      {/* The sender's own outgoing request — they can't
+                          action it, so flag the wait instead of a time. */}
+                      {c.status === "pending"
+                        ? "Pending"
+                        : c.last_message_at
+                          ? formatRelativeTime(c.last_message_at)
+                          : ""}
                     </span>
                   </div>
                   <p

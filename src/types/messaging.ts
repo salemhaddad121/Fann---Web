@@ -9,6 +9,11 @@ export interface ConversationSummary {
   last_message_body: string | null;
   last_message_sender_id: string | null;
   unreadCount: number;
+  // "pending" means an artist opened this thread and the planner hasn't
+  // accepted yet. Declined threads are filtered out server-side, so they
+  // never reach the client.
+  status: "pending" | "accepted" | "declined";
+  initiated_by: string | null;
 }
 
 export interface Message {
