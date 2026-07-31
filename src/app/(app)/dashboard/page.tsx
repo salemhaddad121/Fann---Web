@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Button } from "@/components/auth/Button";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -14,7 +13,7 @@ function greeting(): string {
 }
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -45,28 +44,10 @@ export default function DashboardPage() {
         </dl>
       </div>
 
-      <Link
-        href="/bookings"
-        className="flex items-center justify-between bg-white border border-hairline rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-9 h-9 rounded-[10px] flex items-center justify-center ${
-              user.role === "planner" ? "bg-[#E0F2FE] text-sky" : "bg-mist text-indigo"
-            }`}
-          >
-            <i className="ti ti-calendar-event text-lg" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-ink">My bookings</div>
-            <div className="text-xs text-faint">
-              {user.role === "artist" ? "Requests, upcoming, past" : "Track what you've proposed"}
-            </div>
-          </div>
-        </div>
-        <i className="ti ti-chevron-right text-faint" />
-      </Link>
-
+      {/* My Bookings moved to the sidebar/bottom nav, and Log out to the
+          foot of the sidebar — both are reachable from every page now,
+          so duplicating them here would just be a second place to
+          maintain. */}
       {user.phone && !user.phoneVerifiedAt && (
         <Link
           href="/auth/verify-phone"
@@ -75,10 +56,6 @@ export default function DashboardPage() {
           Verify your phone number →
         </Link>
       )}
-
-      <Button variant="ghost" onClick={logout}>
-        Log out
-      </Button>
     </div>
   );
 }
