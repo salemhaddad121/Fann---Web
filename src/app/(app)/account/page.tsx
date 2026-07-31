@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { changePassword, changeEmail, deleteAccount } from "@/lib/account-api";
+import { getMyArtistProfile, updateMyArtistProfile } from "@/lib/artists-api";
+import { getMyPlannerProfile, updateMyPlannerProfile } from "@/lib/planners-api";
 import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
+import { OtpInput } from "@/components/auth/OtpInput";
 import { ApiError } from "@/lib/api";
 
 function Row({ label, value, trailing }: { label: string; value: string; trailing?: React.ReactNode }) {
@@ -151,6 +154,192 @@ function ChangeEmailForm() {
   );
 }
 
+// Changing the number reuses the same OTP pair as signup verification:
+// send-otp writes the new number to the user record and texts a code,
+// verify-otp marks it verified. Done inline here rather than linking out
+// to /auth/verify-phone so the whole settings list behaves consistently.
+function ChangeNumberForm() {
+  const { user, sendOtp, verifyOtp } = useAuth();
+  const [phone, setPhone] = useState("");
+  const [step, setStep] = useState<"phone" | "code">("phone");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleSend(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setNotice(null);
+    if (!/^\+?[1-9]\d{6,14}$/.test(phone)) {
+      setError("Enter a valid international phone number, e.g. +9613123456.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await sendOtp(phone);
+      setStep("code");
+      setNotice("We sent a 6-digit code over WhatsApp.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't send the code.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleVerify(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (code.length !== 6) {
+      setError("Enter all 6 digits.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await verifyOtp(phone, code);
+      setNotice("Phone number updated.");
+      setStep("phone");
+      setPhone("");
+      setCode("");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "That code didn't work.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (step === "code") {
+    return (
+      <form onSubmit={handleVerify}>
+        {error && <Banner kind="error">{error}</Banner>}
+        {notice && <Banner kind="success">{notice}</Banner>}
+        <p className="text-xs text-muted mb-3">
+          Enter the code sent to <span className="font-semibold text-ink">{phone}</span>.
+        </p>
+        <div className="mb-4">
+          <OtpInput value={code} onChange={setCode} />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex-1"
+            onClick={() => {
+              setStep("phone");
+              setCode("");
+              setError(null);
+              setNotice(null);
+            }}
+          >
+            Back
+          </Button>
+          <Button type="submit" loading={busy} className="flex-1">
+            Verify
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSend}>
+      {error && <Banner kind="error">{error}</Banner>}
+      {notice && <Banner kind="success">{notice}</Banner>}
+      <FormField
+        label="New phone number"
+        type="tel"
+        autoComplete="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder={user?.phone ? String(user.phone) : "+9613123456"}
+      />
+      <Button type="submit" loading={busy}>
+        Send verification code
+      </Button>
+    </form>
+  );
+}
+
+// City/country live on the role's profile table, not the user record, so
+// this writes through the same PUT the profile editor uses. Both fields
+// are optional on the DTO, so sending only these two leaves bio,
+// categories and the rest untouched.
+function ChangeLocationForm() {
+  const { user } = useAuth();
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const isArtist = user?.role === "artist";
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = isArtist ? getMyArtistProfile : getMyPlannerProfile;
+    load()
+      .then((p) => {
+        if (cancelled) return;
+        setCity(p.location_city ?? "");
+        setCountry(p.location_country ?? "");
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError("Couldn't load your current location.");
+          setLoaded(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isArtist]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+    setSaving(true);
+    try {
+      const payload = { locationCity: city, locationCountry: country };
+      if (isArtist) await updateMyArtistProfile(payload);
+      else await updateMyPlannerProfile(payload);
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't update your location.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!loaded) return <p className="text-sm text-muted">Loading…</p>;
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <Banner kind="error">{error}</Banner>}
+      {success && <Banner kind="success">Location updated.</Banner>}
+      <FormField
+        label="City"
+        autoComplete="address-level2"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        placeholder="Beirut"
+      />
+      <FormField
+        label="Country"
+        autoComplete="country-name"
+        value={country}
+        onChange={(e) => setCountry(e.target.value)}
+        placeholder="Lebanon"
+      />
+      <Button type="submit" loading={saving}>
+        Update location
+      </Button>
+    </form>
+  );
+}
+
 function DeleteAccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
@@ -176,7 +365,11 @@ function DeleteAccountSection() {
 
   if (!confirming) {
     return (
-      <div className="border border-hairline rounded-xl p-3.5">
+      <div className="border border-[#FCA5A5] bg-danger-bg rounded-xl p-3.5">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <i className="ti ti-alert-triangle text-danger text-sm" />
+          <p className="text-xs font-bold text-danger">Danger zone</p>
+        </div>
         <p className="text-xs text-muted leading-relaxed mb-3">
           Deleting your account removes your profile from search immediately. Past bookings,
           reviews, and messages are kept for the other people involved in them — this can&apos;t
@@ -184,7 +377,7 @@ function DeleteAccountSection() {
         </p>
         <button
           onClick={() => setConfirming(true)}
-          className="text-xs font-semibold text-danger"
+          className="w-full rounded-[10px] bg-danger text-white text-xs font-semibold py-2.5"
         >
           Delete my account
         </button>
@@ -228,7 +421,7 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-lg mx-auto pb-10">
-      <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-1">Account settings</h1>
+      <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-1">Settings</h1>
 
       <div className="p-4">
         <p className="text-xs font-bold text-ink mb-2">Account</p>
@@ -277,20 +470,34 @@ export default function AccountPage() {
           <ChangeEmailForm />
         </div>
 
+        <p className="text-xs font-bold text-ink mb-2">Change number</p>
+        <div className="mb-6">
+          <ChangeNumberForm />
+        </div>
+
+        {/* Location lives on the artist/planner profile, so admins — who
+            have neither — don't get this section. */}
+        {user.role !== "admin" && (
+          <>
+            <p className="text-xs font-bold text-ink mb-2">Change location</p>
+            <div className="mb-6">
+              <ChangeLocationForm />
+            </div>
+          </>
+        )}
+
         <p className="text-xs font-bold text-ink mb-2">Change password</p>
         <div className="mb-6">
           <ChangePasswordForm />
         </div>
 
         {/* Admins have no self-service delete — the destructive section is
-            hidden for them (artists and planners still see it). */}
+            hidden for them (artists and planners still see it). Kept last
+            so the destructive action sits at the bottom of the list. */}
         {user.role !== "admin" && (
-          <>
-            <p className="text-xs font-bold text-ink mb-2">Delete account</p>
-            <div className="mb-6">
-              <DeleteAccountSection />
-            </div>
-          </>
+          <div className="mb-6">
+            <DeleteAccountSection />
+          </div>
         )}
 
         <Button variant="ghost" onClick={logout}>
