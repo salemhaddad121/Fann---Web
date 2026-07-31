@@ -3,17 +3,13 @@ import { badgeColor } from "@/lib/badge-colors";
 import { MediaStrip } from "@/components/profile/MediaStrip";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
+import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar";
 import type { ArtistDetail } from "@/types/artists";
 import type { UserStatus } from "@/types/admin";
 
 function isUnavailableToday(artist: ArtistDetail): boolean {
   const today = new Date().toISOString().slice(0, 10);
   return artist.availability.some((b) => b.start_date <= today && b.end_date >= today);
-}
-
-function formatRange(start: string, end: string): string {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${new Date(start).toLocaleDateString(undefined, opts)} – ${new Date(end).toLocaleDateString(undefined, opts)}`;
 }
 
 // joined_at is a TIMESTAMP, so it arrives as a full ISO string rather
@@ -26,10 +22,14 @@ export function ArtistProfileView({
   artist,
   isOwnProfile = false,
   accountStatus,
+  onPickDate,
 }: {
   artist: ArtistDetail;
   isOwnProfile?: boolean;
   accountStatus?: UserStatus;
+  // Passed only for a planner viewing someone else's profile — makes the
+  // availability calendar clickable to start a booking request.
+  onPickDate?: (dateKey: string) => void;
 }) {
   const primaryCategory = artist.categories[0];
   const unavailableToday = isUnavailableToday(artist);
@@ -150,21 +150,18 @@ export function ArtistProfileView({
           ) : undefined
         }
       >
-        {artist.availability.length === 0 ? (
-          <p className="text-sm text-success flex items-center gap-1.5">
-            <i className="ti ti-circle-check" /> No blocked dates coming up
+        {/* The calendar replaces the old list of blocked date ranges —
+            same grid the artist blocks dates on, with their unavailable
+            days highlighted. The -mx-4 undoes Section's padding, since
+            CalendarGrid brings its own. */}
+        {onPickDate && (
+          <p className="text-xs text-muted mb-1">
+            Tap an available date to request a booking.
           </p>
-        ) : (
-          <div className="flex flex-col gap-1.5">
-            {artist.availability.map((b) => (
-              <div key={b.id} className="flex items-center gap-2 text-sm text-muted">
-                <i className="ti ti-calendar-x text-faint" />
-                {formatRange(b.start_date, b.end_date)}
-                {b.note && <span className="text-faint">· {b.note}</span>}
-              </div>
-            ))}
-          </div>
         )}
+        <div className="-mx-4">
+          <AvailabilityCalendar blocks={artist.availability} onPickDate={onPickDate} />
+        </div>
       </Section>
 
       {artist.social_links && Object.keys(artist.social_links).length > 0 && (

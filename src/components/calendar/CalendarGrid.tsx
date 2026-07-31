@@ -16,6 +16,8 @@ export function CalendarGrid({
   onSelectDay,
   onPrevMonth,
   onNextMonth,
+  interactive = true,
+  canGoPrev = true,
 }: {
   year: number;
   month: number;
@@ -23,6 +25,14 @@ export function CalendarGrid({
   onSelectDay: (dateKey: string, blocked: boolean) => void;
   onPrevMonth: () => void;
   onNextMonth: () => void;
+  // false renders the grid as a read-only display: days aren't buttons,
+  // and nothing shows a hover or pointer affordance. Used on the public
+  // profile, where the calendar reports availability rather than editing
+  // it.
+  interactive?: boolean;
+  // Lets the caller pin the view at the current month — there's nothing
+  // to see in the past, and blocks aren't fetched for it.
+  canGoPrev?: boolean;
 }) {
   const cells = buildMonthGrid(year, month);
   const today = todayKey();
@@ -34,7 +44,8 @@ export function CalendarGrid({
       <div className="flex items-center justify-between px-4 pt-4 pb-3.5">
         <button
           onClick={onPrevMonth}
-          className="w-8 h-8 rounded-full border border-hairline flex items-center justify-center text-muted"
+          disabled={!canGoPrev}
+          className="w-8 h-8 rounded-full border border-hairline flex items-center justify-center text-muted disabled:opacity-30"
           aria-label="Previous month"
         >
           <i className="ti ti-chevron-left text-base" />
@@ -68,15 +79,30 @@ export function CalendarGrid({
           const isToday = cell.key === today;
           const blocked = isBlocked(cell.key, blocks);
 
+          // cursor-pointer is applied per-case rather than relying on the
+          // global button rule, so a read-only grid never implies a click
+          // target.
+          const clickable = interactive && !isPast ? " cursor-pointer" : "";
           let classes = "aspect-square rounded-full flex items-center justify-center text-[13px] ";
           if (isPast) {
             classes += "text-[#C5D3EE]";
           } else if (blocked) {
-            classes += "bg-danger-bg text-danger cursor-pointer";
+            classes += "bg-danger-bg text-danger" + clickable;
           } else if (isToday) {
-            classes += "border-[1.5px] border-indigo text-indigo font-bold cursor-pointer";
+            classes += "border-[1.5px] border-indigo text-indigo font-bold" + clickable;
           } else {
-            classes += "text-ink cursor-pointer hover:bg-mist";
+            classes += "text-ink" + clickable;
+            if (interactive) classes += " hover:bg-mist";
+          }
+
+          // Read-only: plain divs, so there's no focusable control and no
+          // pointer cursor implying the day does something.
+          if (!interactive) {
+            return (
+              <div key={cell.key} className={classes}>
+                {cell.day}
+              </div>
+            );
           }
 
           return (

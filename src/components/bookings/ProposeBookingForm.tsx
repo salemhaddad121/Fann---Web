@@ -7,6 +7,8 @@ import { Banner } from "@/components/auth/Banner";
 export function ProposeBookingForm({
   onCancel,
   onSubmit,
+  initialDate,
+  containerClassName = "absolute inset-0 bg-white z-10 flex flex-col",
 }: {
   onCancel: () => void;
   onSubmit: (payload: {
@@ -17,9 +19,16 @@ export function ProposeBookingForm({
     agreedFeeUsd?: number;
     notes?: string;
   }) => Promise<void>;
+  // Prefills the date — set when the flow starts from a calendar day
+  // rather than from the message thread's "propose" button.
+  initialDate?: string;
+  // The message thread renders this as a full-bleed overlay inside its
+  // own relative container; the profile needs a centred modal. Kept as a
+  // prop so the thread's layout is untouched.
+  containerClassName?: string;
 }) {
   const [eventName, setEventName] = useState("");
-  const [eventDate, setEventDate] = useState("");
+  const [eventDate, setEventDate] = useState(initialDate ?? "");
   const [eventLocation, setEventLocation] = useState("");
   const [durationHours, setDurationHours] = useState("");
   const [agreedFeeUsd, setAgreedFeeUsd] = useState("");
@@ -51,7 +60,7 @@ export function ProposeBookingForm({
   }
 
   return (
-    <div className="absolute inset-0 bg-white z-10 flex flex-col">
+    <div className={containerClassName}>
       <div className="flex items-center gap-2 px-4 py-3 border-b border-hairline shrink-0">
         <button type="button" onClick={onCancel} className="text-muted" aria-label="Close">
           <i className="ti ti-x text-lg" />
