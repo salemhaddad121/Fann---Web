@@ -7,9 +7,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { getArtist } from "@/lib/artists-api";
 import { startConversation } from "@/lib/messaging-api";
+import { createBooking } from "@/lib/bookings-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
+import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
+import { formatDateLong } from "@/lib/calendar";
 import type { ArtistDetail } from "@/types/artists";
 import { ApiError } from "@/lib/api";
 
@@ -59,6 +62,9 @@ function Content({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  // Booking request started from a calendar day.
+  const [pickedDate, setPickedDate] = useState<string | null>(null);
+  const [bookingNotice, setBookingNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +111,28 @@ function Content({ id }: { id: string }) {
     }
   }
 
+  async function handleProposeBooking(payload: {
+    eventName: string;
+    eventDate: string;
+    eventLocation?: string;
+    durationHours?: number;
+    agreedFeeUsd?: number;
+    notes?: string;
+  }) {
+    const booking = await createBooking({ artistId: artist!.user_id, ...payload });
+    setPickedDate(null);
+    setBookingNotice(
+      `Request sent for ${formatDateLong(booking.event_date)} — waiting on ${artist!.display_name} to confirm.`,
+    );
+    // Pull the profile again so the new pending booking is reflected in
+    // the availability the calendar draws from.
+    getArtist(id)
+      .then(setArtist)
+      .catch(() => {
+        // Non-critical: the request already went through.
+      });
+  }
+
   if (loading) return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
   if (error || !artist) {
     return (
@@ -137,11 +165,38 @@ function Content({ id }: { id: string }) {
         )}
       </div>
 
+      {bookingNotice && (
+        <div className="mx-4 mt-3 px-3.5 py-2.5 rounded-[10px] bg-success-bg border border-[#86EFAC] text-success text-xs">
+          {bookingNotice}
+        </div>
+      )}
+
       <ArtistProfileView
         artist={artist}
         isOwnProfile={isOwnProfile}
         accountStatus={isOwnProfile ? user?.status : undefined}
+        onPickDate={
+          user?.role === "planner" && !isOwnProfile
+            ? (dateKey) => {
+                setBookingNotice(null);
+                setPickedDate(dateKey);
+              }
+            : undefined
+        }
       />
+
+      {pickedDate && (
+        <div className="fixed inset-0 z-[70] bg-ink/40 flex items-end sm:items-center justify-center">
+          <div className="w-full sm:max-w-lg sm:rounded-2xl bg-white overflow-hidden max-h-[90vh] flex flex-col">
+            <ProposeBookingForm
+              initialDate={pickedDate}
+              containerClassName="flex flex-col min-h-0"
+              onCancel={() => setPickedDate(null)}
+              onSubmit={handleProposeBooking}
+            />
+          </div>
+        </div>
+      )}
 
       {isOwnProfile ? (
         <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">

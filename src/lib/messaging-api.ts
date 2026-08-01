@@ -6,14 +6,37 @@ export interface Conversation {
   artist_id: string;
   planner_id: string;
   created_at: string;
+  status: "pending" | "accepted" | "declined";
+  initiated_by: string | null;
 }
 
-// Planners only — the backend throws a 403 for anyone else. Returns the
-// existing thread if one's already started with this artist.
+// Planners only. Returns the existing thread if one's already started
+// with this artist. Comes back accepted — a planner reaching out to an
+// artist needs no approval.
 export async function startConversation(artistUserId: string): Promise<Conversation> {
   return apiFetch<Conversation>("/conversations", {
     method: "POST",
     body: { artistId: artistUserId },
+  });
+}
+
+// Artists only. Comes back as a *pending* request: the planner has to
+// accept before they can reply. Throws if they previously declined.
+export async function requestConversation(plannerUserId: string): Promise<Conversation> {
+  return apiFetch<Conversation>("/conversations", {
+    method: "POST",
+    body: { plannerId: plannerUserId },
+  });
+}
+
+// Planners only — accept or decline an artist's message request.
+export async function respondToRequest(
+  conversationId: string,
+  decision: "accepted" | "declined",
+): Promise<Conversation> {
+  return apiFetch<Conversation>(`/conversations/${conversationId}/respond`, {
+    method: "PATCH",
+    body: { decision },
   });
 }
 

@@ -65,6 +65,10 @@ export interface ArtistDetail extends ArtistCard {
   review_count: number;
   // Completed bookings only. Optional so an older API response still types.
   bookings_count?: number;
+  // users.created_at — when the account was created, not when the profile
+  // row was written (those differ). Optional so an older API response
+  // still types.
+  joined_at?: string;
   media: MediaItem[];
   availability: AvailabilityBlock[];
 }

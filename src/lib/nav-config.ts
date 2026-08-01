@@ -7,19 +7,31 @@ export interface NavItem {
   badge?: "messages"; // which live count (if any) decorates this item
 }
 
-// Artist: Home, Search, Messages, Calendar, Profile
+// The primary destinations, in the order they appear in the sidebar.
+//
+// These five are also exactly what the mobile BottomNav renders — seven
+// items don't fit across a phone. The two the sidebar adds below them
+// (Notifications, Log out) are reachable on mobile from the TopNav bell
+// and the account chip respectively, so nothing becomes unreachable.
+//
+// "Home" is deliberately absent: the dashboard is no longer a nav
+// destination, only the landing page behind the wordmark.
+
+// Artist: Search, My Bookings, Messages, Calendar, Profile
+// Calendar is where artists block out dates, so it stays in the nav —
+// the public profile's availability calendar reads from it.
 const ARTIST_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: "home" },
   { href: "/search", label: "Search", icon: "search" },
+  { href: "/bookings", label: "My Bookings", icon: "calendar-event" },
   { href: "/messages", label: "Messages", icon: "message-circle", badge: "messages" },
   { href: "/calendar", label: "Calendar", icon: "calendar" },
   { href: "/profile", label: "Profile", icon: "user" },
 ];
 
-// Planner: Home, Search, Messages, Saved, Profile
+// Planner: Search, My Bookings, Messages, Saved, Profile
 const PLANNER_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: "home" },
   { href: "/search", label: "Search", icon: "search" },
+  { href: "/bookings", label: "My Bookings", icon: "calendar-event" },
   { href: "/messages", label: "Messages", icon: "message-circle", badge: "messages" },
   { href: "/saved", label: "Saved", icon: "heart" },
   { href: "/profile", label: "Profile", icon: "user" },
