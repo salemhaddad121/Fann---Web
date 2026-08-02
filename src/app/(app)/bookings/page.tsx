@@ -109,9 +109,11 @@ export default function BookingsPage() {
     <div className="max-w-lg mx-auto pb-8">
       <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-1">Bookings</h1>
 
-      {/* Horizontal scroll rather than wrap: six tabs don't fit across a
-          phone, and a wrapped second row pushes the list off-screen. */}
-      <div className="flex gap-1.5 px-4 py-3 overflow-x-auto">
+      {/* Six equal columns rather than a scrolling row: every tab is
+          visible at once, at any width. The count sits under the label
+          instead of beside it, which is what buys the horizontal room to
+          fit "Completed" and "Cancelled" on a phone. */}
+      <div className="grid grid-cols-6 gap-0.5 px-2 py-3 sm:gap-1 sm:px-4">
         {FILTERS.map((f) => {
           const count = bookings.filter((b) => f.statuses.includes(b.status)).length;
           const selected = f.key === filter;
@@ -120,14 +122,25 @@ export default function BookingsPage() {
               key={f.key}
               onClick={() => setFilter(f.key)}
               aria-pressed={selected}
-              className={`flex-none text-xs font-semibold px-3 py-1.5 rounded-2xl border ${
+              title={f.label}
+              className={`min-w-0 flex flex-col items-center gap-0.5 py-1.5 rounded-xl border ${
                 selected
                   ? "bg-ink text-white border-ink"
                   : "bg-white text-muted border-hairline hover:bg-mist"
               }`}
             >
-              {f.label}
-              <span className={selected ? "text-white/60" : "text-faint"}> {count}</span>
+              {/* 9px below 360px keeps "Completed" from truncating on the
+                  narrowest phones still in use (iPhone SE 1st gen). */}
+              <span className="w-full truncate text-center text-[10px] leading-tight font-semibold tracking-tight max-[359px]:text-[9px] sm:text-[11px] sm:tracking-normal">
+                {f.label}
+              </span>
+              <span
+                className={`text-[11px] font-bold leading-none ${
+                  selected ? "text-white" : "text-ink"
+                }`}
+              >
+                {count}
+              </span>
             </button>
           );
         })}
