@@ -9,6 +9,7 @@ import { Banner } from "@/components/auth/Banner";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { homePathFor } from "@/lib/nav-config";
 
 export default function VerifyPhonePage() {
   const { user, isLoading, sendOtp, verifyOtp } = useAuth();
@@ -53,7 +54,10 @@ export default function VerifyPhonePage() {
     setLoading(true);
     try {
       await verifyOtp(phone, code);
-      router.push("/dashboard");
+      // `user` is non-null in practice (this page redirects out without a
+      // session), but the context types it nullable — fall back to the
+      // non-admin home rather than assert, since admins never reach here.
+      router.push(user ? homePathFor(user.role) : "/search");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "That code didn't work. Please try again.");
     } finally {
@@ -68,7 +72,7 @@ export default function VerifyPhonePage() {
       title="Verify your phone"
       subtitle="Planners can reach you on WhatsApp once this is confirmed."
       footer={
-        <button onClick={() => router.push("/dashboard")} className="font-semibold text-indigo">
+        <button onClick={() => router.push(homePathFor(user.role))} className="font-semibold text-indigo">
           Skip for now
         </button>
       }

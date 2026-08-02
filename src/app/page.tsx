@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { LandingPage } from "@/components/landing/LandingPage";
+import { homePathFor } from "@/lib/nav-config";
 
 export default function RootPage() {
   const { user, isLoading } = useAuth();
@@ -14,7 +15,7 @@ export default function RootPage() {
   // own home.
   useEffect(() => {
     if (isLoading || !user) return;
-    router.replace(user.role === "admin" ? "/admin" : "/dashboard");
+    router.replace(homePathFor(user.role));
   }, [isLoading, user, router]);
 
   if (isLoading || user) return null;
