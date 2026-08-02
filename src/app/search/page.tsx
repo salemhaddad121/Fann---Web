@@ -10,7 +10,7 @@ import { SearchFilters } from "@/components/search/SearchFilters";
 import { PlannerFilters } from "@/components/search/PlannerFilters";
 import { ArtistCard } from "@/components/search/ArtistCard";
 import { PlannerCard } from "@/components/search/PlannerCard";
-import type { ArtistCard as ArtistCardType, Category, SearchArtistsParams } from "@/types/artists";
+import type { ArtistCard as ArtistCardType, CategoryGroup, SearchArtistsParams } from "@/types/artists";
 import type { PlannerCard as PlannerCardType, SearchPlannersParams } from "@/types/planners";
 
 type Filters = Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
@@ -19,8 +19,11 @@ type PlannerFiltersState = Pick<SearchPlannersParams, "city" | "country" | "sort
 function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
   const [rawQuery, setRawQuery] = useState("");
   const [query, setQuery] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
+  const [groups, setGroups] = useState<CategoryGroup[]>([]);
+  // One main category at a time; null is "All". Sub-categories are scoped
+  // to whichever main category is selected.
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedSubs, setSelectedSubs] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filters>({});
   const [page, setPage] = useState(1);
 
@@ -79,14 +82,14 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
     return () => clearTimeout(t);
   }, [rawQuery]);
 
-  // Load the category chip row once.
+  // Load the category rows once. Kept grouped — the filter shows main
+  // categories first and only reveals a group's sub-categories once it's
+  // picked, so flattening here would throw away the structure it needs.
   useEffect(() => {
     let cancelled = false;
     getCategories()
-      .then((groups) => {
-        if (cancelled) return;
-        const flat = groups.flatMap((g) => g.categories);
-        setCategories(flat);
+      .then((data) => {
+        if (!cancelled) setGroups(data);
       })
       .catch(() => {
         // Non-critical — search still works without the chip row.
@@ -96,6 +99,18 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
     };
   }, []);
 
+  // What actually goes to the API. Sub-categories if any are ticked,
+  // otherwise every leaf in the selected group, otherwise nothing.
+  const activeGroup = groups.find((g) => g.slug === selectedGroup) ?? null;
+  const querySlugs = !activeGroup
+    ? []
+    : selectedSubs.length > 0
+      ? selectedSubs
+      : activeGroup.categories.map((c) => c.slug);
+  // Stable primitive for the effect dependency — the array identity
+  // changes every render, the joined string doesn't.
+  const categoryKey = querySlugs.join(",");
+
   // The actual search request.
   useEffect(() => {
     let cancelled = false;
@@ -103,7 +118,12 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await searchArtists({ q: query || undefined, categories: selectedSlugs, ...filters, page });
+        const res = await searchArtists({
+          q: query || undefined,
+          categories: categoryKey ? categoryKey.split(",") : [],
+          ...filters,
+          page,
+        });
         if (cancelled) return;
         setResults(res.data);
         setMeta({ total: res.meta.total, pages: res.meta.pages });
@@ -118,10 +138,18 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [query, selectedSlugs, filters, page]);
+  }, [query, categoryKey, filters, page]);
 
-  function toggleCategory(slug: string) {
-    setSelectedSlugs((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
+  // Switching main category drops the previous group's sub-selection —
+  // those slugs belong to a group that's no longer on screen.
+  function selectGroup(slug: string | null) {
+    setSelectedGroup(slug);
+    setSelectedSubs([]);
+    setPage(1);
+  }
+
+  function toggleSub(slug: string) {
+    setSelectedSubs((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
     setPage(1);
   }
 
@@ -135,9 +163,11 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
       <SearchFilters
         query={rawQuery}
         onQueryChange={setRawQuery}
-        categories={categories}
-        selectedSlugs={selectedSlugs}
-        onToggleCategory={toggleCategory}
+        groups={groups}
+        selectedGroup={selectedGroup}
+        onSelectGroup={selectGroup}
+        selectedSubs={selectedSubs}
+        onToggleSub={toggleSub}
         filters={filters}
         onFiltersChange={updateFilters}
       />

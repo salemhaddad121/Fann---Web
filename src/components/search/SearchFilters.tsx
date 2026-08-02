@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import type { Category, SearchArtistsParams } from "@/types/artists";
+import type { CategoryGroup, SearchArtistsParams } from "@/types/artists";
 
 interface Props {
   query: string;
   onQueryChange: (q: string) => void;
-  categories: Category[];
-  selectedSlugs: string[];
-  onToggleCategory: (slug: string) => void;
+  groups: CategoryGroup[];
+  // At most one main category at a time — null means "All".
+  selectedGroup: string | null;
+  onSelectGroup: (slug: string | null) => void;
+  // Sub-categories within the selected group. Multi-select; empty means
+  // "everything in this group".
+  selectedSubs: string[];
+  onToggleSub: (slug: string) => void;
   filters: Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
   onFiltersChange: (next: Props["filters"]) => void;
 }
@@ -16,12 +21,15 @@ interface Props {
 export function SearchFilters({
   query,
   onQueryChange,
-  categories,
-  selectedSlugs,
-  onToggleCategory,
+  groups,
+  selectedGroup,
+  onSelectGroup,
+  selectedSubs,
+  onToggleSub,
   filters,
   onFiltersChange,
 }: Props) {
+  const activeGroup = groups.find((g) => g.slug === selectedGroup) ?? null;
   const [panelOpen, setPanelOpen] = useState(false);
   const activeFilterCount =
     (filters.city ? 1 : 0) +
@@ -55,31 +63,82 @@ export function SearchFilters({
         </button>
       </div>
 
-      {categories.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+      {/* Main categories only. Picking one reveals its sub-categories
+          below — listing all 36 leaf categories at once (what this used to
+          do) made the row unreadable and hid most of them off-screen.
+          Single-select: browsing "Music" and "Visual" at the same time
+          isn't a meaningful search. */}
+      {groups.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-4 py-3">
           <button
-            onClick={() => selectedSlugs.forEach(onToggleCategory)}
-            className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
-              selectedSlugs.length === 0
+            onClick={() => onSelectGroup(null)}
+            aria-pressed={selectedGroup === null}
+            className={`px-3 py-1 rounded-2xl text-xs border ${
+              selectedGroup === null
                 ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
                 : "border-hairline text-muted"
             }`}
           >
             All categories
           </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => onToggleCategory(c.slug)}
-              className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
-                selectedSlugs.includes(c.slug)
-                  ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
-                  : "border-hairline text-muted"
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
+          {groups.map((g) => {
+            const selected = g.slug === selectedGroup;
+            return (
+              <button
+                key={g.id}
+                onClick={() => onSelectGroup(selected ? null : g.slug)}
+                aria-pressed={selected}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs border ${
+                  selected
+                    ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
+                    : "border-hairline text-muted"
+                }`}
+              >
+                {g.icon && <i className={`ti ${g.icon} text-sm`} />}
+                {g.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Sub-categories for the chosen main category. Selecting none means
+          "everything in this group", so the results aren't empty the moment
+          a main category is picked. */}
+      {activeGroup && activeGroup.categories.length > 0 && (
+        <div className="px-4 pb-3 -mt-1">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+              {activeGroup.name}
+            </span>
+            {selectedSubs.length > 0 && (
+              <button
+                onClick={() => selectedSubs.forEach(onToggleSub)}
+                className="text-[11px] font-semibold text-indigo"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {activeGroup.categories.map((c) => {
+              const selected = selectedSubs.includes(c.slug);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => onToggleSub(c.slug)}
+                  aria-pressed={selected}
+                  className={`px-2.5 py-1 rounded-2xl text-[11px] border ${
+                    selected
+                      ? "bg-indigo text-white border-indigo font-semibold"
+                      : "border-hairline text-muted bg-white"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
