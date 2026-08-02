@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Banner } from "@/components/auth/Banner";
 import { useAuth } from "@/lib/auth-context";
+import { homePathFor } from "@/lib/nav-config";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function AuthCallbackPage() {
     // We just ask who that cookie belongs to.
     refreshUser().then((user) => {
       if (user) {
-        router.replace("/dashboard");
+        router.replace(homePathFor(user.role));
       } else {
         setError("Sign-in didn't complete. Please try again.");
       }

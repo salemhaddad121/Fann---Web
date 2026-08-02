@@ -9,6 +9,7 @@ import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { homePathFor } from "@/lib/nav-config";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
@@ -25,8 +26,8 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
-      router.push("/dashboard");
+      const signedIn = await login(email, password);
+      router.push(homePathFor(signedIn.role));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
     } finally {

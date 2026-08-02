@@ -46,3 +46,15 @@ export function getNavItems(role: UserRole): NavItem[] {
   if (role === "planner") return PLANNER_NAV;
   return ADMIN_NAV;
 }
+
+// Where a user lands after signing in — password login, OAuth callback,
+// phone verification, and hitting "/" with a live session all funnel
+// through here so they can't drift apart.
+//
+// Artists and bookers land on Search: it's the first thing either side
+// actually wants to do, and the dashboard is no longer a nav destination.
+// Admins keep going to their own panel, which is a different app surface
+// entirely.
+export function homePathFor(role: UserRole): string {
+  return role === "admin" ? "/admin" : "/search";
+}
