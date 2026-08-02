@@ -28,10 +28,6 @@ export default function DashboardPage() {
         <h1 className="text-[17px] font-bold text-ink mb-0.5">
           {greeting()}, {user.email.split("@")[0]}
         </h1>
-        <p className="text-xs text-muted">
-          This is a placeholder home screen — the real {user.role} dashboard
-          (from {user.role === "planner" ? "06_booker_dashboard.html" : "05_artist_dashboard.html"}) is next up.
-        </p>
       </div>
 
       <div className="bg-white border border-hairline rounded-2xl p-5 mb-4">
