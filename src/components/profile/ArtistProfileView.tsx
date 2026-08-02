@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { badgeColor } from "@/lib/badge-colors";
 import { MediaStrip } from "@/components/profile/MediaStrip";
+import { MediaLightbox } from "@/components/profile/MediaLightbox";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
 import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar";
@@ -36,6 +40,10 @@ export function ArtistProfileView({
   const photos = artist.media.filter((m) => m.media_type === "photo");
   const videos = artist.media.filter((m) => m.media_type === "video");
 
+  // Index into artist.media, not into `photos` — the hero and the strip
+  // open the same viewer, so they have to agree on what the list is.
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+
   return (
     <div className="max-w-lg mx-auto pb-6">
       {isOwnProfile && accountStatus && <LiveStatusBanner role="artist" status={accountStatus} />}
@@ -46,8 +54,15 @@ export function ArtistProfileView({
           return (
             <div key={i} className="rounded-2xl overflow-hidden h-36 border border-hairline bg-mist">
               {photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={photo.cdn_url} alt="" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setViewerIndex(artist.media.indexOf(photo))}
+                  aria-label="View photo"
+                  className="w-full h-full"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.cdn_url} alt="" className="w-full h-full object-cover" />
+                </button>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[#C5D3EE]">
                   <i className="ti ti-microphone text-3xl" />
@@ -118,7 +133,7 @@ export function ArtistProfileView({
 
       {(photos.length > 0 || videos.length > 0) && (
         <Section title="Media">
-          <MediaStrip media={artist.media} />
+          <MediaStrip media={artist.media} onSelect={setViewerIndex} />
         </Section>
       )}
 
@@ -170,6 +185,12 @@ export function ArtistProfileView({
         </Section>
       )}
 
+      <MediaLightbox
+        items={artist.media}
+        index={viewerIndex}
+        onIndexChange={setViewerIndex}
+        onClose={() => setViewerIndex(null)}
+      />
     </div>
   );
 }
