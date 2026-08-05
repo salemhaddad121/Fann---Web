@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { homePathFor } from "@/lib/nav-config";
 import type { SafeUser } from "@/types/auth";
 
 function initials(user: SafeUser): string {
@@ -16,7 +17,7 @@ export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNo
 
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-white border-b border-hairline">
-      <Link href={user.role === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2">
+      <Link href={homePathFor(user.role)} className="flex items-center gap-2">
         <span className="font-display text-base font-bold text-ink">
           fan<span className="text-indigo">n</span>
         </span>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import type { NavItem } from "@/lib/nav-config";
+import { homePathFor, type NavItem } from "@/lib/nav-config";
 import type { SafeUser } from "@/types/auth";
 
 // Hoisted out of Sidebar rather than declared in its body: a component
@@ -65,7 +65,7 @@ export function Sidebar({
 
   return (
     <aside className="hidden lg:flex flex-col w-60 flex-none sticky top-0 h-screen bg-white border-r border-hairline px-4 py-5">
-      <Link href="/dashboard" className="font-display text-2xl font-bold text-ink px-2 mb-7">
+      <Link href={homePathFor(user.role)} className="font-display text-2xl font-bold text-ink px-2 mb-7">
         fan<span className="text-indigo">n</span>
       </Link>
 
