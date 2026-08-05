@@ -18,6 +18,7 @@ import {
   presignMedia,
   confirmMedia,
 } from "@/lib/media-api";
+import { UploadStallWatchdog, stallMessage } from "@/lib/upload-stall-watchdog";
 import type { MediaItem } from "@/types/artists";
 
 import "@uppy/core/css/style.min.css";
@@ -162,9 +163,40 @@ export function UppyMediaUploader({
       },
     });
 
+    // An upload that wedges rather than fails leaves no trace in the UI — see
+    // upload-stall-watchdog.ts for the @uppy/aws-s3 branch that causes it.
+    // Every file is watched from the moment its upload starts; progress ticks
+    // push the deadline back, and any real outcome clears it.
+    const watchdog = new UploadStallWatchdog((fileId) => {
+      const stalled = uppy.getFile(fileId);
+      uppy.info(stallMessage(stalled?.name), "error", 8000);
+      // Take the file out of the dashboard so it stops presenting as an
+      // upload still in flight. Nothing was confirmed, so there's no row to
+      // undo — only the orphaned object in the bucket, which the user can't
+      // see and shouldn't be told about.
+      uppy.removeFile(fileId);
+    });
+
+    uppy.on("upload", (_uploadId, files) => {
+      for (const file of files) watchdog.arm(file.id);
+    });
+    uppy.on("upload-progress", (file) => {
+      if (file) watchdog.arm(file.id);
+    });
+    uppy.on("upload-success", (file) => {
+      if (file) watchdog.clear(file.id);
+    });
+    uppy.on("upload-error", (file) => {
+      if (file) watchdog.clear(file.id);
+    });
+    uppy.on("file-removed", (file) => {
+      if (file) watchdog.clear(file.id);
+    });
+
     // The PUT only puts bytes in the bucket. The row is created by our own
     // confirm endpoint, so that runs per file once Uppy reports success.
     uppy.on("complete", async (result) => {
+      watchdog.clearAll();
       const created: MediaItem[] = [];
       for (const file of result.successful ?? []) {
         const mediaType = mediaTypeFromMime(file.type ?? "");
@@ -189,7 +221,11 @@ export function UppyMediaUploader({
       }
     });
 
-    return () => uppy.destroy();
+    return () => {
+      // Before destroy, or a pending timer fires against a dead instance.
+      watchdog.clearAll();
+      uppy.destroy();
+    };
   }, []);
 
   return (
