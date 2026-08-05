@@ -85,14 +85,14 @@ export function CalendarGrid({
           const clickable = interactive && !isPast ? " cursor-pointer" : "";
           let classes = "aspect-square rounded-full flex items-center justify-center text-[13px] ";
           if (isPast) {
-            classes += "text-[#C5D3EE]";
+            classes += "text-[#e9d9c1]";
           } else if (blocked) {
             classes += "bg-danger-bg text-danger" + clickable;
           } else if (isToday) {
-            classes += "border-[1.5px] border-indigo text-indigo font-bold" + clickable;
+            classes += "border-[1.5px] border-clay text-clay font-bold" + clickable;
           } else {
             classes += "text-ink" + clickable;
-            if (interactive) classes += " hover:bg-mist";
+            if (interactive) classes += " hover:bg-sand";
           }
 
           // Read-only: plain divs, so there's no focusable control and no
@@ -119,8 +119,8 @@ export function CalendarGrid({
       </div>
 
       <div className="flex flex-wrap gap-3.5 px-4 py-3 border-b border-hairline">
-        <Legend swatch="border-[1.5px] border-indigo" label="Today" />
-        <Legend swatch="bg-white border border-hairline" label="Available" />
+        <Legend swatch="border-[1.5px] border-clay" label="Today" />
+        <Legend swatch="bg-surface border border-hairline" label="Available" />
         <Legend swatch="bg-danger-bg border border-[#FCA5A5]" label="Unavailable" />
       </div>
     </div>

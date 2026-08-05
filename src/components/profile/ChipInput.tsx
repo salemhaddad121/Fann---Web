@@ -28,7 +28,7 @@ export function ChipInput({
         {values.map((v) => (
           <span
             key={v}
-            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-2xl bg-mist border border-hairline text-ink"
+            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-2xl bg-sand border border-hairline text-ink"
           >
             {v}
             <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} aria-label={`Remove ${v}`}>
@@ -48,7 +48,7 @@ export function ChipInput({
         }}
         onBlur={commit}
         placeholder={placeholder ?? "Type and press Enter"}
-        className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+        className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
       />
     </div>
   );

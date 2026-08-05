@@ -51,7 +51,7 @@ export function UsersTab() {
   return (
     <div>
       <div className="p-4 flex flex-col gap-2.5 border-b border-hairline">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-mist">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
           <i className="ti ti-search text-faint text-base" />
           <input
             value={q}
@@ -70,7 +70,7 @@ export function UsersTab() {
               setRole(e.target.value);
               setPage(1);
             }}
-            className="flex-1 rounded-[10px] border border-hairline px-2.5 py-2 text-xs bg-white"
+            className="flex-1 rounded-[10px] border border-hairline px-2.5 py-2 text-xs bg-surface"
           >
             {ROLE_OPTIONS.map((r) => (
               <option key={r} value={r}>
@@ -84,7 +84,7 @@ export function UsersTab() {
               setStatus(e.target.value);
               setPage(1);
             }}
-            className="flex-1 rounded-[10px] border border-hairline px-2.5 py-2 text-xs bg-white"
+            className="flex-1 rounded-[10px] border border-hairline px-2.5 py-2 text-xs bg-surface"
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -113,7 +113,7 @@ export function UsersTab() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-semibold text-ink truncate">{name}</span>
-                      {u.is_verified && <i className="ti ti-rosette-discount-check text-indigo text-xs" />}
+                      {u.is_verified && <i className="ti ti-rosette-discount-check text-clay text-xs" />}
                     </div>
                     <div className="text-xs text-muted truncate">
                       {u.role[0].toUpperCase() + u.role.slice(1)} · {u.account_code} · Joined{" "}

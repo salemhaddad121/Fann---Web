@@ -42,7 +42,7 @@ export default function LoginPage() {
       footer={
         <>
           New to Fann?{" "}
-          <Link href="/auth/register" className="font-semibold text-indigo">
+          <Link href="/auth/register" className="font-semibold text-clay">
             Create an account
           </Link>
         </>
@@ -73,7 +73,7 @@ export default function LoginPage() {
             required
           />
           <div className="-mt-3 mb-4 text-right">
-            <Link href="/auth/forgot-password" className="text-xs font-semibold text-indigo">
+            <Link href="/auth/forgot-password" className="text-xs font-semibold text-clay">
               Forgot password?
             </Link>
           </div>

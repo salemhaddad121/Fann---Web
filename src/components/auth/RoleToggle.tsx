@@ -20,11 +20,11 @@ export function RoleToggle({ value, onChange }: { value: Role; onChange: (r: Rol
               key={opt.value}
               onClick={() => onChange(opt.value)}
               className={`rounded-[10px] border px-3 py-2.5 text-left transition-colors ${
-                active ? "border-[#93ADE8] bg-mist" : "border-hairline bg-white"
+                active ? "border-[#e0a570] bg-sand" : "border-hairline bg-surface"
               }`}
               aria-pressed={active}
             >
-              <span className={`block text-sm font-semibold ${active ? "text-indigo" : "text-ink"}`}>
+              <span className={`block text-sm font-semibold ${active ? "text-clay" : "text-ink"}`}>
                 {opt.label}
               </span>
               <span className="block text-xs text-faint mt-0.5">{opt.blurb}</span>

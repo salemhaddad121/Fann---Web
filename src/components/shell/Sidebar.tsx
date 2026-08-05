@@ -30,7 +30,7 @@ function NavLink({
     <Link
       href={href}
       className={`relative flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-semibold ${
-        active ? `bg-mist ${activeColor}` : "text-muted hover:bg-mist"
+        active ? `bg-sand ${activeColor}` : "text-muted hover:bg-sand"
       }`}
     >
       <i className={`ti ti-${icon} text-[19px]`} />
@@ -60,13 +60,13 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { logout } = useAuth();
-  const activeColor = user.role === "planner" ? "text-sky" : "text-indigo";
-  const avatarBg = user.role === "planner" ? "bg-sky" : "bg-indigo";
+  const activeColor = user.role === "planner" ? "text-teal" : "text-clay";
+  const avatarBg = user.role === "planner" ? "bg-teal" : "bg-clay";
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 flex-none sticky top-0 h-screen bg-white border-r border-hairline px-4 py-5">
+    <aside className="hidden lg:flex flex-col w-60 flex-none sticky top-0 h-screen bg-surface border-r border-hairline px-4 py-5">
       <Link href={homePathFor(user.role)} className="font-display text-2xl font-bold text-ink px-2 mb-7">
-        fan<span className="text-indigo">n</span>
+        fan<span className="text-clay">n</span>
       </Link>
 
       <nav className="flex flex-col gap-1">
@@ -97,7 +97,7 @@ export function Sidebar({
       <div className="mt-auto">
         <Link
           href="/account"
-          className="flex items-center gap-2.5 px-2 py-2 rounded-[10px] hover:bg-mist"
+          className="flex items-center gap-2.5 px-2 py-2 rounded-[10px] hover:bg-sand"
         >
           <div className={`w-9 h-9 rounded-full ${avatarBg} text-white flex items-center justify-center font-bold text-[13px] flex-none`}>
             {user.email.slice(0, 2).toUpperCase()}
@@ -110,7 +110,7 @@ export function Sidebar({
 
         <button
           onClick={logout}
-          className="mt-1 w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-semibold text-muted hover:bg-mist hover:text-danger"
+          className="mt-1 w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-semibold text-muted hover:bg-sand hover:text-danger"
         >
           <i className="ti ti-logout text-[19px]" />
           <span>Log out</span>

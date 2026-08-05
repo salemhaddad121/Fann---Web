@@ -18,12 +18,12 @@ export function PlannerProfileView({
       {isOwnProfile && accountStatus && <LiveStatusBanner role="planner" status={accountStatus} />}
       {/* Hero */}
       <div className="p-4">
-        <div className="rounded-2xl overflow-hidden h-40 border border-hairline bg-mist">
+        <div className="rounded-2xl overflow-hidden h-40 border border-hairline bg-sand">
           {planner.thumbnail_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={planner.thumbnail_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[#93C5E8]">
+            <div className="w-full h-full flex items-center justify-center text-[#8fb8b6]">
               <i className="ti ti-building-store text-3xl" />
             </div>
           )}
@@ -35,7 +35,7 @@ export function PlannerProfileView({
         <div className="text-xl font-bold text-ink mb-0.5">{planner.display_name}</div>
         {planner.company_name && <p className="text-sm text-faint mb-1.5">{planner.company_name}</p>}
         {planner.booker_type && (
-          <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-mist text-sky mb-2">
+          <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-sand text-teal mb-2">
             {planner.booker_type}
           </span>
         )}

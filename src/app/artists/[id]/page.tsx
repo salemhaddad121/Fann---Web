@@ -42,7 +42,7 @@ function MessageCta({ artist }: { artist: ArtistDetail }) {
   }
 
   return (
-    <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+    <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
       {error && <p className="text-xs text-danger mb-2">{error}</p>}
       <button
         onClick={handleMessage}
@@ -138,7 +138,7 @@ function Content({ id }: { id: string }) {
     return (
       <div className="px-4 py-10">
         <p className="text-sm text-danger mb-3">{error ?? "Artist not found."}</p>
-        <Link href="/search" className="text-sm font-semibold text-indigo">
+        <Link href="/search" className="text-sm font-semibold text-clay">
           ← Back to search
         </Link>
       </div>
@@ -187,7 +187,7 @@ function Content({ id }: { id: string }) {
 
       {pickedDate && (
         <div className="fixed inset-0 z-[70] bg-ink/40 flex items-end sm:items-center justify-center">
-          <div className="w-full sm:max-w-lg sm:rounded-2xl bg-white overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="w-full sm:max-w-lg sm:rounded-2xl bg-surface overflow-hidden max-h-[90vh] flex flex-col">
             <ProposeBookingForm
               initialDate={pickedDate}
               containerClassName="flex flex-col min-h-0"
@@ -199,10 +199,10 @@ function Content({ id }: { id: string }) {
       )}
 
       {isOwnProfile ? (
-        <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+        <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
           <Link
             href="/profile/edit"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-indigo text-white text-sm font-semibold"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-clay-deep text-white text-sm font-semibold"
           >
             <i className="ti ti-pencil text-sm" /> Edit profile
           </Link>

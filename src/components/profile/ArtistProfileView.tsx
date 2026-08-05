@@ -52,7 +52,7 @@ export function ArtistProfileView({
         {[0, 1].map((i) => {
           const photo = photos[i];
           return (
-            <div key={i} className="rounded-2xl overflow-hidden h-36 border border-hairline bg-mist">
+            <div key={i} className="rounded-2xl overflow-hidden h-36 border border-hairline bg-sand">
               {photo ? (
                 <button
                   type="button"
@@ -64,7 +64,7 @@ export function ArtistProfileView({
                   <img src={photo.cdn_url} alt="" className="w-full h-full object-cover" />
                 </button>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#C5D3EE]">
+                <div className="w-full h-full flex items-center justify-center text-[#e9d9c1]">
                   <i className="ti ti-microphone text-3xl" />
                 </div>
               )}
@@ -79,7 +79,7 @@ export function ArtistProfileView({
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-xl font-bold text-ink">{artist.display_name}</span>
-              {artist.is_verified && <i className="ti ti-rosette-discount-check text-indigo text-lg" />}
+              {artist.is_verified && <i className="ti ti-rosette-discount-check text-clay text-lg" />}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted flex-wrap">
               {primaryCategory && (
@@ -159,7 +159,7 @@ export function ArtistProfileView({
         title="Availability"
         action={
           isOwnProfile ? (
-            <Link href="/calendar" className="text-xs font-semibold text-indigo">
+            <Link href="/calendar" className="text-xs font-semibold text-clay">
               Manage →
             </Link>
           ) : undefined
@@ -198,7 +198,7 @@ export function ArtistProfileView({
 function Stat({ icon, value, label, last }: { icon: string; value: string; label: string; last?: boolean }) {
   return (
     <div className={`flex-1 py-2.5 text-center ${last ? "" : "border-r border-hairline"}`}>
-      <i className={`ti ${icon} text-base text-indigo block mb-1`} />
+      <i className={`ti ${icon} text-base text-clay block mb-1`} />
       <div className="text-base font-bold text-ink">{value}</div>
       <div className="text-[10px] text-faint">{label}</div>
     </div>

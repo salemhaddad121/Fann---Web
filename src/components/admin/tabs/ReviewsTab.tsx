@@ -52,7 +52,7 @@ export function ReviewsTab() {
         <div key={r.id} className="px-4 py-3.5 border-b border-hairline">
           <div className="flex items-center justify-between gap-2 mb-1">
             <div className="flex items-center gap-1.5">
-              <div className="flex text-indigo">
+              <div className="flex text-clay">
                 {Array.from({ length: 5 }, (_, i) => (
                   <i key={i} className={`ti text-xs ${i < r.overall_score ? "ti-star-filled" : "ti-star"}`} />
                 ))}

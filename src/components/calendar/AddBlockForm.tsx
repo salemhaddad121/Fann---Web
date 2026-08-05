@@ -50,7 +50,7 @@ export function AddBlockForm({
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-[10px] border border-hairline px-2.5 py-2 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-2.5 py-2 text-sm outline-none focus:border-clay"
           />
         </label>
         <label className="text-xs">
@@ -60,7 +60,7 @@ export function AddBlockForm({
             value={endDate}
             min={startDate || undefined}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-[10px] border border-hairline px-2.5 py-2 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-2.5 py-2 text-sm outline-none focus:border-clay"
           />
         </label>
       </div>
@@ -71,7 +71,7 @@ export function AddBlockForm({
           onChange={(e) => setNote(e.target.value)}
           placeholder="e.g. Family trip"
           maxLength={200}
-          className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+          className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
         />
       </label>
       <div className="flex gap-2">

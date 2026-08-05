@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
         <Banner kind="success">
           If an account exists for <strong>{email}</strong>, a password reset link is on its way.
         </Banner>
-        <Link href="/auth/login" className="text-sm font-semibold text-indigo">
+        <Link href="/auth/login" className="text-sm font-semibold text-clay">
           Back to log in
         </Link>
       </AuthShell>
@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
       title="Forgot your password?"
       subtitle="We'll email you a link to reset it."
       footer={
-        <Link href="/auth/login" className="font-semibold text-indigo">
+        <Link href="/auth/login" className="font-semibold text-clay">
           Back to log in
         </Link>
       }

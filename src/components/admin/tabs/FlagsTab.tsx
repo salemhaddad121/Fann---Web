@@ -71,7 +71,7 @@ export function FlagsTab() {
       {rows.map((f) => (
         <div key={f.id} className="px-4 py-3.5 border-b border-hairline">
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-mist text-muted">
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-sand text-muted">
               {TARGET_LABELS[f.target_type] ?? f.target_type}
             </span>
             <span className="text-[11px] text-faint">{formatRelativeTime(f.created_at)}</span>
@@ -88,7 +88,7 @@ export function FlagsTab() {
                       ? `/planners/${directory[f.target_id].profileId}`
                       : `/artists/${directory[f.target_id].profileId}`
                   }
-                  className="font-semibold text-indigo"
+                  className="font-semibold text-clay"
                 >
                   {directory[f.target_id].displayName ?? "View profile"}
                 </Link>
@@ -110,7 +110,7 @@ export function FlagsTab() {
             <button
               disabled={busyId === f.id}
               onClick={() => handleResolve(f.id, "dismissed")}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-mist text-muted border border-hairline disabled:opacity-50"
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-sand text-muted border border-hairline disabled:opacity-50"
             >
               Dismiss
             </button>

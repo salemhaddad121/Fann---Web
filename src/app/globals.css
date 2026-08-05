@@ -1,41 +1,73 @@
 @import "tailwindcss";
 
 /*
-  Fann brand tokens — carried over from the existing app mockups
-  (design/screens/*.html) so the new web auth flow feels like the
-  same product, not a different site bolted on.
+  Fann brand tokens — the "Maqam" direction from the Claude Design
+  handoff (Fann Branding Concepts.dc.html, concept 1a): a warm Levantine
+  palette of brown ink on cream paper, with a terracotta artist accent
+  and a deep teal planner accent.
+
+  Naming note: the previous token set was color-named (--indigo, --sky,
+  --mist), which stopped being true the moment the palette changed. These
+  are named by role instead — --clay and --teal are the two role accents,
+  --sand is the soft fill — so a future palette change is a value edit
+  here and nothing else.
 */
 :root {
-  --ink: #0b1d51;      /* primary text, brand panel background */
-  --indigo: #2b52e8;   /* primary action / artist accent */
-  --sky: #0284c7;      /* planner accent */
-  --mist: #f4f7ff;     /* soft fill background */
-  --hairline: #e2eaf5; /* borders */
-  --muted: #4b5a7a;    /* secondary text */
-  --faint: #8a9bc0;    /* placeholder / tertiary text */
+  /* Base — shared by both roles */
+  --ink: #3a2317;      /* primary text, dark brand panels */
+  --paper: #fbf3e9;    /* warm page background */
+  --surface: #fffaf3;  /* cards and panels sitting on paper */
+  --sand: #f7ede0;      /* soft fill — inputs, inactive chips */
+  --sand-deep: #f3e2c8; /* the auth brand panel */
+  --hairline: #e9d9c1;  /* borders */
+  --muted: #8a7360;     /* secondary text */
+  --faint: #a89680;     /* placeholder / tertiary text */
+
+  /* Secondary text sitting on --sand-deep. --muted only reaches 3.5:1 there,
+     under the 4.5:1 AA floor; this clears it at 6.25:1. */
+  --ink-soft: #6b4a30;
+
+  /* Role accents. The design keeps one base for both sides and swaps only
+     the accent, so the product reads as a single brand with a subtle role
+     cue rather than two separate themes. */
+  --clay: #c07a3f;       /* artist accent — wordmark, line art, highlights */
+  --clay-deep: #8a3b2a;  /* artist primary action — buttons, active tabs */
+  --clay-light: #e0a570; /* artist accent legible on --ink */
+  --teal: #0d6e6e;       /* planner accent */
+  --teal-deep: #0a5555;  /* planner line art, pressed states */
+
+  /* Status colors are deliberately left cool/semantic. They signal state,
+     not brand, and reading "success" as green is worth more than palette
+     purity. */
   --danger: #7f1d1d;
   --danger-bg: #fef2f2;
   --danger-border: #fca5a5;
   --success: #166534;
   --success-bg: #dcfce7;
 
-  /* System font stacks — no external fetch required, matches the
-     stack already used in design/screens/*.html. The display stack
-     leans on whatever serif ships with the OS (Georgia on
-     Windows/macOS, a serif fallback elsewhere) to give headlines a
-     bit of editorial contrast against the sans body text. */
+  /* System font stacks — no external fetch required. The display stack
+     leans on whatever serif ships with the OS (Georgia on Windows/macOS,
+     a serif fallback elsewhere), which is what the design's wordmark and
+     headlines are set in. */
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", ui-serif, serif;
 }
 
 @theme inline {
   --color-ink: var(--ink);
-  --color-indigo: var(--indigo);
-  --color-sky: var(--sky);
-  --color-mist: var(--mist);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sand: var(--sand);
+  --color-sand-deep: var(--sand-deep);
+  --color-ink-soft: var(--ink-soft);
   --color-hairline: var(--hairline);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
+  --color-clay: var(--clay);
+  --color-clay-deep: var(--clay-deep);
+  --color-clay-light: var(--clay-light);
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
   --color-success: var(--success);
@@ -45,7 +77,7 @@
 }
 
 body {
-  background: #ffffff;
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -76,7 +108,7 @@ body {
    elsewhere in the product. */
 .otp-box {
   border: 0.5px solid var(--hairline);
-  background: var(--mist);
+  background: var(--sand);
   border-radius: 10px;
   text-align: center;
   font-size: 18px;
@@ -85,6 +117,6 @@ body {
   outline: none;
 }
 .otp-box:focus {
-  border-color: var(--indigo);
-  background: #ffffff;
+  border-color: var(--clay-deep);
+  background: var(--surface);
 }

@@ -82,7 +82,7 @@ export default function NotificationsPage() {
   if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center text-center px-8 py-16">
-        <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-xl text-faint mb-4">
+        <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center text-xl text-faint mb-4">
           <i className="ti ti-bell" />
         </div>
         <p className="text-[15px] font-bold text-ink mb-1.5">No notifications yet</p>
@@ -101,7 +101,7 @@ export default function NotificationsPage() {
           <button
             onClick={handleMarkAllRead}
             disabled={markingAll}
-            className="text-xs font-semibold text-indigo disabled:opacity-50"
+            className="text-xs font-semibold text-clay disabled:opacity-50"
           >
             Mark all read
           </button>
@@ -134,7 +134,7 @@ export default function NotificationsPage() {
                   </p>
                 )}
               </div>
-              {unread && <span className="w-2 h-2 rounded-full bg-indigo shrink-0 mt-1.5" />}
+              {unread && <span className="w-2 h-2 rounded-full bg-clay shrink-0 mt-1.5" />}
             </button>
           );
         })}

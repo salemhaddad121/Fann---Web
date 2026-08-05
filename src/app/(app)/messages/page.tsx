@@ -84,7 +84,7 @@ export default function MessagesPage() {
     <div className="max-w-lg mx-auto">
       <div className="px-4 pt-4 pb-3 border-b border-hairline">
         <h1 className="text-lg font-bold text-ink mb-3">Messages</h1>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-mist">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
           <i className="ti ti-search text-faint text-base" />
           <input
             value={query}
@@ -102,7 +102,7 @@ export default function MessagesPage() {
             onClick={() => setFilter(f)}
             className={`px-3 py-1 rounded-2xl text-xs border ${
               filter === f
-                ? `${user?.role === "planner" ? "bg-[#E0F2FE] text-sky border-[#38BDF8]" : "bg-mist text-indigo border-[#93ADE8]"} font-semibold`
+                ? `${user?.role === "planner" ? "bg-[#dfeceb] text-teal border-[#7fb3b0]" : "bg-sand text-clay border-[#e0a570]"} font-semibold`
                 : "border-hairline text-muted"
             }`}
           >
@@ -162,7 +162,7 @@ export default function MessagesPage() {
 
       {conversations.length === 0 ? (
         <div className="flex flex-col items-center text-center px-8 py-16">
-          <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-xl text-faint mb-4">
+          <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center text-xl text-faint mb-4">
             <i className="ti ti-message-circle" />
           </div>
           <p className="text-[15px] font-bold text-ink mb-1.5">No messages yet</p>
@@ -219,7 +219,7 @@ export default function MessagesPage() {
                 {unread && (
                   <span
                     className={`min-w-[18px] h-[18px] rounded-full text-white text-[10px] font-semibold flex items-center justify-center px-1 shrink-0 ${
-                      user?.role === "planner" ? "bg-sky" : "bg-indigo"
+                      user?.role === "planner" ? "bg-teal" : "bg-clay"
                     }`}
                   >
                     {c.unreadCount}

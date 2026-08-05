@@ -83,11 +83,11 @@ export default function ProfilePage() {
         <PlannerOwnProfile userId={user.id} status={user.status} />
       )}
 
-      <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+      <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
         <Link
           href="/profile/edit"
           className={`flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-white text-sm font-semibold ${
-            user.role === "planner" ? "bg-sky" : "bg-indigo"
+            user.role === "planner" ? "bg-teal" : "bg-clay"
           }`}
         >
           <i className="ti ti-pencil text-sm" /> Edit profile

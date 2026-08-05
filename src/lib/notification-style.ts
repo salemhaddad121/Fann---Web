@@ -5,8 +5,8 @@ const STYLES: Record<NotificationType, { icon: string; bg: string; fg: string }>
   booking_accepted: { icon: "ti-calendar-check", bg: "bg-[#DCFCE7]", fg: "text-[#166534]" },
   booking_declined: { icon: "ti-calendar-x", bg: "bg-[#FEF2F2]", fg: "text-[#7F1D1D]" },
   booking_cancelled: { icon: "ti-calendar-off", bg: "bg-[#F1F5F9]", fg: "text-[#334155]" },
-  review_request: { icon: "ti-star", bg: "bg-mist", fg: "text-indigo" },
-  new_message: { icon: "ti-message-circle", bg: "bg-[#E0F2FE]", fg: "text-[#075985]" },
+  review_request: { icon: "ti-star", bg: "bg-sand", fg: "text-clay" },
+  new_message: { icon: "ti-message-circle", bg: "bg-[#dfeceb]", fg: "text-[#0a5555]" },
   account_approved: { icon: "ti-rosette-discount-check", bg: "bg-[#DCFCE7]", fg: "text-[#166534]" },
   account_suspended: { icon: "ti-alert-triangle", bg: "bg-[#FEF3C7]", fg: "text-[#92400E]" },
   account_banned: { icon: "ti-ban", bg: "bg-[#FEF2F2]", fg: "text-[#7F1D1D]" },
@@ -16,7 +16,7 @@ const STYLES: Record<NotificationType, { icon: string; bg: string; fg: string }>
   payment_rejected: { icon: "ti-cash-off", bg: "bg-[#FEF2F2]", fg: "text-[#7F1D1D]" },
 };
 
-const FALLBACK = { icon: "ti-bell", bg: "bg-mist", fg: "text-muted" };
+const FALLBACK = { icon: "ti-bell", bg: "bg-sand", fg: "text-muted" };
 
 export function notificationStyle(type: string) {
   return STYLES[type as NotificationType] ?? FALLBACK;

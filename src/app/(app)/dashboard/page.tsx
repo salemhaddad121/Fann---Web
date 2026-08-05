@@ -30,7 +30,7 @@ export default function DashboardPage() {
         </h1>
       </div>
 
-      <div className="bg-white border border-hairline rounded-2xl p-5 mb-4">
+      <div className="bg-surface border border-hairline rounded-2xl p-5 mb-4">
         <p className="text-xs font-semibold text-ink mb-3">Your account</p>
         <dl className="text-sm space-y-2">
           <Row label="Email" value={user.email} />
@@ -47,7 +47,7 @@ export default function DashboardPage() {
       {user.phone && !user.phoneVerifiedAt && (
         <Link
           href="/auth/verify-phone"
-          className="block mb-4 text-sm font-semibold text-indigo underline"
+          className="block mb-4 text-sm font-semibold text-clay underline"
         >
           Verify your phone number →
         </Link>

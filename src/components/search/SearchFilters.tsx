@@ -38,9 +38,9 @@ export function SearchFilters({
     (filters.verifiedOnly ? 1 : 0);
 
   return (
-    <div className="bg-white border-b border-hairline">
+    <div className="bg-surface border-b border-hairline">
       <div className="flex items-center gap-2 px-4 pt-3">
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-mist">
+        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
           <i className="ti ti-search text-faint text-base" />
           <input
             value={query}
@@ -56,7 +56,7 @@ export function SearchFilters({
           <i className="ti ti-adjustments-horizontal text-sm" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-indigo text-white text-[9px] flex items-center justify-center">
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-clay-deep text-white text-[9px] flex items-center justify-center">
               {activeFilterCount}
             </span>
           )}
@@ -75,7 +75,7 @@ export function SearchFilters({
             aria-pressed={selectedGroup === null}
             className={`px-3 py-1 rounded-2xl text-xs border ${
               selectedGroup === null
-                ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
+                ? "bg-sand text-clay border-[#e0a570] font-semibold"
                 : "border-hairline text-muted"
             }`}
           >
@@ -90,7 +90,7 @@ export function SearchFilters({
                 aria-pressed={selected}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs border ${
                   selected
-                    ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
+                    ? "bg-sand text-clay border-[#e0a570] font-semibold"
                     : "border-hairline text-muted"
                 }`}
               >
@@ -114,7 +114,7 @@ export function SearchFilters({
             {selectedSubs.length > 0 && (
               <button
                 onClick={() => selectedSubs.forEach(onToggleSub)}
-                className="text-[11px] font-semibold text-indigo"
+                className="text-[11px] font-semibold text-clay"
               >
                 Clear
               </button>
@@ -130,8 +130,8 @@ export function SearchFilters({
                   aria-pressed={selected}
                   className={`px-2.5 py-1 rounded-2xl text-[11px] border ${
                     selected
-                      ? "bg-indigo text-white border-indigo font-semibold"
-                      : "border-hairline text-muted bg-white"
+                      ? "bg-clay-deep text-white border-clay font-semibold"
+                      : "border-hairline text-muted bg-surface"
                   }`}
                 >
                   {c.name}
@@ -150,7 +150,7 @@ export function SearchFilters({
               value={filters.city ?? ""}
               onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
               placeholder="e.g. Beirut"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
             />
           </label>
 
@@ -166,7 +166,7 @@ export function SearchFilters({
                   minPrice: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
             />
           </label>
           <label className="text-xs">
@@ -181,7 +181,7 @@ export function SearchFilters({
                   maxPrice: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
             />
           </label>
 
@@ -192,7 +192,7 @@ export function SearchFilters({
               onChange={(e) =>
                 onFiltersChange({ ...filters, sort: e.target.value as SearchArtistsParams["sort"] })
               }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo bg-white"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay bg-surface"
             >
               <option value="newest">Newest</option>
               <option value="price_asc">Price: low to high</option>
@@ -205,7 +205,7 @@ export function SearchFilters({
               type="checkbox"
               checked={!!filters.verifiedOnly}
               onChange={(e) => onFiltersChange({ ...filters, verifiedOnly: e.target.checked })}
-              className="w-4 h-4 accent-indigo"
+              className="w-4 h-4 accent-clay"
             />
             <span className="font-semibold text-ink">Verified only</span>
           </label>
