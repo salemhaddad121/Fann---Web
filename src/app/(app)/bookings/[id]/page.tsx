@@ -109,7 +109,7 @@ export default function BookingDetailPage() {
         <p className="text-sm text-muted mb-4">
           With{" "}
           {profileHref ? (
-            <Link href={profileHref} className="font-semibold text-indigo hover:underline">
+            <Link href={profileHref} className="font-semibold text-clay hover:underline">
               {other?.displayName ?? (isArtist ? "a planner" : "an artist")}
             </Link>
           ) : (
@@ -136,7 +136,7 @@ export default function BookingDetailPage() {
         )}
 
         {booking.status === "cancelled" && booking.cancellation_note && (
-          <div className="mb-4 bg-mist border border-hairline rounded-xl p-3">
+          <div className="mb-4 bg-sand border border-hairline rounded-xl p-3">
             <p className="text-xs font-semibold text-ink mb-1">Cancellation note</p>
             <p className="text-sm text-muted">{booking.cancellation_note}</p>
           </div>
@@ -177,7 +177,7 @@ export default function BookingDetailPage() {
                     onChange={(e) => setCancelNote(e.target.value)}
                     rows={2}
                     maxLength={500}
-                    className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+                    className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
                   />
                 </label>
                 <div className="flex gap-2">

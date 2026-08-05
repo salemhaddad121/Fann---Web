@@ -115,7 +115,7 @@ function ArtistCalendar({ userId }: { userId: string }) {
               setFormStart(todayKey());
               setFormOpen(true);
             }}
-            className="flex items-center gap-1 text-xs font-semibold text-indigo px-2.5 py-1.5 rounded-lg bg-mist border border-[#93ADE8]"
+            className="flex items-center gap-1 text-xs font-semibold text-clay px-2.5 py-1.5 rounded-lg bg-sand border border-[#e0a570]"
           >
             <i className="ti ti-plus text-xs" /> Add dates
           </button>

@@ -6,7 +6,7 @@ const PLATFORM_STYLES: Record<string, { icon: string; bg: string; label: string 
   facebook: { icon: "ti-brand-facebook", bg: "#1877F2", label: "Facebook" },
   linkedin: { icon: "ti-brand-linkedin", bg: "#0077B5", label: "LinkedIn" },
   twitter: { icon: "ti-brand-x", bg: "#000000", label: "X" },
-  website: { icon: "ti-world", bg: "#4B5A7A", label: "Website" },
+  website: { icon: "ti-world", bg: "#8a7360", label: "Website" },
 };
 
 function displayHandle(url: string): string {
@@ -27,7 +27,7 @@ export function SocialLinks({ links }: { links: Record<string, string> | null | 
       {entries.map(([platform, url]) => {
         const style = PLATFORM_STYLES[platform.toLowerCase()] ?? {
           icon: "ti-link",
-          bg: "#4B5A7A",
+          bg: "#8a7360",
           label: platform,
         };
         return (
@@ -36,7 +36,7 @@ export function SocialLinks({ links }: { links: Record<string, string> | null | 
             href={url.startsWith("http") ? url : `https://${url}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 px-3.5 py-2.5 bg-white border border-hairline rounded-xl"
+            className="flex items-center gap-2.5 px-3.5 py-2.5 bg-surface border border-hairline rounded-xl"
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"

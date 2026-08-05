@@ -126,7 +126,7 @@ export default function ThreadPage() {
       <AppShell user={user} chrome="sidebar-only">
         <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center gap-3">
           <p className="text-sm text-danger">This conversation isn&apos;t available.</p>
-          <Link href="/messages" className="text-sm font-semibold text-indigo">
+          <Link href="/messages" className="text-sm font-semibold text-clay">
             ← Back to messages
           </Link>
         </div>
@@ -139,8 +139,8 @@ export default function ThreadPage() {
   }
 
   const isPlanner = user.role === "planner";
-  const accent = isPlanner ? "bg-sky" : "bg-indigo";
-  const accentText = isPlanner ? "text-sky" : "text-indigo";
+  const accent = isPlanner ? "bg-teal" : "bg-clay";
+  const accentText = isPlanner ? "text-teal" : "text-clay";
   const name = otherParty?.displayName ?? "Unknown";
   const profileHref = otherParty?.profileId
     ? otherParty.role === "artist"
@@ -155,7 +155,7 @@ export default function ThreadPage() {
     // renders the shell itself instead, so it picks up the desktop sidebar
     // (and the backdrop) without the mobile bars.
     <AppShell user={user} chrome="sidebar-only">
-      <div className="h-screen flex flex-col max-w-lg mx-auto bg-white relative">
+      <div className="h-screen flex flex-col max-w-lg mx-auto bg-surface relative">
         <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline shrink-0">
           <button onClick={() => router.push("/messages")} className="text-muted" aria-label="Back to messages">
             <i className="ti ti-arrow-left text-lg" />
@@ -182,7 +182,7 @@ export default function ThreadPage() {
           {isPlanner && (
             <button
               onClick={() => setProposeOpen(true)}
-              className="flex items-center gap-1 text-xs font-semibold text-sky border border-[#38BDF8] bg-[#E0F2FE] px-2.5 py-1.5 rounded-lg shrink-0"
+              className="flex items-center gap-1 text-xs font-semibold text-teal border border-[#7fb3b0] bg-[#dfeceb] px-2.5 py-1.5 rounded-lg shrink-0"
             >
               <i className="ti ti-calendar-plus text-sm" /> Propose booking
             </button>
@@ -228,7 +228,7 @@ export default function ThreadPage() {
             }}
             rows={1}
             placeholder="Write a message…"
-            className="flex-1 resize-none rounded-3xl border border-hairline bg-mist px-4 py-2.5 text-sm outline-none focus:border-indigo max-h-20"
+            className="flex-1 resize-none rounded-3xl border border-hairline bg-sand px-4 py-2.5 text-sm outline-none focus:border-clay max-h-20"
           />
           <button
             onClick={handleSend}

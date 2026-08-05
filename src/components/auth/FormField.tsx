@@ -16,7 +16,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
         <input
           id={inputId}
           ref={ref}
-          className={`w-full rounded-[10px] border px-3.5 py-2.5 text-sm text-ink placeholder:text-faint outline-none transition-colors bg-white focus:border-indigo focus:ring-1 focus:ring-indigo ${
+          className={`w-full rounded-[10px] border px-3.5 py-2.5 text-sm text-ink placeholder:text-faint outline-none transition-colors bg-surface focus:border-clay focus:ring-1 focus:ring-clay ${
             error ? "border-[#FCA5A5]" : "border-hairline"
           } ${className}`}
           aria-invalid={!!error}

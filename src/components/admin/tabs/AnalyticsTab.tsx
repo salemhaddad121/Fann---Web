@@ -29,10 +29,10 @@ function SignupChart({ data }: { data: SignupTrendPoint[] }) {
           const total = d.artists + d.planners;
           return (
             <div key={d.date} className="flex-1 flex flex-col-reverse h-full" title={`${d.date}: ${total} signup${total === 1 ? "" : "s"}`}>
-              {plannerH > 0 && <div className="bg-sky rounded-t-[1px]" style={{ height: `${plannerH}%` }} />}
+              {plannerH > 0 && <div className="bg-teal rounded-t-[1px]" style={{ height: `${plannerH}%` }} />}
               {artistH > 0 && (
                 <div
-                  className={`bg-indigo ${plannerH === 0 ? "rounded-t-[1px]" : ""}`}
+                  className={`bg-clay ${plannerH === 0 ? "rounded-t-[1px]" : ""}`}
                   style={{ height: `${artistH}%` }}
                 />
               )}
@@ -42,10 +42,10 @@ function SignupChart({ data }: { data: SignupTrendPoint[] }) {
       </div>
       <div className="flex items-center gap-4 text-[11px] text-muted">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-indigo" /> Artists
+          <span className="w-2 h-2 rounded-full bg-clay" /> Artists
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-sky" /> Planners
+          <span className="w-2 h-2 rounded-full bg-teal" /> Planners
         </span>
       </div>
     </div>
@@ -59,8 +59,8 @@ function GeographyList({ data }: { data: GeographyRow[] }) {
       {data.map((row) => (
         <div key={row.city} className="flex items-center gap-2.5">
           <span className="text-xs text-ink w-24 truncate shrink-0">{row.city}</span>
-          <div className="flex-1 h-2 bg-mist rounded-full overflow-hidden">
-            <div className="h-full bg-indigo rounded-full" style={{ width: `${(row.count / max) * 100}%` }} />
+          <div className="flex-1 h-2 bg-sand rounded-full overflow-hidden">
+            <div className="h-full bg-clay rounded-full" style={{ width: `${(row.count / max) * 100}%` }} />
           </div>
           <span className="text-xs text-faint w-8 text-right shrink-0">{row.count}</span>
         </div>
@@ -73,7 +73,7 @@ function GeographyList({ data }: { data: GeographyRow[] }) {
 // breakdowns so the three sections read as one thing.
 function RankedBars({
   data,
-  accent = "bg-indigo",
+  accent = "bg-clay",
 }: {
   data: { label: string; count: number }[];
   accent?: string;
@@ -86,7 +86,7 @@ function RankedBars({
           <span className="text-xs text-ink w-28 truncate shrink-0" title={row.label}>
             {row.label}
           </span>
-          <div className="flex-1 h-2 bg-mist rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-sand rounded-full overflow-hidden">
             <div
               className={`h-full ${accent} rounded-full`}
               style={{ width: `${(row.count / max) * 100}%` }}
@@ -223,7 +223,7 @@ export function AnalyticsTab() {
         ) : (
           <RankedBars
             data={bookerTypes.map((r) => ({ label: r.bookerType, count: r.count }))}
-            accent="bg-sky"
+            accent="bg-teal"
           />
         )}
       </div>

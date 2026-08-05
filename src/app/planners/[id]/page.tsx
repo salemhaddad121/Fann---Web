@@ -37,7 +37,7 @@ function MessageRequestCta({ planner }: { planner: PlannerDetail }) {
   }
 
   return (
-    <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+    <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
       {error && <p className="text-xs text-danger mb-2">{error}</p>}
       <button
         onClick={handleRequest}
@@ -85,7 +85,7 @@ function Content({ id }: { id: string }) {
     return (
       <div className="px-4 py-10">
         <p className="text-sm text-danger mb-3">{error ?? "Booker not found."}</p>
-        <Link href="/search" className="text-sm font-semibold text-sky">
+        <Link href="/search" className="text-sm font-semibold text-teal">
           ← Back to search
         </Link>
       </div>
@@ -109,10 +109,10 @@ function Content({ id }: { id: string }) {
       />
 
       {isOwnProfile ? (
-        <div className="sticky bottom-0 bg-white border-t border-hairline p-3 max-w-lg mx-auto">
+        <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
           <Link
             href="/profile/edit"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-sky text-white text-sm font-semibold"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-teal text-white text-sm font-semibold"
           >
             <i className="ti ti-pencil text-sm" /> Edit profile
           </Link>

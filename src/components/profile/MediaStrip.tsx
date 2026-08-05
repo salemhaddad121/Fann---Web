@@ -23,7 +23,7 @@ export function MediaStrip({
           onClick={() => onSelect?.(i)}
           disabled={!onSelect}
           aria-label={m.media_type === "video" ? "Play video" : "View photo"}
-          className="relative shrink-0 w-28 h-28 rounded-xl overflow-hidden border border-hairline bg-mist"
+          className="relative shrink-0 w-28 h-28 rounded-xl overflow-hidden border border-hairline bg-sand"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- external CDN URLs */}
           <img src={m.cdn_url} alt="" className="w-full h-full object-cover" />

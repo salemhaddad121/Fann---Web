@@ -101,7 +101,7 @@ export function CategoriesTab() {
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
           placeholder="New group name…"
-          className="flex-1 rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+          className="flex-1 rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
         />
         <Button type="submit" loading={busy} className="w-auto px-4">
           Add group
@@ -115,7 +115,7 @@ export function CategoriesTab() {
             <div key={g.id} className="border border-hairline rounded-xl p-3.5">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  {g.icon && <i className={`ti ${g.icon} text-indigo`} />}
+                  {g.icon && <i className={`ti ${g.icon} text-clay`} />}
                   <span className="text-sm font-bold text-ink">{g.name}</span>
                   <span className="text-[11px] text-faint">({g.category_count})</span>
                 </div>
@@ -133,7 +133,7 @@ export function CategoriesTab() {
                 {groupCategories.map((c) => (
                   <span
                     key={c.id}
-                    className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-2xl bg-mist border border-hairline text-ink"
+                    className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-2xl bg-sand border border-hairline text-ink"
                   >
                     {c.name}
                     <span className="text-faint">({c.artist_count})</span>
@@ -159,12 +159,12 @@ export function CategoriesTab() {
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     placeholder="Category name…"
                     autoFocus
-                    className="flex-1 rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-indigo"
+                    className="flex-1 rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-clay"
                   />
                   <button
                     onClick={() => handleAddCategory(g.id)}
                     disabled={busy}
-                    className="text-xs font-semibold text-indigo px-2.5"
+                    className="text-xs font-semibold text-clay px-2.5"
                   >
                     Add
                   </button>
@@ -178,7 +178,7 @@ export function CategoriesTab() {
               ) : (
                 <button
                   onClick={() => setAddingCategoryTo(g.id)}
-                  className="text-xs font-semibold text-indigo flex items-center gap-1"
+                  className="text-xs font-semibold text-clay flex items-center gap-1"
                 >
                   <i className="ti ti-plus text-xs" /> Add category
                 </button>

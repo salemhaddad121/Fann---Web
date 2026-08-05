@@ -41,7 +41,7 @@ function SavedList() {
   if (artists.length === 0) {
     return (
       <div className="flex flex-col items-center text-center px-8 py-16">
-        <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-xl text-faint mb-4">
+        <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center text-xl text-faint mb-4">
           <i className="ti ti-heart" />
         </div>
         <p className="text-[15px] font-bold text-ink mb-1.5">Nothing saved yet</p>

@@ -62,7 +62,7 @@ export default function BookingsPage() {
   if (bookings.length === 0) {
     return (
       <div className="flex flex-col items-center text-center px-8 py-16">
-        <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-xl text-faint mb-4">
+        <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center text-xl text-faint mb-4">
           <i className="ti ti-calendar-event" />
         </div>
         <p className="text-[15px] font-bold text-ink mb-1.5">No bookings yet</p>
@@ -126,7 +126,7 @@ export default function BookingsPage() {
               className={`min-w-0 flex flex-col items-center gap-0.5 py-1.5 rounded-xl border ${
                 selected
                   ? "bg-ink text-white border-ink"
-                  : "bg-white text-muted border-hairline hover:bg-mist"
+                  : "bg-surface text-muted border-hairline hover:bg-sand"
               }`}
             >
               {/* 9px below 360px keeps "Completed" from truncating on the

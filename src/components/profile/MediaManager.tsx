@@ -80,7 +80,7 @@ export function MediaManager({
 
       <div className="grid grid-cols-3 gap-2">
         {media.map((m) => (
-          <div key={m.id} className="relative aspect-square rounded-xl overflow-hidden border border-hairline bg-mist group">
+          <div key={m.id} className="relative aspect-square rounded-xl overflow-hidden border border-hairline bg-sand group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={m.cdn_url} alt="" className="w-full h-full object-cover" />
             {m.media_type === "video" && (
@@ -89,7 +89,7 @@ export function MediaManager({
               </div>
             )}
             {m.is_primary && (
-              <span className="absolute top-1 left-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-indigo text-white">
+              <span className="absolute top-1 left-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-clay-deep text-white">
                 Primary
               </span>
             )}
@@ -100,7 +100,7 @@ export function MediaManager({
                   disabled={busyId === m.id}
                   onClick={() => handleSetPrimary(m.id)}
                   title="Set as primary photo"
-                  className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center text-ink disabled:opacity-50"
+                  className="w-6 h-6 rounded-full bg-surface/90 flex items-center justify-center text-ink disabled:opacity-50"
                 >
                   <i className="ti ti-star text-xs" />
                 </button>
@@ -110,7 +110,7 @@ export function MediaManager({
                 disabled={busyId === m.id}
                 onClick={() => handleDelete(m.id)}
                 title="Delete"
-                className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center text-danger disabled:opacity-50"
+                className="w-6 h-6 rounded-full bg-surface/90 flex items-center justify-center text-danger disabled:opacity-50"
               >
                 <i className="ti ti-trash text-xs" />
               </button>

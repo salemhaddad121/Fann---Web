@@ -72,7 +72,7 @@ export default function VerifyPhonePage() {
       title="Verify your phone"
       subtitle="Planners can reach you on WhatsApp once this is confirmed."
       footer={
-        <button onClick={() => router.push(homePathFor(user.role))} className="font-semibold text-indigo">
+        <button onClick={() => router.push(homePathFor(user.role))} className="font-semibold text-clay">
           Skip for now
         </button>
       }
@@ -108,7 +108,7 @@ export default function VerifyPhonePage() {
           <button
             type="button"
             onClick={handleSendCode}
-            className="mt-3 text-xs font-semibold text-indigo block"
+            className="mt-3 text-xs font-semibold text-clay block"
           >
             Didn&apos;t receive it? Resend code
           </button>

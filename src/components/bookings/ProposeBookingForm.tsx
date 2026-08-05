@@ -8,7 +8,7 @@ export function ProposeBookingForm({
   onCancel,
   onSubmit,
   initialDate,
-  containerClassName = "absolute inset-0 bg-white z-10 flex flex-col",
+  containerClassName = "absolute inset-0 bg-surface z-10 flex flex-col",
 }: {
   onCancel: () => void;
   onSubmit: (payload: {
@@ -77,7 +77,7 @@ export function ProposeBookingForm({
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
             placeholder="e.g. Saab Family Wedding"
-            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
           />
         </label>
 
@@ -88,7 +88,7 @@ export function ProposeBookingForm({
               type="date"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
-              className="w-full rounded-[10px] border border-hairline px-3 py-2.5 text-sm outline-none focus:border-indigo"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2.5 text-sm outline-none focus:border-clay"
             />
           </label>
           <label className="text-xs">
@@ -100,7 +100,7 @@ export function ProposeBookingForm({
               step={0.5}
               value={durationHours}
               onChange={(e) => setDurationHours(e.target.value)}
-              className="w-full rounded-[10px] border border-hairline px-3 py-2.5 text-sm outline-none focus:border-indigo"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2.5 text-sm outline-none focus:border-clay"
             />
           </label>
         </div>
@@ -111,7 +111,7 @@ export function ProposeBookingForm({
             value={eventLocation}
             onChange={(e) => setEventLocation(e.target.value)}
             placeholder="e.g. Phoenicia Hotel, Beirut"
-            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
           />
         </label>
 
@@ -122,7 +122,7 @@ export function ProposeBookingForm({
             min={0}
             value={agreedFeeUsd}
             onChange={(e) => setAgreedFeeUsd(e.target.value)}
-            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
           />
         </label>
 
@@ -133,7 +133,7 @@ export function ProposeBookingForm({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             maxLength={1000}
-            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
           />
         </label>
 

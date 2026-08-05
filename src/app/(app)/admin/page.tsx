@@ -25,7 +25,7 @@ const AUDIT_DOTS: Record<string, string> = {
   rejected: "bg-[#EF4444]",
   banned: "bg-[#EF4444]",
   suspended: "bg-[#F59E0B]",
-  dismissed: "bg-[#8A9BC0]",
+  dismissed: "bg-[#a89680]",
   actioned: "bg-[#EF4444]",
   created: "bg-[#22C55E]",
   deleted: "bg-[#EF4444]",
@@ -34,7 +34,7 @@ const AUDIT_DOTS: Record<string, string> = {
 
 function auditDot(action: string) {
   const suffix = action.split(".").pop() ?? "";
-  return AUDIT_DOTS[suffix] ?? "bg-[#8A9BC0]";
+  return AUDIT_DOTS[suffix] ?? "bg-[#a89680]";
 }
 
 function auditSentence(entry: AuditLogEntry): string {
@@ -73,7 +73,7 @@ function QueueRow({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 bg-white border border-hairline rounded-xl px-3.5 py-3"
+      className="flex items-center gap-3 bg-surface border border-hairline rounded-xl px-3.5 py-3"
     >
       <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center text-lg shrink-0 ${iconBg} ${iconFg}`}>
         <i className={`ti ${icon}`} />
@@ -139,8 +139,8 @@ function AdminHome({ userName }: { userName: string }) {
       <div className="p-4">
         <p className="text-[13px] font-bold text-ink mb-2.5">Platform overview</p>
         <div className="grid grid-cols-2 gap-2.5 mb-5">
-          <StatCard icon="ti-users" bg="bg-mist" fg="text-indigo" value={totalArtists} label="Total artists" />
-          <StatCard icon="ti-building-community" bg="bg-[#E0F2FE]" fg="text-sky" value={totalPlanners} label="Total planners" />
+          <StatCard icon="ti-users" bg="bg-sand" fg="text-clay" value={totalArtists} label="Total artists" />
+          <StatCard icon="ti-building-community" bg="bg-[#dfeceb]" fg="text-teal" value={totalPlanners} label="Total planners" />
           <StatCard icon="ti-user-exclamation" bg="bg-[#FEF3C7]" fg="text-[#92400E]" value={pendingAccounts} label="Pending accounts" />
           <StatCard icon="ti-flag" bg="bg-[#FEF2F2]" fg="text-danger" value={stats.openFlags} label="Open flags" />
         </div>
@@ -149,8 +149,8 @@ function AdminHome({ userName }: { userName: string }) {
         <div className="flex flex-col gap-2 mb-5">
           <QueueRow
             icon="ti-user-check"
-            iconBg="bg-mist"
-            iconFg="text-indigo"
+            iconBg="bg-sand"
+            iconFg="text-clay"
             title="Pending approvals"
             subtitle="Artists and planners awaiting ID review"
             count={stats.pendingIdDocuments}
@@ -159,8 +159,8 @@ function AdminHome({ userName }: { userName: string }) {
           />
           <QueueRow
             icon="ti-credit-card"
-            iconBg="bg-[#E0F2FE]"
-            iconFg="text-sky"
+            iconBg="bg-[#dfeceb]"
+            iconFg="text-teal"
             title="Payments queue"
             subtitle="Planner payments awaiting confirmation"
             count={stats.pendingPayments}
@@ -179,12 +179,12 @@ function AdminHome({ userName }: { userName: string }) {
           />
           <QueueRow
             icon="ti-users"
-            iconBg="bg-mist"
+            iconBg="bg-sand"
             iconFg="text-muted"
             title="User management"
             subtitle="All artists, planners, and account status"
             count={totalUsers}
-            countStyle="bg-mist text-indigo"
+            countStyle="bg-sand text-clay"
             href="/admin/panel?tab=users"
           />
           <QueueRow
@@ -197,23 +197,23 @@ function AdminHome({ userName }: { userName: string }) {
           />
           <QueueRow
             icon="ti-star"
-            iconBg="bg-mist"
-            iconFg="text-indigo"
+            iconBg="bg-sand"
+            iconFg="text-clay"
             title="Reviews"
             subtitle="Moderate visible reviews"
             href="/admin/panel?tab=reviews"
           />
           <QueueRow
             icon="ti-chart-bar"
-            iconBg="bg-[#E0F2FE]"
-            iconFg="text-sky"
+            iconBg="bg-[#dfeceb]"
+            iconFg="text-teal"
             title="Analytics"
             subtitle="Signups over time and top cities"
             href="/admin/panel?tab=analytics"
           />
           <QueueRow
             icon="ti-clipboard-list"
-            iconBg="bg-mist"
+            iconBg="bg-sand"
             iconFg="text-muted"
             title="Audit log"
             subtitle="Full history of admin actions"
@@ -225,7 +225,7 @@ function AdminHome({ userName }: { userName: string }) {
         {activity.length === 0 ? (
           <p className="text-sm text-faint">No admin actions yet.</p>
         ) : (
-          <div className="bg-white border border-hairline rounded-xl overflow-hidden">
+          <div className="bg-surface border border-hairline rounded-xl overflow-hidden">
             {activity.map((entry) => (
               <div key={entry.id} className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-hairline last:border-b-0">
                 <span className={`w-2 h-2 rounded-full shrink-0 ${auditDot(entry.action)}`} />
@@ -257,7 +257,7 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="bg-white border border-hairline rounded-xl p-3.5">
+    <div className="bg-surface border border-hairline rounded-xl p-3.5">
       <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center text-base mb-2 ${bg} ${fg}`}>
         <i className={`ti ${icon}`} />
       </div>

@@ -37,7 +37,7 @@ function AdminPanelInner() {
             key={t.key}
             onClick={() => router.push(`/admin/panel?tab=${t.key}`)}
             className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-              tab === t.key ? "bg-mist text-indigo border-[#93ADE8]" : "border-hairline text-muted"
+              tab === t.key ? "bg-sand text-clay border-[#e0a570]" : "border-hairline text-muted"
             }`}
           >
             {t.label}

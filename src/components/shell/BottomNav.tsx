@@ -15,12 +15,12 @@ export function BottomNav({
   unreadMessages: number;
 }) {
   const pathname = usePathname();
-  const activeColor = role === "planner" ? "text-sky" : "text-indigo";
+  const activeColor = role === "planner" ? "text-teal" : "text-clay";
 
   if (items.length === 0) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[60] flex bg-white border-t border-hairline">
+    <nav className="fixed bottom-0 left-0 right-0 z-[60] flex bg-surface border-t border-hairline">
       {items.map((item) => {
         const active = pathname === item.href;
         const badgeCount = item.badge === "messages" ? unreadMessages : 0;

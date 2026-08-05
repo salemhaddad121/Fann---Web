@@ -31,11 +31,11 @@ export function ArtistCard({
   return (
     <Link
       href={`/artists/${artist.id}`}
-      className="bg-white border border-hairline rounded-[14px] overflow-hidden flex flex-col"
+      className="bg-surface border border-hairline rounded-[14px] overflow-hidden flex flex-col"
     >
       {/* Portrait 5:6-ish frame. The name banner below is a fixed ~93px tall,
           so on the old 64% (landscape) frame it swallowed 89% of the photo. */}
-      <div className="relative w-full pt-[120%] bg-mist">
+      <div className="relative w-full pt-[120%] bg-sand">
         {artist.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element -- external CDN URLs, no next.config domain list set up yet
           <img
@@ -62,7 +62,7 @@ export function ArtistCard({
               onToggleSave?.();
             }}
             aria-label={isSaved ? "Remove from saved" : "Save"}
-            className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center"
+            className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-surface/90 flex items-center justify-center"
           >
             <i className={`ti ${isSaved ? "ti-heart-filled text-danger" : "ti-heart text-muted"} text-sm`} />
           </button>

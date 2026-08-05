@@ -49,7 +49,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm bg-white rounded-[14px] border border-hairline p-5 shadow-xl"
+        className="w-full max-w-sm bg-surface rounded-[14px] border border-hairline p-5 shadow-xl"
       >
         <p className="text-sm font-bold text-ink mb-1.5">{title}</p>
         <div className="text-[13px] text-muted leading-relaxed mb-4">{body}</div>
@@ -66,7 +66,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={busy}
             className={`text-sm font-semibold text-white px-4 py-2 rounded-[10px] disabled:opacity-50 ${
-              destructive ? "bg-danger" : "bg-indigo"
+              destructive ? "bg-danger" : "bg-clay"
             }`}
           >
             {busy ? "Working…" : confirmLabel}

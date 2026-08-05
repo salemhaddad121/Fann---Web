@@ -38,7 +38,7 @@ function VerifyEmailInner() {
       {status === "success" && (
         <>
           <Banner kind="success">{message}</Banner>
-          <Link href="/auth/login" className="text-sm font-semibold text-indigo">
+          <Link href="/auth/login" className="text-sm font-semibold text-clay">
             Continue to log in
           </Link>
         </>
@@ -46,7 +46,7 @@ function VerifyEmailInner() {
       {status === "error" && (
         <>
           <Banner kind="error">{message}</Banner>
-          <Link href="/auth/login" className="text-sm font-semibold text-indigo">
+          <Link href="/auth/login" className="text-sm font-semibold text-clay">
             Back to log in
           </Link>
         </>

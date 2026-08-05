@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1d51",
+  themeColor: "#3a2317",
   width: "device-width",
   initialScale: 1,
 };
@@ -38,7 +38,7 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white">
+      <body className="min-h-full flex flex-col bg-surface">
         <ServiceWorkerRegister />
         <AuthProvider>{children}</AuthProvider>
       </body>

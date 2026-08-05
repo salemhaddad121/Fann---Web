@@ -26,9 +26,9 @@ export function PlannerFilters({
   const activeFilterCount = (filters.city ? 1 : 0) + (filters.country ? 1 : 0);
 
   return (
-    <div className="bg-white border-b border-hairline">
+    <div className="bg-surface border-b border-hairline">
       <div className="flex items-center gap-2 px-4 pt-3">
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-mist">
+        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
           <i className="ti ti-search text-faint text-base" />
           <input
             value={query}
@@ -44,7 +44,7 @@ export function PlannerFilters({
           <i className="ti ti-adjustments-horizontal text-sm" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-sky text-white text-[9px] flex items-center justify-center">
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-teal text-white text-[9px] flex items-center justify-center">
               {activeFilterCount}
             </span>
           )}
@@ -57,7 +57,7 @@ export function PlannerFilters({
             onClick={() => selectedEventTypes.forEach(onToggleEventType)}
             className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
               selectedEventTypes.length === 0
-                ? "bg-[#E0F2FE] text-sky border-[#38BDF8] font-semibold"
+                ? "bg-[#dfeceb] text-teal border-[#7fb3b0] font-semibold"
                 : "border-hairline text-muted"
             }`}
           >
@@ -69,7 +69,7 @@ export function PlannerFilters({
               onClick={() => onToggleEventType(type)}
               className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
                 selectedEventTypes.includes(type)
-                  ? "bg-[#E0F2FE] text-sky border-[#38BDF8] font-semibold"
+                  ? "bg-[#dfeceb] text-teal border-[#7fb3b0] font-semibold"
                   : "border-hairline text-muted"
               }`}
             >
@@ -87,7 +87,7 @@ export function PlannerFilters({
               value={filters.city ?? ""}
               onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
               placeholder="e.g. Beirut"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-sky"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
             />
           </label>
           <label className="text-xs">
@@ -96,7 +96,7 @@ export function PlannerFilters({
               value={filters.country ?? ""}
               onChange={(e) => onFiltersChange({ ...filters, country: e.target.value || undefined })}
               placeholder="e.g. Lebanon"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-sky"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
             />
           </label>
           <label className="col-span-2 text-xs">
@@ -106,7 +106,7 @@ export function PlannerFilters({
               onChange={(e) =>
                 onFiltersChange({ ...filters, sort: e.target.value as SearchPlannersParams["sort"] })
               }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-sky bg-white"
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal bg-surface"
             >
               <option value="newest">Newest</option>
               <option value="name_asc">Name: A to Z</option>

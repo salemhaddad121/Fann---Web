@@ -45,7 +45,7 @@ export function MessageList({
                   className={`max-w-[75%] px-3.5 py-2 text-[13px] leading-relaxed break-words ${
                     isMine
                       ? `${accent} text-white rounded-2xl rounded-br-md`
-                      : "bg-mist border border-hairline text-ink rounded-2xl rounded-bl-md"
+                      : "bg-sand border border-hairline text-ink rounded-2xl rounded-bl-md"
                   }`}
                 >
                   {m.body}

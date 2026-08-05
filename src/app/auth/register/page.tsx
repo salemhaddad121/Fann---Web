@@ -67,7 +67,7 @@ function RegisterForm() {
           We&apos;ve sent a verification link to <strong>{email}</strong>. Open it to activate your
           account, then come back and log in.
         </Banner>
-        <Link href="/auth/login" className="text-sm font-semibold text-indigo">
+        <Link href="/auth/login" className="text-sm font-semibold text-clay">
           Back to log in
         </Link>
       </AuthShell>
@@ -82,7 +82,7 @@ function RegisterForm() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-semibold text-indigo">
+          <Link href="/auth/login" className="font-semibold text-clay">
             Log in
           </Link>
         </>

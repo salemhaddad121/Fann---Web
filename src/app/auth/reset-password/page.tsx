@@ -63,7 +63,7 @@ function ResetPasswordInner() {
     <AuthShell
       title="Set a new password"
       footer={
-        <Link href="/auth/login" className="font-semibold text-indigo">
+        <Link href="/auth/login" className="font-semibold text-clay">
           Back to log in
         </Link>
       }

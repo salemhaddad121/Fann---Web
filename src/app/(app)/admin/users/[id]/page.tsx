@@ -120,7 +120,7 @@ function AdminUserDetailContent({ id }: { id: string }) {
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-base font-bold text-ink">{name}</span>
-              {detail.is_verified && <i className="ti ti-rosette-discount-check text-indigo" />}
+              {detail.is_verified && <i className="ti ti-rosette-discount-check text-clay" />}
             </div>
             <UserStatusBadge status={detail.status} deletedAt={detail.deleted_at} />
           </div>

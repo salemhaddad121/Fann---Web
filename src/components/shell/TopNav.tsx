@@ -11,15 +11,15 @@ function initials(user: SafeUser): string {
 
 export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNotifications: number }) {
   const avatarClass =
-    user.role === "planner" ? "bg-[#E0F2FE] text-[#075985] border-[#38BDF8]"
-    : user.role === "admin" ? "bg-mist text-ink border-hairline"
-    : "bg-[#EEF2FE] text-[#1E3A8A] border-[#93ADE8]";
+    user.role === "planner" ? "bg-[#dfeceb] text-[#0a5555] border-[#7fb3b0]"
+    : user.role === "admin" ? "bg-sand text-ink border-hairline"
+    : "bg-[#f7ede0] text-[#8a3b2a] border-[#e0a570]";
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-white border-b border-hairline">
+    <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-surface border-b border-hairline">
       <Link href={homePathFor(user.role)} className="flex items-center gap-2">
         <span className="font-display text-base font-bold text-ink">
-          fan<span className="text-indigo">n</span>
+          fan<span className="text-clay">n</span>
         </span>
         {user.role === "admin" && (
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]">

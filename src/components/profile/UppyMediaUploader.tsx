@@ -194,7 +194,7 @@ export function UppyMediaUploader({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-ink/40">
-      <div className="w-full max-w-2xl bg-white rounded-[14px] border border-hairline overflow-hidden">
+      <div className="w-full max-w-2xl bg-surface rounded-[14px] border border-hairline overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
           <span className="text-sm font-semibold text-ink">Add photos &amp; videos</span>
           <button onClick={onClose} aria-label="Close" className="text-muted">

@@ -14,10 +14,10 @@ export function PlannerCard({ planner }: { planner: PlannerCardType }) {
   return (
     <Link
       href={`/planners/${planner.id}`}
-      className="bg-white border border-hairline rounded-[14px] overflow-hidden flex flex-col"
+      className="bg-surface border border-hairline rounded-[14px] overflow-hidden flex flex-col"
     >
       {/* Portrait frame to match ArtistCard — see the note there. */}
-      <div className="relative w-full pt-[120%] bg-mist">
+      <div className="relative w-full pt-[120%] bg-sand">
         {planner.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element -- external CDN URLs, no next.config domain list set up yet
           <img

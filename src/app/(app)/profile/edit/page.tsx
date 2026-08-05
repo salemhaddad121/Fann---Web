@@ -33,7 +33,7 @@ function SocialLinksEditor({
             value={value[platform] ?? ""}
             onChange={(e) => onChange({ ...value, [platform]: e.target.value })}
             placeholder={`${platform[0].toUpperCase()}${platform.slice(1)} URL`}
-            className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-indigo"
+            className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
           />
         ))}
       </div>
@@ -125,7 +125,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={4}
-          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-indigo"
+          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
         />
       </label>
       <div className="grid grid-cols-2 gap-3">
@@ -158,7 +158,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
                   disabled={!categoryIds.includes(c.id) && categoryIds.length >= 4}
                   className={`text-xs px-3 py-1 rounded-2xl border disabled:opacity-40 ${
                     categoryIds.includes(c.id)
-                      ? "bg-mist text-indigo border-[#93ADE8] font-semibold"
+                      ? "bg-sand text-clay border-[#e0a570] font-semibold"
                       : "border-hairline text-muted"
                   }`}
                 >
@@ -254,7 +254,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={4}
-          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-sky"
+          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-teal"
         />
       </label>
       <div className="grid grid-cols-2 gap-3">
@@ -267,7 +267,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
         <select
           value={bookerType}
           onChange={(e) => setBookerType(e.target.value)}
-          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-sky bg-white"
+          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-teal bg-surface"
         >
           <option value="">Select a type…</option>
           {BOOKER_TYPES.map((t) => (
@@ -301,8 +301,8 @@ export default function EditProfilePage() {
 
   const isPlanner = user.role === "planner";
   return isPlanner ? (
-    <PlannerEditForm accent="bg-sky" />
+    <PlannerEditForm accent="bg-teal" />
   ) : (
-    <ArtistEditForm accent="bg-indigo" />
+    <ArtistEditForm accent="bg-clay" />
   );
 }

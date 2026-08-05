@@ -68,7 +68,7 @@ export function MediaLightbox({
       <button
         onClick={onClose}
         aria-label="Close"
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25"
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-surface/15 text-white flex items-center justify-center hover:bg-surface/25"
       >
         <i className="ti ti-x text-xl" />
       </button>
@@ -81,7 +81,7 @@ export function MediaLightbox({
               step(-1);
             }}
             aria-label="Previous"
-            className="absolute left-3 sm:left-6 w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25"
+            className="absolute left-3 sm:left-6 w-10 h-10 rounded-full bg-surface/15 text-white flex items-center justify-center hover:bg-surface/25"
           >
             <i className="ti ti-chevron-left text-xl" />
           </button>
@@ -91,7 +91,7 @@ export function MediaLightbox({
               step(1);
             }}
             aria-label="Next"
-            className="absolute right-3 sm:right-6 w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25"
+            className="absolute right-3 sm:right-6 w-10 h-10 rounded-full bg-surface/15 text-white flex items-center justify-center hover:bg-surface/25"
           >
             <i className="ti ti-chevron-right text-xl" />
           </button>

@@ -6,6 +6,7 @@ import { getCategories } from "@/lib/artists-api";
 import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
+import { FannLockup } from "@/components/brand/FannMark";
 
 // Copy comes from Salem's "Landing Page.docx". Note the deliberate cross-sell:
 // the artist section lists the *event* types an artist could get booked for,
@@ -19,7 +20,7 @@ function Pills({ items }: { items: string[] }) {
       {items.map((label) => (
         <li
           key={label}
-          className="font-display text-[13px] text-ink/80 bg-white/70 border border-hairline rounded-full px-3 py-1"
+          className="font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-1"
         >
           {label}
         </li>
@@ -32,7 +33,7 @@ function JoinNow({ role }: { role: "artist" | "planner" }) {
   return (
     <Link
       href={`/auth/register?role=${role}`}
-      className="inline-flex items-center gap-1.5 mt-5 bg-indigo text-white text-sm font-semibold px-5 py-2.5 rounded-[10px]"
+      className="inline-flex items-center gap-1.5 mt-5 bg-clay-deep text-white text-sm font-semibold px-5 py-2.5 rounded-[10px]"
     >
       JOIN NOW <i className="ti ti-arrow-right text-base" />
     </Link>
@@ -108,26 +109,33 @@ export function LandingPage() {
               performance at your venue, Fann makes it easy to find, message, and hire local
               artists without the back-and-forth.
             </p>
-            <div className="flex flex-wrap gap-2.5 mt-6">
+            {/* Dual role CTAs, per the design's landing hero — each side gets
+                its own accent and lands on the register form pre-set to that
+                role. The label follows the design sheet literally: "Planner",
+                which is the database's term for the role. Deliberate: the
+                section further down this same page still reads "For Bookers",
+                so both labels for one role coexist here on purpose. Don't
+                "fix" the mismatch without asking. */}
+            <div className="flex flex-wrap gap-3 mt-6">
               <Link
-                href="/auth/register"
-                className="bg-indigo text-white text-sm font-semibold px-5 py-2.5 rounded-[10px]"
+                href="/auth/register?role=artist"
+                className="bg-clay-deep text-white text-sm font-semibold px-5 py-3 rounded-[10px]"
               >
-                Get started
+                Join as an Artist
               </Link>
               <Link
-                href="/auth/login"
-                className="bg-white text-ink text-sm font-semibold px-5 py-2.5 rounded-[10px] border border-hairline"
+                href="/auth/register?role=planner"
+                className="bg-teal text-white text-sm font-semibold px-5 py-3 rounded-[10px]"
               >
-                Log in
+                Join as a Planner
               </Link>
             </div>
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
             {/* For Artists */}
-            <section className="bg-white/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-indigo">
+            <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-clay">
                 For Artists
               </span>
               <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
@@ -150,8 +158,8 @@ export function LandingPage() {
             </section>
 
             {/* For Planners (Bookers) */}
-            <section className="bg-white/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-sky">
+            <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-teal">
                 For Bookers
               </span>
               <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
@@ -179,11 +187,9 @@ export function LandingPage() {
           </div>
         </main>
 
-        <footer className="border-t border-hairline bg-white/85 px-5 py-6">
+        <footer className="border-t border-hairline bg-surface/85 px-5 py-6">
           <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <span className="font-display text-base font-bold text-ink">
-              fan<span className="text-indigo">n</span>
-            </span>
+            <FannLockup size={22} textClassName="text-base" />
             <span className="text-xs text-faint">
               Connecting artists and event bookers across Lebanon.
             </span>
