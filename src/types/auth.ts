@@ -29,6 +29,11 @@ export interface RegisterPayload {
   password: string;
   role: Extract<UserRole, "artist" | "planner">;
   phone?: string;
+  // Both required. The API rejects anything but true on either — the
+  // checkboxes are the user-facing half of a server-enforced rule, not
+  // the rule itself.
+  acceptedTerms: boolean;
+  acceptedPrivacy: boolean;
 }
 
 export interface RegisterResponse {
