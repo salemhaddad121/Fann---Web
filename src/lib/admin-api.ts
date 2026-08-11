@@ -17,6 +17,8 @@ import type {
   EngagementStats,
   UserStatus,
   PaginatedResponse,
+  VerificationRecord,
+  VerificationResult,
 } from "@/types/admin";
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -197,4 +199,15 @@ export async function listAdminReviews(page = 1): Promise<PaginatedResponse<Admi
 
 export async function removeAdminReview(id: string): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/admin/reviews/${id}`, { method: "DELETE" });
+}
+
+export async function getVerifications(params: {
+  result?: VerificationResult;
+  page?: number;
+} = {}): Promise<{ data: VerificationRecord[]; meta: { total: number; page: number; limit: number } }> {
+  const qs = new URLSearchParams();
+  if (params.result) qs.set("result", params.result);
+  if (params.page) qs.set("page", String(params.page));
+  const suffix = qs.toString() ? `?${qs}` : "";
+  return apiFetch(`/admin/verifications${suffix}`);
 }

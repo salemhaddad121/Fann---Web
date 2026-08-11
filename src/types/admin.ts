@@ -162,3 +162,56 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: { total: number; page: number; limit: number; pages: number };
 }
+
+// ----------------------------------------------------------------
+// Identity verification records
+//
+// Provider-sourced fields are null until a verification provider is
+// integrated — see fann-api migration 017. They're typed as nullable
+// rather than optional so the UI has to decide what to show when absent.
+// ----------------------------------------------------------------
+export type VerificationResult = "pending" | "passed" | "failed" | "manually_approved";
+
+export interface VerificationAuditStep {
+  at: string;
+  actor: string;
+  step: string;
+  detail?: string;
+}
+
+export interface VerificationConsent {
+  document: string;
+  version: string;
+  accepted_at: string;
+  ip_address: string | null;
+}
+
+export interface VerificationRecord {
+  id: string;
+  user_id: string;
+  provider: string | null;
+  provider_transaction_id: string | null;
+  created_at: string;
+  completed_at: string | null;
+  result: VerificationResult;
+  verified_name: string | null;
+  verified_date_of_birth: string | null;
+  verified_nationality: string | null;
+  document_type: string | null;
+  document_number_masked: string | null;
+  methods: string[];
+  provider_attestation: string | null;
+  provider_report_url: string | null;
+  report_sha256: string | null;
+  report_signature: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  consent_snapshot: VerificationConsent[];
+  audit_log: VerificationAuditStep[];
+  reviewed_by: string | null;
+  // Joined from users for the list view.
+  user_email: string;
+  user_role: string;
+  user_status: string;
+  user_account_code: string;
+}
