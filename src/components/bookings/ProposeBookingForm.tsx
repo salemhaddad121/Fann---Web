@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
+import { digitsOnly, decimalOnly } from "@/lib/numeric-input";
 
 export function ProposeBookingForm({
   onCancel,
@@ -93,13 +94,15 @@ export function ProposeBookingForm({
           </label>
           <label className="text-xs">
             <span className="block font-semibold text-ink mb-1.5">Duration (hours)</span>
+            {/* text + inputMode, not type="number": that accepts "7e5" and
+                "-5" as values and silently blanks typed letters. */}
             <input
-              type="number"
-              min={0.5}
-              max={24}
-              step={0.5}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="e.g. 2.5"
               value={durationHours}
-              onChange={(e) => setDurationHours(e.target.value)}
+              onChange={(e) => setDurationHours(decimalOnly(e.target.value))}
               className="w-full rounded-[10px] border border-hairline px-3 py-2.5 text-sm outline-none focus:border-clay"
             />
           </label>
@@ -118,10 +121,12 @@ export function ProposeBookingForm({
         <label className="block mb-3.5">
           <span className="block text-xs font-semibold text-ink mb-1.5">Agreed fee, USD (optional)</span>
           <input
-            type="number"
-            min={0}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="e.g. 750"
             value={agreedFeeUsd}
-            onChange={(e) => setAgreedFeeUsd(e.target.value)}
+            onChange={(e) => setAgreedFeeUsd(digitsOnly(e.target.value))}
             className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
           />
         </label>
