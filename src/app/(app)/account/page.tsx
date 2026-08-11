@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { changePassword, changeEmail, deleteAccount } from "@/lib/account-api";
-import { getMyArtistProfile, updateMyArtistProfile } from "@/lib/artists-api";
-import { getMyPlannerProfile, updateMyPlannerProfile } from "@/lib/planners-api";
 import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
@@ -260,86 +258,6 @@ function ChangeNumberForm() {
   );
 }
 
-// City/country live on the role's profile table, not the user record, so
-// this writes through the same PUT the profile editor uses. Both fields
-// are optional on the DTO, so sending only these two leaves bio,
-// categories and the rest untouched.
-function ChangeLocationForm() {
-  const { user } = useAuth();
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const isArtist = user?.role === "artist";
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = isArtist ? getMyArtistProfile : getMyPlannerProfile;
-    load()
-      .then((p) => {
-        if (cancelled) return;
-        setCity(p.location_city ?? "");
-        setCountry(p.location_country ?? "");
-        setLoaded(true);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setError("Couldn't load your current location.");
-          setLoaded(true);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isArtist]);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    setSaving(true);
-    try {
-      const payload = { locationCity: city, locationCountry: country };
-      if (isArtist) await updateMyArtistProfile(payload);
-      else await updateMyPlannerProfile(payload);
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn't update your location.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (!loaded) return <p className="text-sm text-muted">Loading…</p>;
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {error && <Banner kind="error">{error}</Banner>}
-      {success && <Banner kind="success">Location updated.</Banner>}
-      <FormField
-        label="City"
-        autoComplete="address-level2"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        placeholder="Beirut"
-      />
-      <FormField
-        label="Country"
-        autoComplete="country-name"
-        value={country}
-        onChange={(e) => setCountry(e.target.value)}
-        placeholder="Lebanon"
-      />
-      <Button type="submit" loading={saving}>
-        Update location
-      </Button>
-    </form>
-  );
-}
-
 function DeleteAccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
@@ -412,7 +330,7 @@ function DeleteAccountSection() {
 }
 
 export default function AccountPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   if (!user) return null;
 
   const memberSince = user.createdAt
@@ -475,17 +393,6 @@ export default function AccountPage() {
           <ChangeNumberForm />
         </div>
 
-        {/* Location lives on the artist/planner profile, so admins — who
-            have neither — don't get this section. */}
-        {user.role !== "admin" && (
-          <>
-            <p className="text-xs font-bold text-ink mb-2">Change location</p>
-            <div className="mb-6">
-              <ChangeLocationForm />
-            </div>
-          </>
-        )}
-
         <p className="text-xs font-bold text-ink mb-2">Change password</p>
         <div className="mb-6">
           <ChangePasswordForm />
@@ -499,10 +406,6 @@ export default function AccountPage() {
             <DeleteAccountSection />
           </div>
         )}
-
-        <Button variant="ghost" onClick={logout}>
-          Log out
-        </Button>
       </div>
     </div>
   );
