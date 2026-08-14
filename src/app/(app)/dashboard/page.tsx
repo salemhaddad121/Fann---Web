@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { SubscriptionBanner } from "@/components/subscriptions/SubscriptionBanner";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -29,6 +30,9 @@ export default function DashboardPage() {
           {greeting()}, {user.email.split("@")[0]}
         </h1>
       </div>
+
+      {/* Bookers only — artists don't subscribe, they're what's subscribed to. */}
+      {user.role === "planner" && <SubscriptionBanner />}
 
       <div className="bg-surface border border-hairline rounded-2xl p-5 mb-4">
         <p className="text-xs font-semibold text-ink mb-3">Your account</p>

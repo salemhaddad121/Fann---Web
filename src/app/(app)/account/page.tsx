@@ -9,6 +9,7 @@ import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { ApiError } from "@/lib/api";
+import { SubscriptionSection } from "@/components/subscriptions/SubscriptionSection";
 
 function Row({ label, value, trailing }: { label: string; value: string; trailing?: React.ReactNode }) {
   return (
@@ -382,6 +383,16 @@ export default function AccountPage() {
           {user.accountCode && <Row label="Account code" value={String(user.accountCode)} />}
           {memberSince && <Row label="Member since" value={memberSince} />}
         </div>
+
+        {/* Bookers only — artists have nothing to subscribe to. */}
+        {user.role === "planner" && (
+          <>
+            <p className="text-xs font-bold text-ink mb-2">Subscription</p>
+            <div className="mb-6">
+              <SubscriptionSection />
+            </div>
+          </>
+        )}
 
         <p className="text-xs font-bold text-ink mb-2">Change email</p>
         <div className="mb-6">
