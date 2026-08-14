@@ -5,11 +5,41 @@ import { listPendingPayments, reviewPayment } from "@/lib/admin-api";
 import { Pagination } from "@/components/admin/Pagination";
 import type { AdminPayment } from "@/types/admin";
 
+// Keys are the payment_service enum values from migration 001, which are
+// capitalised. The lowercase keys this had before never matched, so every
+// row fell through to showing the raw value.
 const SERVICE_LABELS: Record<string, string> = {
-  omt: "OMT",
-  wish: "Wish",
-  western_union: "Western Union",
+  OMT: "OMT",
+  Wish: "Whish Money",
+  WesternUnion: "Western Union",
+  other: "Other",
 };
+
+const PLAN_LABELS: Record<string, string> = {
+  day: "Day pass",
+  month: "Monthly",
+  year: "Yearly",
+};
+
+/**
+ * What the admin is actually approving.
+ *
+ * Without this the row shows a dollar amount and nothing else, so a pack of
+ * ten day passes and a single yearly plan look identical at a glance — and
+ * confirming is what mints the subscription.
+ */
+function PlanSummary({ payment }: { payment: AdminPayment }) {
+  if (!payment.plan_code) {
+    return <span className="text-faint">Legacy payment · no plan attached</span>;
+  }
+  const label = PLAN_LABELS[payment.plan_code] ?? payment.plan_code;
+  return (
+    <span className="font-semibold text-ink">
+      {label}
+      {payment.quantity > 1 && ` × ${payment.quantity}`}
+    </span>
+  );
+}
 
 export function PaymentsTab() {
   const [rows, setRows] = useState<AdminPayment[] | null>(null);
@@ -82,14 +112,25 @@ export function PaymentsTab() {
                 {p.display_name ?? p.company_name ?? p.email}
               </div>
               <div className="text-xs text-muted">
-                {p.account_code} · {SERVICE_LABELS[p.transfer_service] ?? p.transfer_service}
+                <PlanSummary payment={p} />
+              </div>
+              <div className="text-xs text-muted">
+                {p.account_code}
+                {p.transfer_service
+                  ? ` · ${SERVICE_LABELS[p.transfer_service] ?? p.transfer_service}`
+                  : " · transfer not reported yet"}
                 {p.reference_code && ` · Ref ${p.reference_code}`}
               </div>
-              <div className="text-xs text-faint">
-                Period: {new Date(p.period_start).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                {" – "}
-                {new Date(p.period_end).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-              </div>
+              {/* Only legacy payments carry a period. New ones have none
+                  until the subscription they buy is activated, and feeding
+                  null to new Date() renders "Invalid Date". */}
+              {p.period_start && p.period_end && (
+                <div className="text-xs text-faint">
+                  Period: {new Date(p.period_start).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  {" – "}
+                  {new Date(p.period_end).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                </div>
+              )}
             </div>
             <div className="text-right shrink-0">
               <div className="text-base font-bold text-ink">${Number(p.amount_usd).toLocaleString()}</div>

@@ -41,10 +41,18 @@ export interface AdminPayment {
   id: string;
   planner_id: string;
   amount_usd: string | number;
-  transfer_service: string;
+  /** Null on payments that predate the subscription plans (seed data). */
+  plan_code: string | null;
+  quantity: number;
+  currency: string;
+  provider: string;
+  /** Null until the buyer reports how they sent the money. */
+  transfer_service: string | null;
   reference_code: string | null;
-  period_start: string;
-  period_end: string;
+  // Nullable since migration 018. A purchase intent has no period until the
+  // subscription it buys is activated, so new payments carry neither.
+  period_start: string | null;
+  period_end: string | null;
   status: string;
   created_at: string;
   email?: string;
