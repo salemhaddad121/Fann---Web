@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { useRequireAuth } from "@/lib/use-require-auth";
+import { UnlockCta } from "@/components/profile/LockedField";
+import { GuestChrome } from "@/components/shell/GuestChrome";
 import { getArtist } from "@/lib/artists-api";
 import { startConversation } from "@/lib/messaging-api";
 import { createBooking } from "@/lib/bookings-api";
@@ -207,8 +208,12 @@ function Content({ id }: { id: string }) {
             <i className="ti ti-pencil text-sm" /> Edit profile
           </Link>
         </div>
-      ) : (
+      ) : artist.viewer_tier === "subscribed" ? (
+        // Admins and artists viewing someone else fall through to null
+        // inside MessageCta — there is no messaging action for them here.
         <MessageCta artist={artist} />
+      ) : (
+        <UnlockCta tier={artist.viewer_tier} />
       )}
     </div>
   );
@@ -216,9 +221,19 @@ function Content({ id }: { id: string }) {
 
 export default function ArtistDetailPage() {
   const params = useParams<{ id: string }>();
-  const { user, isLoading } = useRequireAuth();
+  const { user, isLoading } = useAuth();
 
-  if (isLoading || !user) return null;
+  // Wait for the session probe before deciding which chrome to render,
+  // otherwise a signed-in user briefly sees the guest header.
+  if (isLoading) return null;
+
+  if (!user) {
+    return (
+      <GuestChrome>
+        <Content id={params.id} />
+      </GuestChrome>
+    );
+  }
 
   return (
     <AppShell user={user} background="artist">

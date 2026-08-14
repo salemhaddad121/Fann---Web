@@ -13,16 +13,35 @@ export interface CategoryGroup {
   categories: Category[];
 }
 
+/**
+ * How much of this record the server decided to send.
+ *
+ * 'guest' and 'registered' receive identical data — an account alone
+ * unlocks nothing — but they need different prompts, so the API reports
+ * which one it was rather than making the client guess.
+ */
+export type ViewerTier = "guest" | "registered" | "subscribed";
+
 export interface ArtistCard {
   id: string;
   user_id: string;
+  /** Masked to "Karim N." unless viewer_tier is "subscribed". */
   display_name: string;
   bio: string | null;
   location_city: string | null;
   location_country: string | null;
-  base_price_usd: string | number | null;
+  // The paywalled fields are OMITTED by the server below the paying tier,
+  // not nulled — so these are optional, and their absence is the signal to
+  // render a locked placeholder. Never assume they exist.
+  base_price_usd?: string | number | null;
+  social_links?: Record<string, string> | null;
+  deposit_usd?: string | number | null;
+  cancellation_policy?: string | null;
+  /** Stands in for base_price_usd below the paying tier, e.g. "$250–$500". */
+  base_price_band?: string | null;
+  viewer_tier?: ViewerTier;
+  is_masked?: boolean;
   languages: string[] | null;
-  social_links: Record<string, string> | null;
   is_verified: boolean;
   thumbnail_url: string | null;
   created_at: string;
