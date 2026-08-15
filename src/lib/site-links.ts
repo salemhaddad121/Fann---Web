@@ -21,12 +21,13 @@ export interface FooterColumn {
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
+    // Two entries by design. Careers and Press were cut permanently: a
+    // careers page with no jobs and a press page with no coverage each read
+    // worse than no link at all.
     heading: "Company",
     links: [
       { label: "About Fann", href: null },
       { label: "How it works", href: null },
-      { label: "Careers", href: null },
-      { label: "Press", href: null },
     ],
   },
   {
@@ -59,10 +60,13 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: "Services",
     links: [
+      // Slugs must match the categories seeded in migration 005 exactly —
+      // "band" and "mc" are not slugs, and pointed at an empty result set,
+      // which reads as "Fann has no bands" rather than as a broken link.
       { label: "DJs", href: "/search?categories=dj" },
       { label: "Photographers", href: "/search?categories=photographer" },
-      { label: "Bands", href: "/search?categories=band" },
-      { label: "MCs & hosts", href: "/search?categories=mc" },
+      { label: "Bands", href: "/search?categories=band-group" },
+      { label: "MCs & hosts", href: "/search?categories=mc-host" },
     ],
   },
   {
@@ -76,13 +80,18 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   },
 ];
 
-/** Legal links, shown on their own row below the columns. */
+/**
+ * Legal links, shown on their own row below the columns.
+ *
+ * "Notice at Collection" was cut permanently and should not be reinstated.
+ * It is a California CCPA artifact — it appears on US marketplaces because
+ * they have Californian users. Fann is Lebanese, serves Lebanese businesses
+ * and excludes individual consumers by design, so publishing one would
+ * advertise rights there is no process to honour.
+ */
 export const LEGAL_LINKS: SiteLink[] = [
   { label: "Terms of Service", href: "/terms" },
   { label: "Privacy Policy", href: "/privacy" },
-  // Named as the spec asks. Not yet written — unlinked rather than pointed
-  // at a 404, since a broken link to a privacy notice is worse than none.
-  { label: "Notice at Collection", href: null },
 ];
 
 export interface SocialLink {
