@@ -22,7 +22,13 @@ export function ArtistCard({
   onToggleSave?: () => void;
 }) {
   const primaryCategory = artist.categories[0];
-  const price = formatPrice(artist.base_price_usd);
+  // The exact figure only reaches subscribers; everyone else gets a band.
+  // Falling through to "Price on request" for a guest would hide budget
+  // information the server is deliberately willing to share, and make the
+  // whole roster look unpriced.
+  // The band is already a range ("$250–$500"), so it is shown as-is rather
+  // than prefixed with "From", which would read as a range of minimums.
+  const price = formatPrice(artist.base_price_usd) ?? artist.base_price_band ?? null;
   const showSaveButton = onToggleSave !== undefined;
   const subtitle = [artist.location_city, price ?? "Price on request"]
     .filter(Boolean)

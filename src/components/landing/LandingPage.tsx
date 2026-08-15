@@ -7,6 +7,7 @@ import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { FannLockup } from "@/components/brand/FannMark";
+import { SearchEntry } from "@/components/landing/SearchEntry";
 
 // Copy comes from Salem's "Landing Page.docx". Note the deliberate cross-sell:
 // the artist section lists the *event* types an artist could get booked for,
@@ -116,6 +117,14 @@ export function LandingPage() {
                 section further down this same page still reads "For Bookers",
                 so both labels for one role coexist here on purpose. Don't
                 "fix" the mismatch without asking. */}
+            {/* Search entry.
+                Above the join buttons deliberately. Browsing is now open to
+                anyone — profiles load without an account, just with contact
+                details withheld — so the page's first ask should be "look
+                around", not "sign up". Asking someone to register before
+                they have seen a single artist is the harder sell. */}
+            <SearchEntry />
+
             <div className="flex flex-wrap gap-3 mt-6">
               <Link
                 href="/auth/register?role=artist"

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth-context";
+import { GuestChrome } from "@/components/shell/GuestChrome";
 import { searchArtists, getCategories } from "@/lib/artists-api";
 import { searchPlanners, getEventTypes } from "@/lib/planners-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
@@ -358,9 +359,25 @@ function PlannerDirectory() {
 }
 
 export default function SearchPage() {
-  const { user, isLoading } = useRequireAuth();
+  const { user, isLoading } = useAuth();
 
-  if (isLoading || !user) return null;
+  if (isLoading) return null;
+
+  // Search is open to guests as of the guest-experience work. This
+  // deliberately reverses the members-only rule that use-require-auth.ts
+  // still documents for the rest of the app: the whole point of masking
+  // names and banding prices server-side is that the roster can be browsed
+  // without an account, with only the contact details held back.
+  //
+  // isPlanner is false, so the save hearts are not rendered — there is no
+  // account to save anything to.
+  if (!user) {
+    return (
+      <GuestChrome showSearchLink={false}>
+        <ArtistDirectory isPlanner={false} />
+      </GuestChrome>
+    );
+  }
 
   // Artists use this to find bookers — now real, via GET /planners.
   //

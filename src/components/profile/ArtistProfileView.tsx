@@ -8,6 +8,7 @@ import { MediaLightbox } from "@/components/profile/MediaLightbox";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
 import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar";
+import { LockedField } from "@/components/profile/LockedField";
 import type { ArtistDetail } from "@/types/artists";
 import type { UserStatus } from "@/types/admin";
 
@@ -116,9 +117,18 @@ export function ArtistProfileView({
             value={String(artist.bookings_count ?? 0)}
             label={artist.bookings_count === 1 ? "Booking" : "Bookings"}
           />
+          {/* The exact figure is only sent to subscribers; everyone else
+              gets a band instead. Showing the band rather than "—" is the
+              point — a booker with a $300 budget needs to know whether to
+              keep reading, and hiding price entirely just sends them to
+              ask in a message they cannot send yet. */}
           <Stat
             icon="ti-currency-dollar"
-            value={artist.base_price_usd != null ? `$${Number(artist.base_price_usd).toLocaleString()}` : "—"}
+            value={
+              artist.base_price_usd != null
+                ? `$${Number(artist.base_price_usd).toLocaleString()}`
+                : (artist.base_price_band ?? "—")
+            }
             label="From"
             last
           />
@@ -182,6 +192,16 @@ export function ArtistProfileView({
       {artist.social_links && Object.keys(artist.social_links).length > 0 && (
         <Section title="Connect">
           <SocialLinks links={artist.social_links} />
+        </Section>
+      )}
+
+      {/* Absent rather than empty means the server withheld it. Showing a
+          locked placeholder tells the viewer there is something here to
+          unlock; rendering nothing would imply the artist simply has no
+          links, which is a different and misleading message. */}
+      {artist.social_links === undefined && artist.viewer_tier !== "subscribed" && (
+        <Section title="Connect">
+          <LockedField label="Social links" tier={artist.viewer_tier} lines={2} />
         </Section>
       )}
 
