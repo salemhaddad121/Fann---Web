@@ -253,7 +253,7 @@ export default function PlansPage() {
                 {!user && (
                   <div className="mt-5 rounded-2xl border border-hairline bg-surface p-5 text-center">
                     <p className="text-sm text-muted">
-                      Sign in as a booker to buy a plan.
+                      Sign in as a planner to buy a plan.
                     </p>
                     <Link
                       href="/auth/login"
@@ -266,8 +266,8 @@ export default function PlansPage() {
 
                 {user && !isBooker && (
                   <p className="mt-5 rounded-2xl border border-hairline bg-surface p-5 text-center text-sm text-muted">
-                    Plans are for bookers. As an artist your profile is free —
-                    bookers subscribe in order to reach you.
+                    Plans are for planners. As an artist your profile is free —
+                    planners subscribe in order to reach you.
                   </p>
                 )}
               </>

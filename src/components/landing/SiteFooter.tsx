@@ -57,7 +57,7 @@ export function SiteFooter() {
           <div>
             <FannLockup size={20} textClassName="text-[15px]" />
             <p className="mt-1.5 text-xs text-faint">
-              Connecting artists and event bookers across Lebanon.
+              Connecting artists and event planners across Lebanon.
             </p>
           </div>
 

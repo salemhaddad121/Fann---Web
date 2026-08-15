@@ -54,7 +54,7 @@ export function VerificationBanner() {
           ? "One of your documents was rejected. Upload a replacement and we'll take another look."
           : started
             ? "We'll email you once it's checked. Your profile goes live after that."
-            : "Bookers only see artists whose identity we've checked. It takes a photo ID and a selfie."}
+            : "Planners only see artists whose identity we've checked. It takes a photo ID and a selfie."}
       </p>
 
       {data.outstanding.length > 0 && (

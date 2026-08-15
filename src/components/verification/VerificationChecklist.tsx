@@ -150,7 +150,7 @@ export function VerificationChecklist() {
           </p>
           <p className="mt-0.5 text-xs leading-relaxed text-muted">
             We check every artist&apos;s identity before their profile is shown to
-            bookers. It protects you as much as them — a booker knows the person
+            planners. It protects you as much as them — a planner knows the person
             they&apos;re hiring is who they say they are.
           </p>
           {data.outstanding.length > 0 && (
@@ -174,7 +174,7 @@ export function VerificationChecklist() {
 
       <p className="mt-3 px-1 text-[11px] leading-relaxed text-faint">
         These are stored privately and only ever seen by our review team. They are
-        never shown on your profile and never sent to bookers.
+        never shown on your profile and never sent to planners.
       </p>
     </div>
   );

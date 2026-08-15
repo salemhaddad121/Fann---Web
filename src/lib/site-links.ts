@@ -48,9 +48,9 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    heading: "Bookers",
+    heading: "Planners",
     links: [
-      { label: "Join as a booker", href: "/auth/register?role=planner" },
+      { label: "Join as a planner", href: "/auth/register?role=planner" },
       { label: "Browse artists", href: "/search" },
       { label: "Plans & pricing", href: "/plans" },
       { label: "Planning a wedding", href: null },

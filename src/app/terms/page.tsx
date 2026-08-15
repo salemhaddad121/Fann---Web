@@ -16,7 +16,7 @@ export default function TermsPage() {
         happens when something goes wrong.
       </p>
       <p>
-        Fann provides the platform where artists and bookers find each other
+        Fann provides the platform where artists and planners find each other
         and agree terms. Any booking is an agreement between those two
         parties.
       </p>

@@ -203,7 +203,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
           <span>
             A profile needs {REQUIRED_PROFILE_PICTURES} profile picture and{" "}
             {REQUIRED_GALLERY_IMAGES} gallery images before it&apos;s ready to show
-            bookers. Still missing: {missingMedia.join(" and ")}.
+            planners. Still missing: {missingMedia.join(" and ")}.
           </span>
         </p>
       )}
@@ -327,7 +327,7 @@ function PlannerEditForm({ accent }: { accent: string }) {
       </div>
 
       <label className="block mb-4">
-        <span className="block text-xs font-semibold text-ink mb-1.5">Type of booker</span>
+        <span className="block text-xs font-semibold text-ink mb-1.5">Type of planner</span>
         <select
           value={bookerType}
           onChange={(e) => setBookerType(e.target.value)}

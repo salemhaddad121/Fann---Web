@@ -314,7 +314,7 @@ function PlannerDirectory() {
 
       <div className="flex items-center justify-between px-4 pt-3 pb-1.5">
         <span className="text-xs text-faint">
-          {loading ? "Searching…" : `${meta.total} booker${meta.total === 1 ? "" : "s"} found`}
+          {loading ? "Searching…" : `${meta.total} planner${meta.total === 1 ? "" : "s"} found`}
         </span>
       </div>
 
@@ -323,7 +323,7 @@ function PlannerDirectory() {
       {!error && !loading && results.length === 0 && (
         <div className="flex flex-col items-center text-center px-8 py-16">
           <i className="ti ti-mood-empty text-2xl text-faint mb-2" />
-          <p className="text-sm text-muted">No bookers match those filters yet.</p>
+          <p className="text-sm text-muted">No planners match those filters yet.</p>
         </div>
       )}
 
