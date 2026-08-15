@@ -6,7 +6,19 @@
 // user's data to the next account on the same device, and a stale HTML
 // document could show a logged-out shell. Those always hit the network.
 
-const CACHE = "fann-static-v1";
+// BUMP THIS whenever a cached asset changes at a URL that stays the same.
+//
+// Everything under /_next/static/ is content-hashed, so a new build gives it
+// a new URL and the cache is irrelevant. The rest — /icons/, /backgrounds/,
+// /seed/, favicon.ico — sits at a fixed path forever, and the fetch handler
+// below is cache-first (`cached || fetch`), meaning it never revalidates. A
+// visitor who has the old file keeps it indefinitely.
+//
+// The activate handler deletes every cache whose key is not this constant,
+// so changing the value here is what actually evicts the old copies.
+//
+// v2 (2026-08-15): app icons and favicon regenerated from the Maqam mark.
+const CACHE = "fann-static-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
