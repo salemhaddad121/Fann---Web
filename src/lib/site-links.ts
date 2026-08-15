@@ -32,8 +32,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: "Support",
     links: [
-      { label: "Help centre", href: null },
-      { label: "Contact us", href: null },
+      { label: "Help centre", href: "/help" },
+      { label: "Contact us", href: "/help" },
       { label: "Trust & safety", href: null },
       { label: "Report a problem", href: null },
     ],

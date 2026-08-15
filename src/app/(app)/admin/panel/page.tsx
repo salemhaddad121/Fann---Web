@@ -13,6 +13,7 @@ import { ReviewsTab } from "@/components/admin/tabs/ReviewsTab";
 import { AuditTab } from "@/components/admin/tabs/AuditTab";
 import { VerificationsTab } from "@/components/admin/tabs/VerificationsTab";
 import { AnalyticsTab } from "@/components/admin/tabs/AnalyticsTab";
+import { SupportTab } from "@/components/admin/tabs/SupportTab";
 
 const TABS = [
   { key: "users", label: "Users" },
@@ -21,6 +22,7 @@ const TABS = [
   { key: "flags", label: "Flags" },
   { key: "categories", label: "Categories" },
   { key: "reviews", label: "Reviews" },
+  { key: "support", label: "Support" },
   { key: "analytics", label: "Analytics" },
   { key: "verifications", label: "Verification" },
   { key: "audit", label: "Audit log" },
@@ -53,6 +55,7 @@ function AdminPanelInner() {
       {tab === "flags" && <FlagsTab />}
       {tab === "categories" && <CategoriesTab />}
       {tab === "reviews" && <ReviewsTab />}
+      {tab === "support" && <SupportTab />}
       {tab === "analytics" && <AnalyticsTab />}
       {tab === "verifications" && <VerificationsTab />}
       {tab === "audit" && <AuditTab />}

@@ -36,6 +36,9 @@ export function GuestChrome({
             <Link href="/plans" className="text-sm font-semibold text-muted">
               Plans
             </Link>
+            <Link href="/help" className="text-sm font-semibold text-muted">
+              Help
+            </Link>
             <Link
               href="/auth/login"
               className="rounded-[10px] bg-clay-deep px-3.5 py-2 text-sm font-semibold text-white"
