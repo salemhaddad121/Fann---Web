@@ -200,9 +200,11 @@ export function ArtistProfileView({
         </div>
       </Section>
 
-      {/* Booking terms. Both fields are withheld by the server below the
-          paying tier, so their presence is itself the signal that this
-          viewer is allowed to see them — no tier check needed here. */}
+      {/* Booking terms are public — every tier gets them, including guests.
+          They are what a booker needs to judge whether an artist is worth
+          pursuing, and unlike a name or a number they cannot be used to
+          book around the platform. Shown whenever the artist has set
+          either; no tier check, because the server withholds neither. */}
       {(artist.deposit_usd != null || artist.cancellation_policy) && (
         <Section title="Booking terms">
           <div className="space-y-3">

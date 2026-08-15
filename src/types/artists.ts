@@ -35,6 +35,9 @@ export interface ArtistCard {
   // render a locked placeholder. Never assume they exist.
   base_price_usd?: string | number | null;
   social_links?: Record<string, string> | null;
+  // Booking terms are NOT paywalled — every tier receives them. Optional
+  // only because an artist may not have set them, so null here means "none
+  // given", not "withheld".
   deposit_usd?: string | number | null;
   cancellation_policy?: string | null;
   /** Stands in for base_price_usd below the paying tier, e.g. "$250–$500". */
