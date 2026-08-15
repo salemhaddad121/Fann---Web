@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCategories } from "@/lib/artists-api";
 import { getEventTypes } from "@/lib/planners-api";
@@ -59,32 +56,31 @@ function NoFees({ freeToUse = false }: { freeToUse?: boolean }) {
   );
 }
 
-export function LandingPage() {
-  const [artistCategories, setArtistCategories] = useState<string[]>([]);
-  const [eventTypes, setEventTypes] = useState<string[]>([]);
+/**
+ * The taxonomy shown in the two pill rows.
+ *
+ * Both endpoints are public, so this can run on the server without a
+ * session — which is the point: the pills are real content naming every
+ * category and event type Fann covers, and fetching them in an effect kept
+ * them out of the HTML entirely. Each falls back to an empty list on
+ * failure, and Pills renders nothing for an empty list, so a flaky API
+ * costs a row rather than the page.
+ */
+async function loadTaxonomy() {
+  const [groups, eventTypes] = await Promise.all([
+    getCategories().catch(() => []),
+    getEventTypes().catch(() => []),
+  ]);
 
-  // Both endpoints are public, so the landing page can show real taxonomy
-  // without a session. Non-critical — the sections read fine without them.
-  useEffect(() => {
-    let cancelled = false;
-    getCategories()
-      .then((groups) => {
-        if (cancelled) return;
-        const names = groups
-          .flatMap((g) => g.categories.map((c) => c.name))
-          .filter((n) => !n.toLowerCase().startsWith("other"));
-        setArtistCategories(names);
-      })
-      .catch(() => {});
-    getEventTypes()
-      .then((types) => {
-        if (!cancelled) setEventTypes(types);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const artistCategories = groups
+    .flatMap((g) => g.categories.map((c) => c.name))
+    .filter((n) => !n.toLowerCase().startsWith("other"));
+
+  return { artistCategories, eventTypes };
+}
+
+export async function LandingPage() {
+  const { artistCategories, eventTypes } = await loadTaxonomy();
 
   return (
     <div className="min-h-screen relative">
