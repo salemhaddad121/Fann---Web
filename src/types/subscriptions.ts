@@ -46,6 +46,12 @@ export interface MySubscriptions {
 }
 
 export interface PaymentIntent {
+  provider: string;
+  // Exactly one of these is set. redirect_url means a hosted checkout to
+  // send the buyer to; instructions means a reference-matching or manual
+  // flow with nowhere to redirect. Branch on which is present.
+  redirect_url: string | null;
+  instructions: string | null;
   id: string;
   plan_code: PlanCode;
   quantity: number;

@@ -179,7 +179,19 @@ export default function PlansPage() {
     setBusyPlan(planCode);
     setError(null);
     try {
-      setIntent(await createPaymentIntent(planCode, quantity));
+      const created = await createPaymentIntent(planCode, quantity);
+
+      // Two shapes come back and the provider decides which. A hosted
+      // checkout gives a URL to send the buyer to; a reference-matching or
+      // manual flow gives instructions and nowhere to go. Branching on the
+      // response rather than on a hardcoded provider name is what lets a
+      // real gateway be plugged in without touching this page.
+      if (created.redirect_url) {
+        window.location.href = created.redirect_url;
+        return;
+      }
+
+      setIntent(created);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Couldn't start that purchase.");
     } finally {
