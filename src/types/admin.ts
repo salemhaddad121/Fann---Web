@@ -26,15 +26,23 @@ export interface AdminUserDetail extends AdminUserRow {
   latest_payment?: AdminPayment | null;
 }
 
+export type IdDocumentKind = "id_document" | "selfie";
+
 export interface AdminIdDocument {
   id: string;
   user_id: string;
   status: string;
+  // Which artefact this is. The two are judged differently — an ID is
+  // checked for validity, a selfie for whether it is the same person — so
+  // the reviewer has to be told which they are looking at.
+  kind: IdDocumentKind;
   uploaded_at: string;
   email: string;
   role: string;
   account_code: string;
   display_name: string | null;
+  /** The account's own status, so a reviewer can see it is still pending. */
+  user_status?: string;
 }
 
 export interface AdminPayment {

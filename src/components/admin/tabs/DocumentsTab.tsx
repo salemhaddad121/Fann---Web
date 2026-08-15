@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { listPendingDocuments, reviewIdDocument } from "@/lib/admin-api";
 import { Pagination } from "@/components/admin/Pagination";
+import { ViewDocumentLink } from "@/components/admin/ViewDocumentLink";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import type { AdminIdDocument } from "@/types/admin";
@@ -79,12 +80,31 @@ export function DocumentsTab() {
                 {initialsFromName(name)}
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-semibold text-ink truncate">{name}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-semibold text-ink truncate">{name}</span>
+                  {/* The two artefacts are judged differently — an ID is
+                      checked for validity, a selfie for whether it is the
+                      same person — so the reviewer has to be told which
+                      one they are looking at. */}
+                  <span
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                      doc.kind === "selfie"
+                        ? "border-[#93C5FD] bg-[#DBEAFE] text-[#1E40AF]"
+                        : "border-hairline bg-surface text-muted"
+                    }`}
+                  >
+                    {doc.kind === "selfie" ? "Selfie" : "ID"}
+                  </span>
+                </div>
                 <div className="text-xs text-muted truncate">
                   {doc.role[0].toUpperCase() + doc.role.slice(1)} · {doc.account_code} · Uploaded{" "}
                   {new Date(doc.uploaded_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                 </div>
               </div>
+            </div>
+
+            <div className="mb-2 pl-[52px]">
+              <ViewDocumentLink documentId={doc.id} />
             </div>
 
             {rejectingId === doc.id ? (
