@@ -113,11 +113,11 @@ export function LandingPage() {
             </p>
             {/* Dual role CTAs, per the design's landing hero — each side gets
                 its own accent and lands on the register form pre-set to that
-                role. The label follows the design sheet literally: "Planner",
-                which is the database's term for the role. Deliberate: the
-                section further down this same page still reads "For Bookers",
-                so both labels for one role coexist here on purpose. Don't
-                "fix" the mismatch without asking. */}
+                role. "Planner" is the product's single word for this role: it
+                matches the database, the API, the register form and the
+                section further down this page, so there is no second label to
+                keep in sync. This page previously carried both "Planner" and
+                "Booker" for the one role; Salem settled it on 2026-08-15. */}
             {/* Search entry.
                 Above the join buttons deliberately. Browsing is now open to
                 anyone — profiles load without an account, just with contact
@@ -167,10 +167,10 @@ export function LandingPage() {
               <JoinNow role="artist" />
             </section>
 
-            {/* For Planners (Bookers) */}
+            {/* For Planners */}
             <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-teal">
-                For Bookers
+                For Planners
               </span>
               <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
                 Beyond your own network.

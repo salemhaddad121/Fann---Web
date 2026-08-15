@@ -84,7 +84,7 @@ function Content({ id }: { id: string }) {
   if (error || !planner) {
     return (
       <div className="px-4 py-10">
-        <p className="text-sm text-danger mb-3">{error ?? "Booker not found."}</p>
+        <p className="text-sm text-danger mb-3">{error ?? "Planner not found."}</p>
         <Link href="/search" className="text-sm font-semibold text-teal">
           ← Back to search
         </Link>

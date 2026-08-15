@@ -51,7 +51,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: "I am an artist — what does it cost me?",
     answer:
-      "Nothing. Artist profiles are free. Bookers subscribe in order to reach you.",
+      "Nothing. Artist profiles are free. Planners subscribe in order to reach you.",
   },
   {
     question: "How do I cancel a booking?",

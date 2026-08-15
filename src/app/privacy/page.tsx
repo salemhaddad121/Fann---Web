@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       </p>
       <p>
         What is collected today: the account details you provide (email,
-        phone, and your artist or booker profile), the media you upload,
+        phone, and your artist or planner profile), the media you upload,
         messages and bookings you exchange with other users, identity
         documents submitted for account review, and basic technical records
         — the IP address and browser used when you create an account or

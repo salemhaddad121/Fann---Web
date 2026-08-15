@@ -117,7 +117,7 @@ function EngagementGrid({ rows, label }: { rows: EngagementRow[]; label: string 
       {rows.map((r) => (
         <div key={r.role} className="border border-hairline rounded-xl p-3">
           <p className="text-[11px] text-faint capitalize mb-0.5">
-            {r.role === "planner" ? "Bookers" : "Artists"}
+            {r.role === "planner" ? "Planners" : "Artists"}
           </p>
           <p className="text-lg font-bold text-ink leading-tight">
             {formatDuration(r.avgMsPerActiveDay)}
