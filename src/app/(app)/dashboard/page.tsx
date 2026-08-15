@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { SubscriptionBanner } from "@/components/subscriptions/SubscriptionBanner";
+import { VerificationBanner } from "@/components/verification/VerificationBanner";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -33,6 +34,9 @@ export default function DashboardPage() {
 
       {/* Bookers only — artists don't subscribe, they're what's subscribed to. */}
       {user.role === "planner" && <SubscriptionBanner />}
+
+      {/* Artists only. Renders nothing once verification is complete. */}
+      {user.role === "artist" && <VerificationBanner />}
 
       <div className="bg-surface border border-hairline rounded-2xl p-5 mb-4">
         <p className="text-xs font-semibold text-ink mb-3">Your account</p>
