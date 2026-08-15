@@ -34,6 +34,10 @@ export async function createPaymentIntent(
   });
 }
 
+export async function getPayment(paymentId: string): Promise<MyPayment> {
+  return apiFetch<MyPayment>(`/payments/${paymentId}`);
+}
+
 export async function listMyPayments(): Promise<MyPayment[]> {
   return apiFetch<MyPayment[]>("/payments/me");
 }
