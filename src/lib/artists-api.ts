@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { getSessionId } from "@/lib/page-timing";
 import type {
   ArtistDetail,
   ArtistSearchResponse,
@@ -31,7 +32,16 @@ export async function searchArtists(params: SearchArtistsParams): Promise<Artist
   qs.set("limit", "20");
 
   // Public endpoint — no token needed, works for logged-out visitors too.
-  return apiFetch<ArtistSearchResponse>(`/artists?${qs.toString()}`, { auth: false });
+  //
+  // The session id travels as a header so it stays out of the URL: search
+  // URLs get copied and shared, and an id embedded in one would follow the
+  // link into someone else's browser and merge two people into one session.
+  // The server records the search itself; nothing here reports a count.
+  const sessionId = getSessionId();
+  return apiFetch<ArtistSearchResponse>(`/artists?${qs.toString()}`, {
+    auth: false,
+    headers: sessionId ? { "X-Session-Id": sessionId } : undefined,
+  });
 }
 
 export async function getArtist(id: string): Promise<ArtistDetail> {

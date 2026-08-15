@@ -22,9 +22,58 @@ export function normalisePath(pathname: string): string {
   );
 }
 
+const SESSION_STORAGE_KEY = "fann_session_id";
+
+/**
+ * A per-tab id used to group page views into a session.
+ *
+ * sessionStorage, not localStorage and not a cookie. It dies when the tab
+ * closes, is never sent automatically with requests, and is never joined to
+ * an account — which is what makes recording signed-out visitors defensible
+ * without a consent banner. Anything more persistent would be tracking.
+ *
+ * Returns null during server rendering, where there is no session to speak
+ * of yet; the events simply go up without one.
+ */
+export function getSessionId(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const existing = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (existing) return existing;
+
+    // randomUUID needs a secure context, which localhost counts as, but a
+    // LAN IP over plain http does not — so a dev on a phone would hit the
+    // fallback rather than an exception.
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : fallbackUuid();
+
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY, id);
+    return id;
+  } catch {
+    // Private browsing modes can throw on sessionStorage access. Telemetry
+    // is not worth breaking a page over.
+    return null;
+  }
+}
+
+function fallbackUuid(): string {
+  // v4 shape, from Math.random. Good enough to group one tab's page views;
+  // nothing here depends on it being unguessable.
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export function sendPageEvents(events: PageEvent[]): void {
   if (events.length === 0) return;
-  const body = JSON.stringify({ events });
+  const sessionId = getSessionId();
+  const payload = sessionId ? { events, sessionId } : { events };
+  const body = JSON.stringify(payload);
 
   // sendBeacon survives the page being torn down, which a fetch generally
   // does not — this is the only way the final view of a session gets
@@ -38,5 +87,10 @@ export function sendPageEvents(events: PageEvent[]): void {
 
   // Fallback for the non-unload case. Deliberately swallowed: telemetry
   // must never surface an error to someone using the app.
-  apiFetch("/analytics/page-views", { method: "POST", body: { events } }).catch(() => {});
+  //
+  // auth:false stops a 401 here from triggering a token refresh — a guest
+  // has nothing to refresh, and the endpoint accepts anonymous events.
+  apiFetch("/analytics/page-views", { method: "POST", body: payload, auth: false }).catch(
+    () => {},
+  );
 }

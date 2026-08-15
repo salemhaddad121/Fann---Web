@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { normalisePath } from "./page-timing";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { getSessionId, normalisePath } from "./page-timing";
 
 describe("normalisePath", () => {
   it("leaves static routes alone", () => {
@@ -41,5 +41,60 @@ describe("normalisePath", () => {
 
   it("ignores trailing slashes rather than emitting an empty segment", () => {
     expect(normalisePath("/search/")).toBe("/search");
+  });
+});
+
+describe("getSessionId", () => {
+  beforeEach(() => {
+    window.sessionStorage.clear();
+  });
+
+  it("returns the same id on repeated calls within a tab", () => {
+    // Page views only group into a session if the id is stable.
+    const first = getSessionId();
+    expect(first).toBeTruthy();
+    expect(getSessionId()).toBe(first);
+  });
+
+  it("stores the id in sessionStorage, never in localStorage or a cookie", () => {
+    // This is what makes recording signed-out visitors defensible without a
+    // consent banner: the id dies with the tab and is never sent on its own.
+    const id = getSessionId();
+
+    expect(window.sessionStorage.getItem("fann_session_id")).toBe(id);
+    expect(window.localStorage.getItem("fann_session_id")).toBeNull();
+    expect(document.cookie).not.toContain("fann_session_id");
+  });
+
+  it("issues a fresh id once the stored one is gone", () => {
+    const first = getSessionId();
+    window.sessionStorage.clear();
+
+    expect(getSessionId()).not.toBe(first);
+  });
+
+  it("produces a uuid the API will accept", () => {
+    // The endpoint validates with @IsUUID(), so a malformed id would get the
+    // whole batch rejected.
+    expect(getSessionId()).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+  });
+
+  it("returns null instead of throwing when storage is unavailable", () => {
+    // Private browsing can throw on sessionStorage access; telemetry must
+    // not take the page down with it.
+    //
+    // Spied on the prototype, not the instance: jsdom backs sessionStorage
+    // with a Proxy, so assigning `sessionStorage.getItem = fn` stores an
+    // item called "getItem" instead of replacing the method, and the test
+    // silently passes through to the real implementation.
+    const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+
+    expect(getSessionId()).toBeNull();
+
+    spy.mockRestore();
   });
 });

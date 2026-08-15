@@ -46,14 +46,18 @@ interface RequestOptions {
   body?: unknown;
   auth?: boolean; // whether a 401 here should trigger a refresh-and-retry (default: true)
   retryOn401?: boolean; // internal, prevents infinite retry loops
+  // Extra request headers. Used for X-Session-Id on search, which is a
+  // header rather than a query parameter so it cannot ride along when
+  // someone copies a search URL and sends it to a friend.
+  headers?: Record<string, string>;
 }
 
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, auth = true, retryOn401 = true } = options;
+  const { method = "GET", body, auth = true, retryOn401 = true, headers } = options;
 
   const res = await fetch(`${API_URL}${path}`, {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     credentials: "include", // send/receive the httpOnly accessToken/refreshToken cookies
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
