@@ -399,6 +399,16 @@ export default function AccountPage() {
           </>
         )}
 
+        {/* The signed-in route to /help. The guest route is the header
+            link in GuestChrome and the footer's Support column. */}
+        <Link
+          href="/help"
+          className="mb-6 flex items-center justify-between rounded-[10px] border border-hairline px-3.5 py-3 text-sm"
+        >
+          <span className="font-medium text-ink">Help &amp; support</span>
+          <i className="ti ti-chevron-right text-base text-faint" aria-hidden />
+        </Link>
+
         <p className="text-xs font-bold text-ink mb-2">Change email</p>
         <div className="mb-6">
           <ChangeEmailForm />
