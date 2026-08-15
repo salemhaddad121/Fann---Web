@@ -17,6 +17,17 @@ function isUnavailableToday(artist: ArtistDetail): boolean {
   return artist.availability.some((b) => b.start_date <= today && b.end_date >= today);
 }
 
+// Money, so cents show when there are any and stay hidden when there are
+// none: a 75.50 deposit rendered "$75.5" by plain toLocaleString, which
+// reads as a typo, while a round 100 does not want ".00" hung off it.
+function formatMoney(value: number): string {
+  const hasCents = Math.round(value * 100) % 100 !== 0;
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+}
+
 // joined_at is a TIMESTAMP, so it arrives as a full ISO string rather
 // than the bare "YYYY-MM-DD" the DATE columns give us.
 function formatJoined(iso: string): string {
@@ -188,6 +199,35 @@ export function ArtistProfileView({
           <AvailabilityCalendar blocks={artist.availability} onPickDate={onPickDate} />
         </div>
       </Section>
+
+      {/* Booking terms. Both fields are withheld by the server below the
+          paying tier, so their presence is itself the signal that this
+          viewer is allowed to see them — no tier check needed here. */}
+      {(artist.deposit_usd != null || artist.cancellation_policy) && (
+        <Section title="Booking terms">
+          <div className="space-y-3">
+            {artist.deposit_usd != null && (
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm text-faint">Deposit</span>
+                <span className="text-sm font-semibold text-ink">
+                  {/* 0 is a real answer, not a missing one. */}
+                  {Number(artist.deposit_usd) > 0
+                    ? `$${formatMoney(Number(artist.deposit_usd))}`
+                    : "None required"}
+                </span>
+              </div>
+            )}
+            {artist.cancellation_policy && (
+              <div>
+                <p className="text-sm text-faint">Cancellation policy</p>
+                <p className="mt-0.5 whitespace-pre-line text-sm text-ink-soft">
+                  {artist.cancellation_policy}
+                </p>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
       {artist.social_links && Object.keys(artist.social_links).length > 0 && (
         <Section title="Connect">
