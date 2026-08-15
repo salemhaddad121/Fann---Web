@@ -380,7 +380,12 @@ export default function AccountPage() {
             }
           />
           <Row label="Role" value={user.role[0].toUpperCase() + user.role.slice(1)} />
-          {user.accountCode && <Row label="Account code" value={String(user.accountCode)} />}
+          {/* Account code is deliberately not shown here. It is the payment
+              reconciliation key, not an identifier a user needs day to day,
+              and showing it invites people to quote it in the wrong places.
+              It appears where it is actually needed — on the payment
+              instructions screen — and the column stays, since matching an
+              incoming transfer depends on it. */}
           {memberSince && <Row label="Member since" value={memberSince} />}
         </div>
 

@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/shell/BottomNav";
 import { Sidebar } from "@/components/shell/Sidebar";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PageTiming } from "@/components/shell/PageTiming";
+import { FloatingLogout } from "@/components/shell/FloatingLogout";
 import { getNavItems } from "@/lib/nav-config";
 import { useNavBadges } from "@/lib/use-nav-badges";
 import type { SafeUser } from "@/types/auth";
@@ -66,6 +67,11 @@ export function AppShell({
             </div>
           )}
         </div>
+
+        {/* No sidebar means no logout, since that is where it lives. Admin
+            is the only role in that position, and had no way to sign out
+            at all — TopNav links to /account, which has none either. */}
+        {!hasNav && <FloatingLogout />}
       </div>
     </div>
   );

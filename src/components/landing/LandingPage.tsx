@@ -6,8 +6,9 @@ import { getCategories } from "@/lib/artists-api";
 import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
-import { FannLockup } from "@/components/brand/FannMark";
 import { SearchEntry } from "@/components/landing/SearchEntry";
+import { SiteFooter } from "@/components/landing/SiteFooter";
+import { StoreBadges } from "@/components/landing/StoreBadges";
 
 // Copy comes from Salem's "Landing Page.docx". Note the deliberate cross-sell:
 // the artist section lists the *event* types an artist could get booked for,
@@ -194,16 +195,15 @@ export function LandingPage() {
               <JoinNow role="planner" />
             </section>
           </div>
+
+          {/* Mid-page store badges, driven by the same config as the footer
+              so there is one place to fill in the URLs when the apps ship. */}
+          <section className="mt-5 rounded-[18px] border border-hairline bg-surface/85 p-6 lg:p-7">
+            <StoreBadges heading="Fann on mobile" />
+          </section>
         </main>
 
-        <footer className="border-t border-hairline bg-surface/85 px-5 py-6">
-          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <FannLockup size={22} textClassName="text-base" />
-            <span className="text-xs text-faint">
-              Connecting artists and event bookers across Lebanon.
-            </span>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </div>
   );

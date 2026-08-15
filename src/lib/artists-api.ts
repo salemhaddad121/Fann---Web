@@ -17,6 +17,10 @@ export interface UpdateArtistProfilePayload {
   basePriceUsd?: number;
   languages?: string[];
   socialLinks?: Record<string, string>;
+  // Omitted means "leave unchanged"; 0 is a real value meaning "no deposit
+  // required", so an empty field must send undefined rather than 0.
+  depositUsd?: number;
+  cancellationPolicy?: string;
 }
 
 export async function searchArtists(params: SearchArtistsParams): Promise<ArtistSearchResponse> {

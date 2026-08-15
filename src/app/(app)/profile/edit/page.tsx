@@ -11,6 +11,12 @@ import { Banner } from "@/components/auth/Banner";
 import { ChipInput } from "@/components/profile/ChipInput";
 import { BOOKER_TYPES } from "@/types/planners";
 import { MediaManager } from "@/components/profile/MediaManager";
+import { decimalOnly } from "@/lib/numeric-input";
+import {
+  REQUIRED_GALLERY_IMAGES,
+  REQUIRED_PROFILE_PICTURES,
+  mediaShortfall,
+} from "@/lib/profile-completeness";
 import { ComingSoon } from "@/components/shell/ComingSoon";
 import type { CategoryGroup, MediaItem } from "@/types/artists";
 
@@ -53,6 +59,8 @@ function ArtistEditForm({ accent }: { accent: string }) {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [price, setPrice] = useState("");
+  const [deposit, setDeposit] = useState("");
+  const [cancellationPolicy, setCancellationPolicy] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
@@ -68,6 +76,8 @@ function ArtistEditForm({ accent }: { accent: string }) {
         setCity(profile.location_city ?? "");
         setCountry(profile.location_country ?? "");
         setPrice(profile.base_price_usd != null ? String(profile.base_price_usd) : "");
+        setDeposit(profile.deposit_usd != null ? String(profile.deposit_usd) : "");
+        setCancellationPolicy(profile.cancellation_policy ?? "");
         setLanguages(profile.languages ?? []);
         setSocialLinks(profile.social_links ?? {});
         setCategoryIds(profile.categories.map((c) => c.id));
@@ -80,6 +90,10 @@ function ArtistEditForm({ accent }: { accent: string }) {
       cancelled = true;
     };
   }, []);
+
+  // Recomputed on every render so the notice tracks uploads and deletions
+  // immediately, rather than waiting for a save round trip.
+  const missingMedia = mediaShortfall(media);
 
   function toggleCategory(id: string) {
     setCategoryIds((prev) => {
@@ -100,6 +114,11 @@ function ArtistEditForm({ accent }: { accent: string }) {
         locationCity: city,
         locationCountry: country,
         basePriceUsd: price ? Number(price) : undefined,
+        // Empty means "not set" and 0 means "no deposit"; both are valid and
+        // the column allows either, so an empty box sends nothing rather
+        // than coercing to 0.
+        depositUsd: deposit === "" ? undefined : Number(deposit),
+        cancellationPolicy: cancellationPolicy.trim() || undefined,
         languages,
         socialLinks: Object.fromEntries(Object.entries(socialLinks).filter(([, v]) => v)),
         categoryIds: categoryIds.length ? categoryIds : undefined,
@@ -132,17 +151,62 @@ function ArtistEditForm({ accent }: { accent: string }) {
         <FormField label="City" value={city} onChange={(e) => setCity(e.target.value)} />
         <FormField label="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
       </div>
-      <FormField
-        label="Starting price (USD)"
-        type="number"
-        min={0}
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <FormField
+          label="Starting price (USD)"
+          type="number"
+          min={0}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        {/* Numeric so it can be compared and shown alongside the price.
+            decimalOnly strips anything that is not a number as it is typed —
+            "50%" or "half" would otherwise be silently dropped by Number()
+            on save and read as "no deposit". */}
+        <FormField
+          label="Deposit (USD)"
+          inputMode="decimal"
+          value={deposit}
+          onChange={(e) => setDeposit(decimalOnly(e.target.value))}
+          placeholder="0"
+        />
+      </div>
+      <p className="-mt-3 mb-4 text-xs text-faint">
+        Leave the deposit empty or 0 if you don&apos;t take one.
+      </p>
+
+      <label className="block mb-4">
+        <span className="block text-xs font-semibold text-ink mb-1.5">
+          Cancellation policy
+        </span>
+        <textarea
+          value={cancellationPolicy}
+          onChange={(e) => setCancellationPolicy(e.target.value)}
+          rows={3}
+          maxLength={1000}
+          placeholder="e.g. Full refund up to 14 days before the event, 50% after that."
+          className="w-full rounded-[10px] border border-hairline px-3.5 py-2.5 text-sm outline-none focus:border-clay"
+        />
+      </label>
 
       <ChipInput label="Languages" values={languages} onChange={setLanguages} placeholder="e.g. Arabic" />
 
       <MediaManager media={media} onChange={setMedia} />
+
+      {/* Artists only — the planner form below has no such requirement.
+          Stated before saving and updated as photos are added or removed,
+          so it is visible while it can still be acted on rather than
+          arriving as a rejection afterwards. */}
+      {missingMedia.length > 0 && (
+        <p className="-mt-2 mb-4 flex items-start gap-1.5 text-xs text-clay-deep">
+          <i className="ti ti-alert-circle mt-px text-sm" aria-hidden />
+          <span>
+            A profile needs {REQUIRED_PROFILE_PICTURES} profile picture and{" "}
+            {REQUIRED_GALLERY_IMAGES} gallery images before it&apos;s ready to show
+            bookers. Still missing: {missingMedia.join(" and ")}.
+          </span>
+        </p>
+      )}
 
       <div className="mb-4">
         <span className="block text-xs font-semibold text-ink mb-1.5">Categories (up to 4)</span>
