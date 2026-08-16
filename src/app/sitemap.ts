@@ -92,6 +92,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/for-artists/pricing-your-work`, changeFrequency: "monthly", priority: 0.6 },
 
     { url: `${SITE_URL}/help`, changeFrequency: "monthly", priority: 0.5 },
+    // Listed on purpose: "how do I delete my account" is a real search, and
+    // Play requires this URL to be publicly reachable. /offline is not
+    // listed — it is a service worker fallback shell, not a page.
+    { url: `${SITE_URL}/delete-account`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.3 },
   ];
