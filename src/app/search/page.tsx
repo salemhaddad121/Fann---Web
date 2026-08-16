@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { GuestChrome } from "@/components/shell/GuestChrome";
 import { searchArtists, getCategories } from "@/lib/artists-api";
@@ -11,28 +12,76 @@ import { SearchFilters } from "@/components/search/SearchFilters";
 import { PlannerFilters } from "@/components/search/PlannerFilters";
 import { ArtistCard } from "@/components/search/ArtistCard";
 import { PlannerCard } from "@/components/search/PlannerCard";
+import {
+  readArtistSearchUrl,
+  readPlannerSearchUrl,
+  buildArtistSearchQuery,
+  buildPlannerSearchQuery,
+  resolveCategorySelection,
+  selectionToUrlSlugs,
+  apiCategorySlugs,
+  validateEventTypes,
+} from "@/lib/search-url";
 import type { ArtistCard as ArtistCardType, CategoryGroup, SearchArtistsParams } from "@/types/artists";
 import type { PlannerCard as PlannerCardType, SearchPlannersParams } from "@/types/planners";
 
 type Filters = Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
 type PlannerFiltersState = Pick<SearchPlannersParams, "city" | "country" | "sort">;
 
+/*
+ * The query string is the state, not a copy of it.
+ *
+ * The shareable filters — text query, category or event-type selection, and
+ * page — are read from useSearchParams() on every render and written back
+ * with router.replace. Holding them in useState as well would mean two
+ * sources of truth to keep in step, which is the bug this page already had
+ * in its simplest form: it kept the state and ignored the URL entirely.
+ *
+ * replace rather than push, so the back button leaves /search rather than
+ * walking back through every filter change and every debounced keystroke.
+ *
+ * The finer filters (city, price, verified-only, sort) stay in local state
+ * deliberately — they are refinements made after arriving, not something
+ * anyone links to.
+ */
+
 function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
-  const [rawQuery, setRawQuery] = useState("");
-  const [query, setQuery] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [groups, setGroups] = useState<CategoryGroup[]>([]);
-  // One main category at a time; null is "All". Sub-categories are scoped
-  // to whichever main category is selected.
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [selectedSubs, setSelectedSubs] = useState<string[]>([]);
+  // The category filter cannot be read until the taxonomy has loaded: the URL
+  // carries a flat slug list, and turning that into "which group, which
+  // leaves" needs the group tree. Until then the request is held back rather
+  // than fired unfiltered and then fired again — that would flash the whole
+  // roster before narrowing to the one category the visitor asked for.
+  const [categoriesSettled, setCategoriesSettled] = useState(false);
+
+  const urlState = readArtistSearchUrl(searchParams);
+  const query = urlState.q;
+  const page = urlState.page;
+  const selection = resolveCategorySelection(groups, urlState.categories);
+  const selectedGroup = selection.group;
+  const selectedSubs = selection.subs;
+
+  // The text input is the one thing that cannot be driven by the URL: it has
+  // to echo each keystroke immediately, while the URL only catches up once
+  // typing pauses. Seeded from the URL on mount so a shared link shows its
+  // own query in the box.
+  const [rawQuery, setRawQuery] = useState(query);
   const [filters, setFilters] = useState<Filters>({});
-  const [page, setPage] = useState(1);
 
   const [results, setResults] = useState<ArtistCardType[]>([]);
   const [meta, setMeta] = useState({ total: 0, pages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  function replaceUrl(next: { q: string; categories: string[]; page: number }) {
+    const qs = buildArtistSearchQuery(next);
+    if (qs === searchParams.toString()) return;
+    router.replace(qs ? `/search?${qs}` : "/search", { scroll: false });
+  }
 
   // Only planners can save artists — fetch which ones are already saved
   // once, so each card can show a filled/outline heart without a
@@ -74,14 +123,24 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
     }
   }
 
-  // Debounce the free-text query so we're not firing a request per keystroke.
+  // Debounce the free-text query so we're not writing a URL per keystroke.
+  //
+  // The equality check is what makes this safe on mount: rawQuery starts as
+  // the URL's own query, so there is nothing to write and, crucially, no
+  // reset of page — which would otherwise throw away the page number of any
+  // link that carries one.
   useEffect(() => {
+    if (rawQuery.trim() === query) return;
     const t = setTimeout(() => {
-      setQuery(rawQuery);
-      setPage(1);
+      replaceUrl({
+        q: rawQuery,
+        categories: selectionToUrlSlugs(selection),
+        page: 1,
+      });
     }, 400);
     return () => clearTimeout(t);
-  }, [rawQuery]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawQuery, query]);
 
   // Load the category rows once. Kept grouped — the filter shows main
   // categories first and only reveals a group's sub-categories once it's
@@ -93,28 +152,29 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         if (!cancelled) setGroups(data);
       })
       .catch(() => {
-        // Non-critical — search still works without the chip row.
+        // Non-critical for the chip row. It does mean a category in the URL
+        // cannot be validated, so it is dropped and the search runs broader
+        // rather than not running at all.
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesSettled(true);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // What actually goes to the API. Sub-categories if any are ticked,
-  // otherwise every leaf in the selected group, otherwise nothing.
-  const activeGroup = groups.find((g) => g.slug === selectedGroup) ?? null;
-  const querySlugs = !activeGroup
-    ? []
-    : selectedSubs.length > 0
-      ? selectedSubs
-      : activeGroup.categories.map((c) => c.slug);
-  // Stable primitive for the effect dependency — the array identity
-  // changes every render, the joined string doesn't.
-  const categoryKey = querySlugs.join(",");
+  // What actually goes to the API: leaves only, so a group with nothing
+  // ticked expands to all of its leaves. Stable primitive for the effect
+  // dependency — the array identity changes every render, the joined string
+  // doesn't.
+  const categoryKey = apiCategorySlugs(groups, selection).join(",");
 
   // The actual search request.
   useEffect(() => {
+    if (!categoriesSettled) return;
     let cancelled = false;
+    let redirecting = false;
     (async () => {
       setLoading(true);
       setError(null);
@@ -126,6 +186,16 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
           page,
         });
         if (cancelled) return;
+        // A link can name a page that no longer has results — a bookmarked
+        // page 4 of a category that has since shrunk to one page. The pager
+        // only renders when there is more than one page, so landing past the
+        // end would strand the visitor on an empty screen with no way back.
+        // Clamp to the last real page and let the refetch follow.
+        if (res.meta.pages >= 1 && page > res.meta.pages) {
+          redirecting = true;
+          goToPage(res.meta.pages);
+          return;
+        }
         setResults(res.data);
         setMeta({ total: res.meta.total, pages: res.meta.pages });
       } catch (err) {
@@ -133,30 +203,53 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
           setError(err instanceof Error ? err.message : "Couldn't load results. Please try again.");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        // Stay in the loading state through a clamp, so the empty result set
+        // never flashes on the way to the corrected page.
+        if (!cancelled && !redirecting) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [query, categoryKey, filters, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, categoryKey, filters, page, categoriesSettled]);
 
   // Switching main category drops the previous group's sub-selection —
   // those slugs belong to a group that's no longer on screen.
   function selectGroup(slug: string | null) {
-    setSelectedGroup(slug);
-    setSelectedSubs([]);
-    setPage(1);
+    replaceUrl({ q: query, categories: slug ? [slug] : [], page: 1 });
   }
 
   function toggleSub(slug: string) {
-    setSelectedSubs((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
-    setPage(1);
+    const nextSubs = selectedSubs.includes(slug)
+      ? selectedSubs.filter((s) => s !== slug)
+      : [...selectedSubs, slug];
+    replaceUrl({
+      q: query,
+      // Unticking the last leaf falls back to the whole group rather than to
+      // no filter at all — the group is still open on screen.
+      categories: selectionToUrlSlugs({ group: selectedGroup, subs: nextSubs }),
+      page: 1,
+    });
+  }
+
+  // Unticks every leaf but keeps the group open, which is what the control
+  // sits under and what it did before.
+  function clearSubs() {
+    replaceUrl({
+      q: query,
+      categories: selectionToUrlSlugs({ group: selectedGroup, subs: [] }),
+      page: 1,
+    });
   }
 
   function updateFilters(next: Filters) {
     setFilters(next);
-    setPage(1);
+    goToPage(1);
+  }
+
+  function goToPage(next: number) {
+    replaceUrl({ q: query, categories: selectionToUrlSlugs(selection), page: next });
   }
 
   return (
@@ -169,6 +262,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         onSelectGroup={selectGroup}
         selectedSubs={selectedSubs}
         onToggleSub={toggleSub}
+        onClearSubs={clearSubs}
         filters={filters}
         onFiltersChange={updateFilters}
       />
@@ -203,7 +297,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         <div className="flex items-center justify-center gap-4 pb-8 text-sm">
           <button
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => goToPage(page - 1)}
             className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
           >
             Previous
@@ -213,7 +307,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
           </span>
           <button
             disabled={page >= meta.pages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => goToPage(page + 1)}
             className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
           >
             Next
@@ -225,26 +319,42 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
 }
 
 function PlannerDirectory() {
-  const [rawQuery, setRawQuery] = useState("");
-  const [query, setQuery] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [eventTypes, setEventTypes] = useState<string[]>([]);
-  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
+  // Same reasoning as the artist view: event types in the URL are validated
+  // against the list the API offers, so the request waits for that list.
+  const [eventTypesSettled, setEventTypesSettled] = useState(false);
+
+  const urlState = readPlannerSearchUrl(searchParams);
+  const query = urlState.q;
+  const page = urlState.page;
+  const selectedEventTypes = validateEventTypes(eventTypes, urlState.eventTypes);
+
+  const [rawQuery, setRawQuery] = useState(query);
   const [filters, setFilters] = useState<PlannerFiltersState>({});
-  const [page, setPage] = useState(1);
 
   const [results, setResults] = useState<PlannerCardType[]>([]);
   const [meta, setMeta] = useState({ total: 0, pages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Debounce the free-text query so we're not firing a request per keystroke.
+  function replaceUrl(next: { q: string; eventTypes: string[]; page: number }) {
+    const qs = buildPlannerSearchQuery(next);
+    if (qs === searchParams.toString()) return;
+    router.replace(qs ? `/search?${qs}` : "/search", { scroll: false });
+  }
+
+  // Debounce the free-text query so we're not writing a URL per keystroke.
   useEffect(() => {
+    if (rawQuery.trim() === query) return;
     const t = setTimeout(() => {
-      setQuery(rawQuery);
-      setPage(1);
+      replaceUrl({ q: rawQuery, eventTypes: selectedEventTypes, page: 1 });
     }, 400);
     return () => clearTimeout(t);
-  }, [rawQuery]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawQuery, query]);
 
   // Load the event-type chip row once.
   useEffect(() => {
@@ -255,26 +365,40 @@ function PlannerDirectory() {
       })
       .catch(() => {
         // Non-critical — search still works without the chip row.
+      })
+      .finally(() => {
+        if (!cancelled) setEventTypesSettled(true);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
+  // Stable primitive for the effect dependency, as above.
+  const eventTypeKey = selectedEventTypes.join(",");
+
   // The actual search request.
   useEffect(() => {
+    if (!eventTypesSettled) return;
     let cancelled = false;
+    let redirecting = false;
     (async () => {
       setLoading(true);
       setError(null);
       try {
         const res = await searchPlanners({
           q: query || undefined,
-          eventTypes: selectedEventTypes,
+          eventTypes: eventTypeKey ? eventTypeKey.split(",") : [],
           ...filters,
           page,
         });
         if (cancelled) return;
+        // Clamp a page past the end, as in the artist view above.
+        if (res.meta.pages >= 1 && page > res.meta.pages) {
+          redirecting = true;
+          goToPage(res.meta.pages);
+          return;
+        }
         setResults(res.data);
         setMeta({ total: res.meta.total, pages: res.meta.pages });
       } catch (err) {
@@ -282,22 +406,33 @@ function PlannerDirectory() {
           setError(err instanceof Error ? err.message : "Couldn't load results. Please try again.");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && !redirecting) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [query, selectedEventTypes, filters, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, eventTypeKey, filters, page, eventTypesSettled]);
 
   function toggleEventType(type: string) {
-    setSelectedEventTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
-    setPage(1);
+    const next = selectedEventTypes.includes(type)
+      ? selectedEventTypes.filter((t) => t !== type)
+      : [...selectedEventTypes, type];
+    replaceUrl({ q: query, eventTypes: next, page: 1 });
+  }
+
+  function clearEventTypes() {
+    replaceUrl({ q: query, eventTypes: [], page: 1 });
   }
 
   function updateFilters(next: PlannerFiltersState) {
     setFilters(next);
-    setPage(1);
+    goToPage(1);
+  }
+
+  function goToPage(next: number) {
+    replaceUrl({ q: query, eventTypes: selectedEventTypes, page: next });
   }
 
   return (
@@ -308,6 +443,7 @@ function PlannerDirectory() {
         eventTypes={eventTypes}
         selectedEventTypes={selectedEventTypes}
         onToggleEventType={toggleEventType}
+        onClearEventTypes={clearEventTypes}
         filters={filters}
         onFiltersChange={updateFilters}
       />
@@ -337,7 +473,7 @@ function PlannerDirectory() {
         <div className="flex items-center justify-center gap-4 pb-8 text-sm">
           <button
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => goToPage(page - 1)}
             className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
           >
             Previous
@@ -347,7 +483,7 @@ function PlannerDirectory() {
           </span>
           <button
             disabled={page >= meta.pages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => goToPage(page + 1)}
             className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
           >
             Next
@@ -358,7 +494,7 @@ function PlannerDirectory() {
   );
 }
 
-export default function SearchPage() {
+function SearchPageInner() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return null;
@@ -398,5 +534,16 @@ export default function SearchPage() {
     <AppShell user={user}>
       <ArtistDirectory isPlanner={user.role === "planner"} />
     </AppShell>
+  );
+}
+
+export default function SearchPage() {
+  // useSearchParams needs a Suspense boundary in the App Router, or the
+  // route opts the whole tree out of static rendering at build time. Same
+  // pattern as the admin panel.
+  return (
+    <Suspense fallback={null}>
+      <SearchPageInner />
+    </Suspense>
   );
 }

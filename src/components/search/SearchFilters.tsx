@@ -14,6 +14,10 @@ interface Props {
   // "everything in this group".
   selectedSubs: string[];
   onToggleSub: (slug: string) => void;
+  // Unticking every sub-category at once. A distinct callback rather than
+  // toggling each one in a loop: the selection lives in the URL, so every
+  // toggle reads the same value and only the last write would survive.
+  onClearSubs: () => void;
   filters: Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
   onFiltersChange: (next: Props["filters"]) => void;
 }
@@ -26,6 +30,7 @@ export function SearchFilters({
   onSelectGroup,
   selectedSubs,
   onToggleSub,
+  onClearSubs,
   filters,
   onFiltersChange,
 }: Props) {
@@ -113,7 +118,7 @@ export function SearchFilters({
             </span>
             {selectedSubs.length > 0 && (
               <button
-                onClick={() => selectedSubs.forEach(onToggleSub)}
+                onClick={onClearSubs}
                 className="text-[11px] font-semibold text-clay"
               >
                 Clear

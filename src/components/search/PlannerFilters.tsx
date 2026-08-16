@@ -9,6 +9,10 @@ interface Props {
   eventTypes: string[];
   selectedEventTypes: string[];
   onToggleEventType: (type: string) => void;
+  // Clearing the whole selection at once. A distinct callback rather than
+  // toggling each one in a loop: the selection lives in the URL, so every
+  // toggle reads the same value and only the last write would survive.
+  onClearEventTypes: () => void;
   filters: Pick<SearchPlannersParams, "city" | "country" | "sort">;
   onFiltersChange: (next: Props["filters"]) => void;
 }
@@ -19,6 +23,7 @@ export function PlannerFilters({
   eventTypes,
   selectedEventTypes,
   onToggleEventType,
+  onClearEventTypes,
   filters,
   onFiltersChange,
 }: Props) {
@@ -54,7 +59,7 @@ export function PlannerFilters({
       {eventTypes.length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
           <button
-            onClick={() => selectedEventTypes.forEach(onToggleEventType)}
+            onClick={onClearEventTypes}
             className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
               selectedEventTypes.length === 0
                 ? "bg-[#dfeceb] text-teal border-[#7fb3b0] font-semibold"
