@@ -106,7 +106,7 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-8">
+    <div className="max-w-lg lg:max-w-3xl mx-auto pb-8">
       <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-1">Bookings</h1>
 
       {/* Six equal columns rather than a scrolling row: every tab is

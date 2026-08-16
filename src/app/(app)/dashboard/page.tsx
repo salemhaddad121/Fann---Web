@@ -25,7 +25,12 @@ export default function DashboardPage() {
   if (!user || user.role === "admin") return null;
 
   return (
-    <div className="p-4">
+    // Capped, where it previously had no width constraint at all — on a
+    // desktop the cards stretched to whatever the monitor was, which is the
+    // one layout on the site that got measurably worse the wider the screen.
+    // Same ladder as the other working surfaces: phone width, opening out
+    // once the sidebar appears at lg.
+    <div className="mx-auto max-w-lg p-4 lg:max-w-3xl">
       <div className="mb-5">
         <h1 className="text-[17px] font-bold text-ink mb-0.5">
           {greeting()}, {user.email.split("@")[0]}

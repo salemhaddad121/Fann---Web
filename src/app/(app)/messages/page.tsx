@@ -81,7 +81,7 @@ export default function MessagesPage() {
   });
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg lg:max-w-3xl mx-auto">
       <div className="px-4 pt-4 pb-3 border-b border-hairline">
         <h1 className="text-lg font-bold text-ink mb-3">Messages</h1>
         <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">

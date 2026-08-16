@@ -94,7 +94,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-8">
+    <div className="max-w-lg lg:max-w-3xl mx-auto pb-8">
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h1 className="text-lg font-bold text-ink">Notifications</h1>
         {hasUnread && (
