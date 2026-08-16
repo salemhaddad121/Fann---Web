@@ -2,14 +2,46 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_TAGLINE,
+  SITE_DESCRIPTION,
+  DEFAULT_OG_IMAGE,
+} from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Fann — Book Lebanon's live talent",
-  description:
-    "Fann connects event planners with DJs, bands, photographers and MCs across Lebanon.",
-  applicationName: "Fann",
+  // Lets every page below give openGraph.images and canonical URLs as plain
+  // paths — Next resolves them against this. Without it, relative image
+  // paths are dropped from the tags entirely and share cards come out blank.
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    // Pages set a bare title; the brand is appended here so there is one
+    // place to change it and no page can forget it.
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, title: "Fann", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "default" },
+  // Every one of these links gets pasted into WhatsApp during the cold call
+  // sprint, and a link with no preview card reads as broken.
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    url: SITE_URL,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 512, height: 512, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

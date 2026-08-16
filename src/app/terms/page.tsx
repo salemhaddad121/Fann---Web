@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { LegalDocument } from "@/components/legal/LegalDocument";
 import { CONSENT_VERSIONS } from "@/lib/consent-versions";
 
+// Bare title — the root layout's template appends the brand.
 export const metadata: Metadata = {
-  title: "Terms of Service — Fann",
+  title: "Terms of Service",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
