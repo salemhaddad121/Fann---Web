@@ -46,8 +46,8 @@ export function LegalDocument({
 
       <p className="mt-10 text-xs text-faint">
         Questions about this document? Contact{" "}
-        <a href="mailto:hello@fann-leb.com" className="font-semibold text-clay-deep underline">
-          hello@fann-leb.com
+        <a href="mailto:admin@fann-leb.com" className="font-semibold text-clay-deep underline">
+          admin@fann-leb.com
         </a>
         .
       </p>
