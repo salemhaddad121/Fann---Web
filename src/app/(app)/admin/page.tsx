@@ -122,7 +122,7 @@ function AdminHome({ userName }: { userName: string }) {
   const totalUsers = sumBy(stats.users, () => true);
 
   return (
-    <div className="max-w-lg mx-auto pb-8">
+    <div className="max-w-lg lg:max-w-3xl mx-auto pb-8">
       <div className="p-4 border-b border-hairline">
         <h1 className="text-[17px] font-bold text-ink mb-0.5">
           {greeting()}, {userName}

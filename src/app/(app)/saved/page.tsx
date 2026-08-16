@@ -53,11 +53,14 @@ function SavedList() {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg lg:max-w-5xl mx-auto">
       <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-2">Saved</h1>
-      {/* Stops at 3 columns, unlike /search: this page keeps its max-w-lg
-          (512px) cap, where a 4th or 5th column would leave ~90px cards. */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 px-4 pb-6">
+      {/* Columns follow the container rather than being capped at 3.
+          The old note was right that a 4th column inside a 512px cap left
+          ~90px cards — the fix is that the cap now opens out at lg, so the
+          extra columns arrive with the width to carry them. Below lg this
+          is unchanged, and the ladder now matches /search. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
         {artists.map((artist) => (
           <ArtistCard key={artist.id} artist={artist} isSaved onToggleSave={() => handleRemove(artist.id)} />
         ))}
