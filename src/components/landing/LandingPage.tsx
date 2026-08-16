@@ -6,7 +6,6 @@ import { getCategories } from "@/lib/artists-api";
 import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
-import { SearchEntry } from "@/components/landing/SearchEntry";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { StoreBadges } from "@/components/landing/StoreBadges";
 
@@ -123,8 +122,24 @@ export function LandingPage() {
                 anyone — profiles load without an account, just with contact
                 details withheld — so the page's first ask should be "look
                 around", not "sign up". Asking someone to register before
-                they have seen a single artist is the harder sell. */}
-            <SearchEntry />
+                they have seen a single artist is the harder sell.
+
+                A button, not a search field. The field here could only hand a
+                query string to /search, and typing a genre into a box on the
+                landing page is a worse first move than seeing the full roster
+                and filtering it — /search already owns the categories, the
+                filters and the pagination. The caption stays: it is the only
+                copy on the page telling a stranger they can look without an
+                account, which is the entire point of the guest tier. */}
+            <div className="mt-6 text-center">
+              <Link
+                href="/search"
+                className="inline-block rounded-[10px] bg-ink px-5 py-3 text-sm font-semibold text-white"
+              >
+                Browse Artists Now
+              </Link>
+              <p className="mt-2 text-xs text-faint">No account needed to browse.</p>
+            </div>
 
             <div className="flex flex-wrap gap-3 mt-6">
               <Link
