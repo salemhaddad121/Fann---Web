@@ -18,10 +18,31 @@
 // so changing the value here is what actually evicts the old copies.
 //
 // v2 (2026-08-15): app icons and favicon regenerated from the Maqam mark.
-const CACHE = "fann-static-v2";
+// v3 (2026-08-16): offline fallback added — returning visitors need the new
+//   worker for it to exist at all, and the shell has to be precached.
+const CACHE = "fann-static-v3";
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+// Served in place of the browser's error page when a navigation cannot
+// reach the network. Precached at install, because by the time it is needed
+// there is no connection to fetch it with.
+//
+// This is a Play requirement as much as a nicety: a TWA showing Chrome's
+// offline dinosaur fails the store's quality criteria.
+const OFFLINE_URL = "/offline";
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      // reload bypasses the HTTP cache, so a stale copy of the shell is not
+      // what gets stored for the life of this worker version.
+      .then((cache) => cache.add(new Request(OFFLINE_URL, { cache: "reload" })))
+      // Never block activation on it. If the shell cannot be fetched at
+      // install time, the worker should still install and keep serving
+      // static assets — a missing fallback is better than no worker.
+      .catch(() => undefined)
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -43,6 +64,28 @@ self.addEventListener("fetch", (event) => {
   // anyway, but guard the path too — belt and suspenders.)
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+
+  // Navigations: always the network first, falling back to the offline
+  // shell only when the request actually fails.
+  //
+  // Note this is network-FIRST, not cache-first like the static handler
+  // below, and nothing but the shell is ever stored. Caching HTML would
+  // risk serving a logged-out shell to a signed-in user, or one account's
+  // page to the next person on the device — the reason the original worker
+  // refused to touch documents at all. Serving a fixed, contentless
+  // fallback page keeps that guarantee intact.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.match(OFFLINE_URL).then(
+          // If the shell somehow is not cached, let the browser show its own
+          // error rather than resolving to undefined.
+          (cached) => cached ?? Response.error(),
+        ),
+      ),
+    );
+    return;
+  }
 
   // Static assets only — never HTML documents, so we can't stale-serve an
   // auth-gated page. Next.js build output lives under /_next/static/.

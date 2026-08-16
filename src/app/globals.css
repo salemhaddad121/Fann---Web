@@ -120,3 +120,25 @@ body {
   border-color: var(--clay-deep);
   background: var(--surface);
 }
+
+/* ----------------------------------------------------------------
+   Play app (TWA) context.
+
+   The Android app is this website in a Chrome Custom Tab, so there is no
+   separate build to strip pricing out of. TwaContextProbe puts .is-twa on
+   <html> when the app launched the page, and this hides every route into
+   the purchase flow.
+
+   Targeting the href rather than tagging each link is deliberate: pricing
+   is linked from the footer, the guest header, the locked-field unlock
+   prompts, the subscription banner and the account page, and a rule that
+   only covers the ones known today would quietly stop covering a new one.
+   Play's billing policy is not a good place to discover a missed link.
+
+   /plans itself does not rely on this — it reads the cookie server-side and
+   renders an explainer instead, so the prices are never in the HTML.
+   ---------------------------------------------------------------- */
+html.is-twa a[href="/plans"],
+html.is-twa a[href^="/plans?"] {
+  display: none !important;
+}

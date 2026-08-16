@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { TwaContextProbe } from "@/components/pwa/TwaContextProbe";
 import {
   SITE_URL,
   SITE_NAME,
@@ -73,6 +74,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-surface">
         <ServiceWorkerRegister />
+        <TwaContextProbe />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
