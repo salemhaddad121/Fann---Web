@@ -26,8 +26,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     // worse than no link at all.
     heading: "Company",
     links: [
-      { label: "About Fann", href: null },
-      { label: "How it works", href: null },
+      { label: "About Fann", href: "/about" },
+      { label: "How it works", href: "/how-it-works" },
     ],
   },
   {
@@ -35,17 +35,24 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     links: [
       { label: "Help centre", href: "/help" },
       { label: "Contact us", href: "/help" },
-      { label: "Trust & safety", href: null },
-      { label: "Report a problem", href: null },
+      { label: "Trust & safety", href: "/trust-and-safety" },
+      // Points at /help rather than a page of its own: reporting a problem
+      // and contacting support are the same form and the same inbox, and a
+      // separate page would only be a second door to it.
+      { label: "Report a problem", href: "/help" },
     ],
   },
   {
+    // /for-artists/*, not /artists/*. A literal segment does beat a dynamic
+    // one in Next's matcher, so /artists/resources would resolve — but it
+    // would sit one new artist slug away from a collision, and /artists/[id]
+    // should keep meaning "an artist profile".
     heading: "Talent",
     links: [
       { label: "Join as an artist", href: "/auth/register?role=artist" },
-      { label: "Artist resources", href: null },
-      { label: "Getting booked", href: null },
-      { label: "Pricing your work", href: null },
+      { label: "Artist resources", href: "/for-artists/resources" },
+      { label: "Getting booked", href: "/for-artists/getting-booked" },
+      { label: "Pricing your work", href: "/for-artists/pricing-your-work" },
     ],
   },
   {
@@ -54,7 +61,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Join as a planner", href: "/auth/register?role=planner" },
       { label: "Browse artists", href: "/search" },
       { label: "Plans & pricing", href: "/plans" },
-      { label: "Planning a wedding", href: null },
+      { label: "Planning a wedding", href: "/planning-a-wedding" },
     ],
   },
   {
@@ -72,10 +79,10 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: "Entertainment",
     links: [
-      { label: "Weddings", href: null },
-      { label: "Corporate events", href: null },
-      { label: "Private parties", href: null },
-      { label: "Venues", href: null },
+      { label: "Weddings", href: "/weddings" },
+      { label: "Corporate events", href: "/corporate-events" },
+      { label: "Private parties", href: "/private-parties" },
+      { label: "Venues", href: "/venues" },
     ],
   },
 ];

@@ -72,7 +72,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/search`, changeFrequency: "daily", priority: 0.9 },
+
+    // The event-type pages. These target the queries that actually convert
+    // — "wedding band Beirut", "corporate event entertainment Lebanon" — so
+    // they rank above the rest of the marketing surface here.
+    { url: `${SITE_URL}/weddings`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/corporate-events`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/private-parties`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/venues`, changeFrequency: "weekly", priority: 0.9 },
+
+    { url: `${SITE_URL}/planning-a-wedding`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/plans`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/how-it-works`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/trust-and-safety`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.6 },
+
+    { url: `${SITE_URL}/for-artists/resources`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/for-artists/getting-booked`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/for-artists/pricing-your-work`, changeFrequency: "monthly", priority: 0.6 },
+
     { url: `${SITE_URL}/help`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.3 },

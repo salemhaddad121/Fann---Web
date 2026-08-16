@@ -36,12 +36,13 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [{ url: DEFAULT_OG_IMAGE, width: 512, height: 512, alt: SITE_NAME }],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_IMAGE],
-  },
+  // Card type only, deliberately. Next merges metadata per key, not per
+  // field: a page that sets openGraph but not twitter keeps the root's
+  // twitter block wholesale, so a title here would put "Fann — Book
+  // Lebanon's live talent" on the Twitter card of every page on the site.
+  // With no title, description or image, consumers fall back to the
+  // OpenGraph tags, which every page does set correctly.
+  twitter: { card: "summary_large_image" },
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
