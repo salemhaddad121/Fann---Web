@@ -5,15 +5,25 @@
  * relative path will not do — a crawler reading /sitemap.xml has to be told
  * the full URL of every page in it.
  *
- * NEXT_PUBLIC_SITE_URL overrides the default per environment. The default is
- * the decided primary domain rather than the current one: fann-leb.com is
- * where everything is moving, and pointing new SEO surface at a domain being
- * retired would be self-defeating. Set the variable on any deployment that
- * is not the production site — a preview that advertises the production
- * origin will have its pages canonicalised onto pages it is not serving.
+ * NEXT_PUBLIC_SITE_URL overrides this per environment and is the mechanism
+ * that should actually be used — set it on every deployment, including
+ * previews, or a preview will canonicalise its pages onto the production
+ * ones it is not serving.
+ *
+ * ⚠️ The default must be a domain that RESOLVES, which is why it is the
+ * current live origin and not fann-leb.com. This briefly defaulted to
+ * fann-leb.com on the reasoning that it is the decided primary domain — but
+ * it is not live yet, so production shipped canonicals, a robots.txt Host
+ * and a sitemap all naming a host that 404s. Pointing a canonical at a dead
+ * URL is worse than pointing it at an old one: an old domain 301s to the
+ * new one and the signal survives, where a 404 is just a crawl error on
+ * every page at once.
+ *
+ * At the Wave E cutover this becomes fann-leb.com — but by then the right
+ * fix is to set NEXT_PUBLIC_SITE_URL and stop relying on the default.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://fann-leb.com"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.fann.guru"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "Fann";
