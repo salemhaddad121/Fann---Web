@@ -55,6 +55,49 @@ export function LockedField({
 }
 
 /**
+ * The blurred stand-in for an artist's name.
+ *
+ * Same principle as LockedField and worth repeating, because a blurred name
+ * is the one place where doing it the wrong way looks identical: the server
+ * sends no name below the paying tier, so this is a smudge over an EMPTY
+ * BOX. It is not the real name behind a CSS filter — that version can be
+ * read straight out of the network tab, and the blur would be theatre.
+ *
+ * Consequently the bar is the same on every profile. It carries no width or
+ * shape derived from the hidden name, because deriving anything from a value
+ * is how a value leaks: a bar sized to the real name would let someone read
+ * its length off the page and narrow their guesses.
+ *
+ * `onDark` is for the gradient banner over a search card's photo, where the
+ * surrounding text is white.
+ */
+export function LockedName({
+  onDark = false,
+  width = "7rem",
+}: {
+  onDark?: boolean;
+  width?: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        aria-hidden
+        className={`inline-block rounded blur-[3px] ${
+          onDark ? "bg-white/55" : "bg-hairline"
+        }`}
+        style={{ width, height: "0.85em" }}
+      />
+      <i
+        className={`ti ti-lock shrink-0 text-[0.75em] ${onDark ? "text-white/80" : "text-faint"}`}
+        aria-hidden
+      />
+      {/* The only thing a screen reader gets — the smudge announces nothing. */}
+      <span className="sr-only">Artist name hidden. Subscribe to see it.</span>
+    </span>
+  );
+}
+
+/**
  * The persistent prompt on a locked profile.
  *
  * Sticky because the reason someone is on this page is to make contact, and

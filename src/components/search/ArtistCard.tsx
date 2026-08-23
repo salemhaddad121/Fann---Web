@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { badgeColor } from "@/lib/badge-colors";
+import { LockedName } from "@/components/profile/LockedField";
 import type { ArtistCard as ArtistCardType } from "@/types/artists";
 
 function formatPrice(value: ArtistCardType["base_price_usd"]) {
@@ -46,7 +47,9 @@ export function ArtistCard({
           // eslint-disable-next-line @next/next/no-img-element -- external CDN URLs, no next.config domain list set up yet
           <img
             src={artist.thumbnail_url}
-            alt={artist.display_name}
+            // Falls back to the category rather than to nothing: below the
+            // paying tier there is no name to describe the photo with.
+            alt={artist.display_name ?? `${primaryCategory?.name ?? "Artist"} on Fann`}
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
@@ -79,7 +82,13 @@ export function ArtistCard({
           style={{ backgroundImage: NAME_BANNER_GRADIENT }}
         >
           <div className="flex items-center gap-1">
-            <span className="font-bold text-[15px] leading-[1.15] truncate">{artist.display_name}</span>
+            {artist.display_name ? (
+              <span className="font-bold text-[15px] leading-[1.15] truncate">
+                {artist.display_name}
+              </span>
+            ) : (
+              <LockedName onDark />
+            )}
             {artist.is_verified && (
               <>
                 <i className="ti ti-rosette-discount-check text-sm shrink-0" aria-hidden="true" />
