@@ -21,8 +21,8 @@ const SESSION_COOKIE = "accessToken";
 
 async function loadArtist(id: string): Promise<ArtistDetail | null> {
   // No credentials are forwarded, so this is the guest-tier view of the
-  // record — masked name, banded price, no contact details. That is exactly
-  // what should be public, and exactly what belongs in metadata.
+  // record — no name at all, banded price, no contact details. That is
+  // exactly what should be public, and exactly what belongs in metadata.
   return getArtist(id).catch(() => null);
 }
 
@@ -72,7 +72,8 @@ export default async function ArtistDetailPage({
   // Only anonymous visitors get a server-rendered profile. A signed-in one
   // would be served the anonymous view first and then have it corrected on
   // the client, which means a subscriber watching the name they paid for
-  // resolve out of a mask. Fetching per-viewer on the server instead would
+  // appear out of a blurred placeholder. Fetching per-viewer on the server
+  // instead would
   // mean forwarding the session cookie across subdomains, and whether that
   // cookie is even scoped to work across them is an open question for the
   // domain migration — so this deliberately waits for that to be settled.

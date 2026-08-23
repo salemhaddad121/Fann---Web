@@ -8,7 +8,7 @@ import { MediaLightbox } from "@/components/profile/MediaLightbox";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
 import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar";
-import { LockedField } from "@/components/profile/LockedField";
+import { LockedField, LockedName } from "@/components/profile/LockedField";
 import type { ArtistDetail } from "@/types/artists";
 import type { UserStatus } from "@/types/admin";
 
@@ -90,7 +90,13 @@ export function ArtistProfileView({
         <div className="flex items-start justify-between mb-2">
           <div>
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-xl font-bold text-ink">{artist.display_name}</span>
+              {artist.display_name ? (
+                <span className="text-xl font-bold text-ink">{artist.display_name}</span>
+              ) : (
+                <span className="text-xl font-bold text-ink">
+                  <LockedName width="9rem" />
+                </span>
+              )}
               {artist.is_verified && <i className="ti ti-rosette-discount-check text-clay text-lg" />}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted flex-wrap">
@@ -158,8 +164,17 @@ export function ArtistProfileView({
         </Section>
       )}
 
+      {/* "About Karim" for a subscriber, "About this artist" otherwise —
+          the first word of the name is no longer available to build a
+          friendlier heading out of, and inventing one would be a leak. */}
       {artist.bio && (
-        <Section title={`About ${artist.display_name.split(" ")[0]}`}>
+        <Section
+          title={
+            artist.display_name
+              ? `About ${artist.display_name.split(" ")[0]}`
+              : "About this artist"
+          }
+        >
           <p className="text-[13px] text-muted leading-relaxed">{artist.bio}</p>
         </Section>
       )}

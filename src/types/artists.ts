@@ -25,14 +25,18 @@ export type ViewerTier = "guest" | "registered" | "subscribed";
 export interface ArtistCard {
   id: string;
   user_id: string;
-  /** Masked to "Karim N." unless viewer_tier is "subscribed". */
-  display_name: string;
   bio: string | null;
   location_city: string | null;
   location_country: string | null;
   // The paywalled fields are OMITTED by the server below the paying tier,
   // not nulled — so these are optional, and their absence is the signal to
   // render a locked placeholder. Never assume they exist.
+  //
+  // display_name joined them on 2026-08-23. It used to arrive shortened to
+  // "Karim N."; a non-member now gets no name at all, so this is undefined
+  // unless viewer_tier is "subscribed". Render LockedName, never a blur over
+  // a real value — there is no real value here to blur.
+  display_name?: string;
   base_price_usd?: string | number | null;
   social_links?: Record<string, string> | null;
   // Booking terms are NOT paywalled — every tier receives them. Optional

@@ -130,7 +130,12 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
     const booking = await createBooking({ artistId: artist!.user_id, ...payload });
     setPickedDate(null);
     setBookingNotice(
-      `Request sent for ${formatDateLong(booking.event_date)} — waiting on ${artist!.display_name} to confirm.`,
+      // "the artist" rather than a name: booking is a subscriber action, so
+      // the name is normally here — but the fallback keeps the sentence
+      // readable instead of printing "waiting on undefined".
+      `Request sent for ${formatDateLong(booking.event_date)} — waiting on ${
+        artist!.display_name ?? "the artist"
+      } to confirm.`,
     );
     // Pull the profile again so the new pending booking is reflected in
     // the availability the calendar draws from.
