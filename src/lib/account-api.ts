@@ -29,3 +29,23 @@ export async function deleteAccount(password: string): Promise<{ message: string
     body: { password },
   });
 }
+
+// ----------------------------------------------------------------
+// Communication preferences
+//
+// Marketing only. The API refuses to change terms or privacy through this
+// endpoint — those are conditions of use, and withdrawing them is
+// deleting the account, which is its own flow.
+// ----------------------------------------------------------------
+export async function getMarketingConsent(): Promise<{ granted: boolean }> {
+  return apiFetch<{ granted: boolean }>("/consent/marketing");
+}
+
+export async function setMarketingConsent(
+  granted: boolean,
+): Promise<{ granted: boolean }> {
+  return apiFetch<{ granted: boolean }>("/consent/marketing", {
+    method: "PUT",
+    body: { granted },
+  });
+}

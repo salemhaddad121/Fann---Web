@@ -34,6 +34,10 @@ export interface RegisterPayload {
   // the rule itself.
   acceptedTerms: boolean;
   acceptedPrivacy: boolean;
+  // Optional in both senses: the field may be omitted, and sending false is
+  // a valid signup. §24.2 requires marketing consent to be separable from
+  // accepting the Terms, so refusing it must never block an account.
+  acceptedMarketing?: boolean;
 }
 
 export interface RegisterResponse {

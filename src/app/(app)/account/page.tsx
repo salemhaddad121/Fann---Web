@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { changePassword, changeEmail, deleteAccount } from "@/lib/account-api";
+import {
+  changePassword,
+  changeEmail,
+  deleteAccount,
+  getMarketingConsent,
+  setMarketingConsent,
+} from "@/lib/account-api";
 import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
@@ -259,6 +265,86 @@ function ChangeNumberForm() {
   );
 }
 
+/**
+ * The withdrawal half of T&C §24.2: a marketing consent that cannot be
+ * taken back is not a valid consent.
+ *
+ * Renders nothing until the current value is known. A checkbox that
+ * defaults to unchecked and then corrects itself a moment later would show
+ * some users the opposite of their real setting, and this is a control
+ * where the wrong state read for even a moment is worth avoiding — it is
+ * the one people open the page specifically to check.
+ *
+ * The write is optimistic and reverts on failure. Each PUT appends a row
+ * server-side rather than updating one, so toggling twice is not a
+ * correction of a mistake: it is two recorded decisions, which is what the
+ * audit trail is for.
+ */
+function CommunicationPreferences() {
+  const [granted, setGranted] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMarketingConsent()
+      .then(({ granted }) => {
+        if (!cancelled) setGranted(granted);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Couldn't load your preference.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleToggle(next: boolean) {
+    const previous = granted;
+    setGranted(next);
+    setError(null);
+    setSaving(true);
+    try {
+      await setMarketingConsent(next);
+    } catch {
+      setGranted(previous);
+      setError("Couldn't save that. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (granted === null) {
+    return (
+      <p className="rounded-[10px] border border-hairline px-3.5 py-3 text-xs text-faint">
+        {error ?? "Loading…"}
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-[10px] border border-hairline px-3.5 py-3">
+      <label className="flex items-start gap-2.5 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={granted}
+          disabled={saving}
+          onChange={(e) => handleToggle(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-clay-deep"
+        />
+        <span className="text-xs leading-relaxed text-muted">
+          <span className="font-medium text-ink">Marketing emails</span>
+          <br />
+          Occasional emails about new artists and Fann updates. Turning this
+          off does not affect emails about your account, bookings or
+          payments.
+        </span>
+      </label>
+      {error && <p className="mt-2 ml-6 text-xs text-danger">{error}</p>}
+    </div>
+  );
+}
+
 function DeleteAccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");
@@ -408,6 +494,11 @@ export default function AccountPage() {
           <span className="font-medium text-ink">Help &amp; support</span>
           <i className="ti ti-chevron-right text-base text-faint" aria-hidden />
         </Link>
+
+        <p className="text-xs font-bold text-ink mb-2">Communication</p>
+        <div className="mb-6">
+          <CommunicationPreferences />
+        </div>
 
         <p className="text-xs font-bold text-ink mb-2">Change email</p>
         <div className="mb-6">
