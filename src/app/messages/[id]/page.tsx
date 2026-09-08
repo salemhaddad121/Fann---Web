@@ -8,6 +8,7 @@ import { getConversation, getMessages, sendMessage, markRead } from "@/lib/messa
 import type { Conversation } from "@/lib/messaging-api";
 import { getUserPublicInfo, type PublicUserInfo } from "@/lib/users-api";
 import { createBooking } from "@/lib/bookings-api";
+import { ApiError } from "@/lib/api";
 import { initialsFromName } from "@/lib/format";
 import { badgeColor } from "@/lib/badge-colors";
 import { MessageList } from "@/components/messaging/MessageList";
@@ -31,6 +32,9 @@ export default function ThreadPage() {
   const [sending, setSending] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
   const [proposeNotice, setProposeNotice] = useState<string | null>(null);
+  // Set when an action comes back 402. The thread has no viewer_tier to
+  // read from, so a lapsed plan is only discoverable by trying something.
+  const [needsPlan, setNeedsPlan] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,8 +101,12 @@ export default function ThreadPage() {
     try {
       const msg = await sendMessage(conversationId, body);
       setMessages((prev) => (prev ? [...prev, msg] : [msg]));
-    } catch {
+    } catch (err) {
       setDraft(body); // put it back so nothing typed is lost
+      // A lapsed plan is not a failed send and must not be swallowed as
+      // one: the composer looks untouched afterwards, so with nothing on
+      // screen the message merely never appears and no reason is given.
+      if (err instanceof ApiError && err.status === 402) setNeedsPlan(true);
     } finally {
       setSending(false);
     }
@@ -113,7 +121,19 @@ export default function ThreadPage() {
     notes?: string;
   }) {
     if (!conversation) return;
-    await createBooking({ artistId: conversation.artist_id, conversationId, ...payload });
+    try {
+      await createBooking({ artistId: conversation.artist_id, conversationId, ...payload });
+    } catch (err) {
+      // Reported here rather than in the form's own banner: "your plan has
+      // ended" belongs on the thread, where the way out stays on screen
+      // after the sheet closes instead of vanishing with it.
+      if (err instanceof ApiError && err.status === 402) {
+        setProposeOpen(false);
+        setNeedsPlan(true);
+        return;
+      }
+      throw err; // anything else is the form's to report
+    }
     setProposeOpen(false);
     setProposeNotice("Booking request sent.");
     setTimeout(() => setProposeNotice(null), 3000);
@@ -215,6 +235,21 @@ export default function ThreadPage() {
             <MessageList messages={messages} currentUserId={user.id} accent={accent} accentText={accentText} />
           )}
         </div>
+
+        {needsPlan && (
+          <div className="mx-3.5 mb-2 flex items-center justify-between gap-3 rounded-[10px] border border-hairline bg-sand px-3.5 py-2.5 shrink-0">
+            <p className="text-xs leading-snug text-muted">
+              Your plan has ended. Renew it to keep messaging and proposing
+              bookings.
+            </p>
+            <Link
+              href="/plans"
+              className="shrink-0 rounded-lg bg-clay-deep px-3 py-1.5 text-xs font-semibold text-white"
+            >
+              See plans
+            </Link>
+          </div>
+        )}
 
         <div className="flex items-end gap-2 px-3.5 py-2.5 border-t border-hairline shrink-0">
           <textarea

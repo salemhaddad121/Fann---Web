@@ -188,8 +188,14 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
         artist={artist}
         isOwnProfile={isOwnProfile}
         accountStatus={isOwnProfile ? user?.status : undefined}
+        // Subscribed planners only, matching the Message button below.
+        // POST /bookings sits behind Paid Access, so handing a free
+        // planner the calendar would open a form that can only 402 on
+        // submit. UnlockCta at the foot of the page is their way in.
         onPickDate={
-          user?.role === "planner" && !isOwnProfile
+          user?.role === "planner" &&
+          !isOwnProfile &&
+          artist.viewer_tier === "subscribed"
             ? (dateKey) => {
                 setBookingNotice(null);
                 setPickedDate(dateKey);
