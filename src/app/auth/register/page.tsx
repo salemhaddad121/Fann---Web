@@ -29,6 +29,10 @@ function RegisterForm() {
   // independent too.
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  // Optional, and unchecked like the others. §24.2 requires marketing
+  // consent to be a positive act and to be separable from the Terms, so
+  // this one never blocks the form — there is no validation for it below.
+  const [acceptedMarketing, setAcceptedMarketing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -61,6 +65,7 @@ function RegisterForm() {
         phone: phone || undefined,
         acceptedTerms,
         acceptedPrivacy,
+        acceptedMarketing,
       });
       setSubmitted(true);
     } catch (err) {
@@ -139,9 +144,9 @@ function RegisterForm() {
         />
         {!fieldErrors.password && <p className="-mt-3 mb-4 text-xs text-faint">{PASSWORD_HINT}</p>}
 
-        {/* Two checkboxes rather than one combined line: the documents are
-            versioned separately server-side, so a user has to be able to
-            have accepted one version of each independently. Links open in a
+        {/* Separate checkboxes rather than one combined line: the two
+            documents are versioned independently server-side, so a user has
+            to be able to have accepted one version of each. Links open in a
             new tab so reading them doesn't discard a part-filled form. */}
         <div className="mb-4 flex flex-col gap-2.5">
           <ConsentCheckbox
@@ -149,17 +154,33 @@ function RegisterForm() {
             checked={acceptedTerms}
             onChange={setAcceptedTerms}
             error={fieldErrors.acceptedTerms}
-            href="/terms"
-            label="Terms of Service"
-          />
+          >
+            I agree to the <ConsentLink href="/terms">Terms of Service</ConsentLink>
+          </ConsentCheckbox>
           <ConsentCheckbox
             name="acceptedPrivacy"
             checked={acceptedPrivacy}
             onChange={setAcceptedPrivacy}
             error={fieldErrors.acceptedPrivacy}
-            href="/privacy"
-            label="Privacy Policy"
-          />
+          >
+            I agree to the <ConsentLink href="/privacy">Privacy Policy</ConsentLink>
+          </ConsentCheckbox>
+
+          {/* Visually separated from the two above so it does not read as a
+              third thing you have to accept. Wording is deliberately plain
+              about what it covers and how to stop — §24.2 consent has to be
+              specific, and CONSENT_VERSIONS.marketing versions this exact
+              sentence. Change it and bump that date on both sides. */}
+          <ConsentCheckbox
+            name="acceptedMarketing"
+            checked={acceptedMarketing}
+            onChange={setAcceptedMarketing}
+            className="mt-1 border-t border-hairline pt-3"
+          >
+            <span className="text-faint">Optional — </span>
+            send me occasional emails about new artists and Fann updates. You
+            can turn this off at any time in Settings.
+          </ConsentCheckbox>
         </div>
 
         <Button type="submit" loading={loading}>
@@ -170,23 +191,46 @@ function RegisterForm() {
   );
 }
 
+/**
+ * Deliberately not a <Link>: this sits inside a <label>, so a client-side
+ * navigation would throw away the part-filled form. stopPropagation keeps
+ * clicking the link from also toggling the box it sits in.
+ */
+function ConsentLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="font-semibold text-clay-deep underline"
+    >
+      {children}
+    </a>
+  );
+}
+
+// Takes its label as children rather than a document name. The two
+// mandatory boxes say "I agree to the <document>"; the optional marketing
+// one says something else entirely, and building that out of a `label`
+// prop would have meant a second component doing the same job.
 function ConsentCheckbox({
   name,
   checked,
   onChange,
   error,
-  href,
-  label,
+  className,
+  children,
 }: {
   name: string;
   checked: boolean;
   onChange: (next: boolean) => void;
   error?: string;
-  href: string;
-  label: string;
+  className?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className={className}>
       <label className="flex items-start gap-2.5 text-xs text-muted cursor-pointer">
         <input
           type="checkbox"
@@ -196,20 +240,7 @@ function ConsentCheckbox({
           aria-invalid={!!error}
           className="mt-0.5 w-4 h-4 accent-clay-deep shrink-0"
         />
-        <span>
-          I agree to the{" "}
-          {/* Deliberately not a <Link>: this sits inside a <label>, and a
-              client-side navigation would throw away the form. */}
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="font-semibold text-clay-deep underline"
-          >
-            {label}
-          </a>
-        </span>
+        <span>{children}</span>
       </label>
       {error && <p className="mt-1 ml-6 text-xs text-danger">{error}</p>}
     </div>
