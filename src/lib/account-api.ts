@@ -49,3 +49,30 @@ export async function setMarketingConsent(
     body: { granted },
   });
 }
+
+// ----------------------------------------------------------------
+// Acceptance of the mandatory documents
+//
+// Separate calls from the marketing preference above, matching the API:
+// marketing is a preference that toggles, terms and privacy are conditions
+// that can only ever be accepted. There is no endpoint for un-accepting
+// them, because that is account closure rather than a setting.
+// ----------------------------------------------------------------
+export interface ConsentStatus {
+  /** Mandatory documents not accepted at their current version. */
+  outdated: string[];
+  needs_acceptance: boolean;
+}
+
+export async function getConsentStatus(): Promise<ConsentStatus> {
+  return apiFetch<ConsentStatus>("/consent/status");
+}
+
+export async function acceptDocuments(
+  documents: string[],
+): Promise<{ outdated: string[] }> {
+  return apiFetch<{ outdated: string[] }>("/consent/accept", {
+    method: "POST",
+    body: { documents },
+  });
+}
