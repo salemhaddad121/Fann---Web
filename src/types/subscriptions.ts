@@ -4,7 +4,10 @@ export type SubscriptionStatus = "ready" | "active" | "queued" | "expired" | "ca
 
 export interface SubscriptionPlan {
   code: PlanCode;
+  /** NET, excluding VAT. The gross is only settled at checkout. */
   price_usd: number;
+  /** 0 means Fann is not charging VAT, and nothing should mention it. */
+  vat_rate: number;
   duration_days: number;
   requires_id_doc: boolean;
   /** null means uncapped. Day passes are capped; month and year are not. */
@@ -55,6 +58,12 @@ export interface PaymentIntent {
   id: string;
   plan_code: PlanCode;
   quantity: number;
+  /** Net, before VAT. */
+  subtotal_usd: number;
+  /** The rate applied to THIS payment, not today's configured rate. */
+  vat_rate: number;
+  vat_usd: number;
+  /** Gross — subtotal_usd + vat_usd. This is the figure to transfer. */
   amount_usd: number;
   currency: string;
   status: string;
@@ -67,6 +76,10 @@ export interface MyPayment {
   id: string;
   plan_code: PlanCode | null;
   quantity: number;
+  subtotal_usd: number;
+  vat_rate: number;
+  vat_usd: number;
+  /** Gross. What was actually owed. */
   amount_usd: number;
   currency: string;
   status: string;

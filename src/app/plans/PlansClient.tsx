@@ -13,6 +13,7 @@ import { PlanCards } from "@/components/plans/PlanCards";
 import { Banner } from "@/components/auth/Banner";
 import { Button } from "@/components/auth/Button";
 import { FannLockup } from "@/components/brand/FannMark";
+import { formatUsd, formatVatRate } from "@/lib/format";
 import {
   TRANSFER_SERVICES,
   type PaymentIntent,
@@ -87,10 +88,34 @@ function TransferInstructions({ intent }: { intent: PaymentIntent }) {
       </p>
 
       <dl className="mt-4 space-y-2.5 border-y border-hairline py-3.5">
+        {/* The plan cards advertise the NET price, so this is the first
+            screen where the buyer sees what they will actually transfer.
+            Showing the arithmetic rather than one larger number is the
+            difference between a tax line and an unexplained increase.
+
+            Suppressed entirely at a zero rate: a "VAT 0% — $0.00" row on
+            every receipt is noise, and it implies a registration Fann may
+            not hold yet. */}
+        {intent.vat_rate > 0 && (
+          <>
+            <div className="flex items-center justify-between">
+              <dt className="text-sm text-faint">Subtotal</dt>
+              <dd className="text-sm text-ink">{formatUsd(intent.subtotal_usd)}</dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-sm text-faint">
+                VAT {formatVatRate(intent.vat_rate)}
+              </dt>
+              <dd className="text-sm text-ink">{formatUsd(intent.vat_usd)}</dd>
+            </div>
+          </>
+        )}
         <div className="flex items-center justify-between">
-          <dt className="text-sm text-faint">Amount</dt>
+          <dt className="text-sm text-faint">
+            {intent.vat_rate > 0 ? "Total to transfer" : "Amount"}
+          </dt>
           <dd className="text-lg font-bold text-ink">
-            ${intent.amount_usd} {intent.currency}
+            {formatUsd(intent.amount_usd)} {intent.currency}
           </dd>
         </div>
         <div className="flex items-center justify-between">

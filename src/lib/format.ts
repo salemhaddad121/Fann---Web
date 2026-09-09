@@ -42,3 +42,20 @@ export function initialsFromName(name: string): string {
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return (words[0][0] + words[1][0]).toUpperCase();
 }
+
+/**
+ * Money, always to two decimals.
+ *
+ * Prices arrive as JS numbers, so 111 and 16.65 would otherwise render as
+ * "$111" beside "$16.65" in the same column. On a checkout screen showing
+ * net, tax and total stacked, a figure missing its cents reads as a
+ * different kind of number.
+ */
+export function formatUsd(amount: number): string {
+  return `$${amount.toFixed(2)}`;
+}
+
+/** "11%" from 0.11. Trailing zeros dropped: 0.115 -> "11.5%". */
+export function formatVatRate(rate: number): string {
+  return `${Number((rate * 100).toFixed(2))}%`;
+}

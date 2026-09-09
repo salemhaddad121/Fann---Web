@@ -110,7 +110,14 @@ export function PlanCards({
   // three years at once is a support ticket waiting to happen.
   const [dayQuantity, setDayQuantity] = useState(1);
 
+  // Every plan carries the same rate — it is a property of the seller, not
+  // of the product — so one card is enough to ask. Zero means Fann is not
+  // charging VAT, and the note stays off: "Excluding VAT" beside a price
+  // that excludes nothing is a claim about a registration Fann may not hold.
+  const vatRate = plans[0]?.vat_rate ?? 0;
+
   return (
+    <>
     <div className="grid gap-4 lg:grid-cols-3">
       {plans.map((plan) => {
         const copy = PLAN_COPY[plan.code];
@@ -217,5 +224,16 @@ export function PlanCards({
         );
       })}
     </div>
+
+    {/* One line under the grid rather than three identical ones inside it.
+        It also says WHERE the VAT turns up, because the next screen shows a
+        larger number than the one just clicked and that should not be a
+        surprise. */}
+    {vatRate > 0 && (
+      <p className="mt-3 text-center text-[11px] text-faint">
+        All prices exclude VAT. VAT is added at checkout.
+      </p>
+    )}
+    </>
   );
 }

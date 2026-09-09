@@ -32,9 +32,13 @@ export default function ThreadPage() {
   const [sending, setSending] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
   const [proposeNotice, setProposeNotice] = useState<string | null>(null);
-  // Set when an action comes back 402. The thread has no viewer_tier to
-  // read from, so a lapsed plan is only discoverable by trying something.
-  const [needsPlan, setNeedsPlan] = useState(false);
+  // Holds the server's own 402 message. The thread has no viewer_tier to
+  // read from, so a paywall is only discoverable by trying something — and
+  // there are now two different reasons for it. A lapsed plan and a spent
+  // day pass both refuse with 402, but a spent pass has NOT ended, so
+  // hardcoding "your plan has ended" would send that buyer to re-buy the
+  // wrong thing. The API says which; this just shows it.
+  const [planNotice, setPlanNotice] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -106,7 +110,7 @@ export default function ThreadPage() {
       // A lapsed plan is not a failed send and must not be swallowed as
       // one: the composer looks untouched afterwards, so with nothing on
       // screen the message merely never appears and no reason is given.
-      if (err instanceof ApiError && err.status === 402) setNeedsPlan(true);
+      if (err instanceof ApiError && err.status === 402) setPlanNotice(err.message);
     } finally {
       setSending(false);
     }
@@ -129,7 +133,7 @@ export default function ThreadPage() {
       // after the sheet closes instead of vanishing with it.
       if (err instanceof ApiError && err.status === 402) {
         setProposeOpen(false);
-        setNeedsPlan(true);
+        setPlanNotice(err.message);
         return;
       }
       throw err; // anything else is the form's to report
@@ -236,12 +240,9 @@ export default function ThreadPage() {
           )}
         </div>
 
-        {needsPlan && (
+        {planNotice && (
           <div className="mx-3.5 mb-2 flex items-center justify-between gap-3 rounded-[10px] border border-hairline bg-sand px-3.5 py-2.5 shrink-0">
-            <p className="text-xs leading-snug text-muted">
-              Your plan has ended. Renew it to keep messaging and proposing
-              bookings.
-            </p>
+            <p className="text-xs leading-snug text-muted">{planNotice}</p>
             <Link
               href="/plans"
               className="shrink-0 rounded-lg bg-clay-deep px-3 py-1.5 text-xs font-semibold text-white"
