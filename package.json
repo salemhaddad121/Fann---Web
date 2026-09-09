@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "check:dead-ends": "node scripts/check-dead-ends.mjs",
+    "pretest:e2e": "node scripts/check-dead-ends.mjs --emit-only",
+    "test:e2e": "playwright test",
+    "verify": "npm run lint && npm run typecheck && npm run check:dead-ends && npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@uppy/aws-s3": "^5.1.0",
@@ -20,6 +25,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
