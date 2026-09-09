@@ -67,7 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // even if the network call fails, still clear local state
     }
     setUser(null);
-    router.push("/login");
+    // /auth/login, not /login — there has never been a route at the latter,
+    // so logging out sent every user to a 404. Nothing in the app links to
+    // it, which is why nothing caught this until check:dead-ends did.
+    router.push("/auth/login");
   }
 
   async function sendOtp(phone: string) {
