@@ -99,6 +99,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 export const LEGAL_LINKS: SiteLink[] = [
   { label: "Terms of Service", href: "/terms" },
   { label: "Privacy Policy", href: "/privacy" },
+  { label: "Refund Policy", href: "/refund-policy" },
 ];
 
 export interface SocialLink {
