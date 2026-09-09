@@ -100,6 +100,10 @@ export default function MessagesPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
+            // Which filter is active was conveyed by colour alone, so a
+            // screen reader announced two identical buttons with no way to
+            // tell which one was in effect.
+            aria-pressed={filter === f}
             className={`px-3 py-1 rounded-2xl text-xs border ${
               filter === f
                 ? `${user?.role === "planner" ? "bg-[#dfeceb] text-teal border-[#7fb3b0]" : "bg-sand text-clay border-[#e0a570]"} font-semibold`
