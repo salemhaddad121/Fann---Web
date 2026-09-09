@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalDocument } from "@/components/legal/LegalDocument";
 import { CONSENT_VERSIONS } from "@/lib/consent-versions";
+import { TERMS_ARCHIVE } from "@/lib/terms-archive";
 
 // Bare title — the root layout's template appends the brand.
 export const metadata: Metadata = {
@@ -8,29 +10,30 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
+/**
+ * The current Terms.
+ *
+ * The text itself lives in TERMS_ARCHIVE rather than here, so this page and
+ * /terms/[version] cannot drift: the current version is the archive entry
+ * CONSENT_VERSIONS points at, not a second copy that happens to match.
+ */
 export default function TermsPage() {
+  const version = CONSENT_VERSIONS.terms;
+
   return (
-    <LegalDocument title="Terms of Service" version={CONSENT_VERSIONS.terms}>
-      <p>
-        Fann is a marketplace that connects artists with the people booking
-        them for events in Lebanon. These terms will cover how accounts work,
-        what each side is responsible for when a booking is agreed, and what
-        happens when something goes wrong.
-      </p>
-      <p>
-        Fann provides the platform where artists and planners find each other
-        and agree terms. Any booking is an agreement between those two
-        parties.
-      </p>
-      <p>
-        Accounts are reviewed before they go live, and may be suspended for
-        misuse — for example harassment, misrepresentation, or attempting to
-        take agreed bookings off the platform.
-      </p>
-      <p>
-        The full text is being prepared and will replace this page. When it
-        does, its version will change and you may be asked to accept the
-        revised document.
+    <LegalDocument title="Terms of Service" version={version}>
+      {TERMS_ARCHIVE[version]}
+
+      {/* The discoverable half of §3.5. A permanent URL nobody can find is
+          only useful to someone who already knows the scheme. */}
+      <p className="text-xs text-faint">
+        Permanent link to this version:{" "}
+        <Link
+          href={`/terms/${version}`}
+          className="font-semibold text-clay-deep underline"
+        >
+          /terms/{version}
+        </Link>
       </p>
     </LegalDocument>
   );
