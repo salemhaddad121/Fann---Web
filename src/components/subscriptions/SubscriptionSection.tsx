@@ -31,16 +31,21 @@ export function SubscriptionSection() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function load() {
-    try {
-      setData(await getMySubscriptions());
-    } catch {
-      setData(null);
-    }
+  // Fetching is separated from setting so the two callers can differ in the
+  // one way that matters: the mount fetch has to be cancellable, the refresh
+  // after activating a pass does not.
+  async function fetchMine(): Promise<MySubscriptions | null> {
+    return getMySubscriptions().catch(() => null);
   }
 
   useEffect(() => {
-    void load();
+    let cancelled = false;
+    fetchMine().then((next) => {
+      if (!cancelled) setData(next);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleActivate(id: string) {
@@ -50,7 +55,7 @@ export function SubscriptionSection() {
     try {
       const started = await activateSubscription(id);
       setNotice(`Day pass started — ${formatRemaining(started.expires_at)}.`);
-      await load();
+      setData(await fetchMine());
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Couldn't start that pass.");
     } finally {
