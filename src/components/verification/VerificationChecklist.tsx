@@ -6,7 +6,6 @@ import { getMyVerification, uploadIdentityDocument } from "@/lib/verification-ap
 import {
   KIND_HINTS,
   KIND_LABELS,
-  type IdDocumentKind,
   type IdDocumentStatus,
   type MyVerification,
   type VerificationDocument,
@@ -119,7 +118,9 @@ export function VerificationChecklist() {
   const [data, setData] = useState<MyVerification | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  // Used after an upload, where there is nothing to cancel against — the
+  // component is still mounted because the user just acted in it.
+  async function refresh() {
     try {
       setData(await getMyVerification());
     } catch {
@@ -127,8 +128,22 @@ export function VerificationChecklist() {
     }
   }
 
+  // The mount fetch is inlined rather than calling refresh(): setState has to
+  // happen in the promise callback, not synchronously in the effect body. The
+  // cancelled guard is what stops a slow response setting state on a
+  // component the artist has already navigated away from.
   useEffect(() => {
-    void load();
+    let cancelled = false;
+    getMyVerification()
+      .then((next) => {
+        if (!cancelled) setData(next);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Couldn't load your verification status.");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (error) return <p className="px-4 py-4 text-sm text-danger">{error}</p>;
@@ -168,7 +183,7 @@ export function VerificationChecklist() {
 
       <div className="rounded-2xl border border-hairline bg-surface">
         {data.documents.map((doc) => (
-          <DocumentRow key={doc.kind} doc={doc} onUploaded={load} />
+          <DocumentRow key={doc.kind} doc={doc} onUploaded={refresh} />
         ))}
       </div>
 
