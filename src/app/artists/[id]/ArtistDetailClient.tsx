@@ -13,6 +13,7 @@ import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
 import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
+import { ReportDialog } from "@/components/support/ReportDialog";
 import { formatDateLong } from "@/lib/calendar";
 import type { ArtistDetail } from "@/types/artists";
 import { ApiError } from "@/lib/api";
@@ -214,6 +215,20 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
               onSubmit={handleProposeBooking}
             />
           </div>
+        </div>
+      )}
+
+      {/* Below the profile and above the CTA: reachable after reading, and
+          never on your own profile, where it would be nonsense. Guests see it
+          too — an artist page is public, so a stranger can be the one who
+          notices something wrong. */}
+      {!isOwnProfile && (
+        <div className="px-4 pb-3 pt-1">
+          <ReportDialog
+            kind="artist"
+            targetId={artist.user_id}
+            targetName={artist.display_name}
+          />
         </div>
       )}
 

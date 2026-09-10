@@ -16,8 +16,16 @@
  * has no postal address system, so §35's postal row has nothing to hold.
  */
 export const LEGAL_ENTITY = {
-  /** Provisional — see the open risk in GO-LIVE-BLOCKERS.md §1. */
-  name: "Fann-Leb",
+  /**
+   * The registered legal entity. Provisional — see the open risk in
+   * GO-LIVE-BLOCKERS.md §1: naming a SARL asserts a specific registered form,
+   * and §1 still carries no Commercial Registry number to back it.
+   *
+   * §1 treats Legal entity and Trading name as separate rows. Only the legal
+   * entity is stated here; no trading name has been given, so the pages do
+   * not claim one.
+   */
+  name: "Fann SARL",
   representative: "Mr. Nabil Katra",
   representativeCapacity: "Lawyer",
   address: "Mina Street, Bakery Building, Tripoli, Lebanon",
