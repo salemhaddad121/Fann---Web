@@ -14,8 +14,13 @@ npm install
 npx playwright install chromium
 ```
 
-`npm install` is needed because `@playwright/test` was added to package.json
-but the lockfile has not been regenerated yet.
+`npx playwright install chromium` downloads the browser itself, which npm does
+not fetch — without it `npm run test:e2e` fails at launch rather than at a
+test.
+
+(The lockfile note that used to be here is gone: `package-lock.json` was
+regenerated and committed on 2026-09-09, so `npm ci` is enough for the
+packages. The browser download is still a separate step.)
 
 ## 1. Batch discipline
 
