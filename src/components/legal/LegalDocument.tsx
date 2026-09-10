@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LEGAL_ENTITY } from "@/lib/legal-entity";
 
 // Shared shell for /terms and /privacy.
 //
@@ -72,10 +73,88 @@ export function LegalDocument({
         {children}
       </div>
 
-      <p className="mt-10 text-xs text-faint">
+      <EntityDetails />
+    </div>
+  );
+}
+
+/**
+ * Who the user is contracting with (T&C §1 and §35).
+ *
+ * On every legal page rather than only the Terms: someone reading the refund
+ * policy to decide whether to pay is exactly the person who needs to know who
+ * is taking the money and where to chase it.
+ *
+ * The number is shown once with the WhatsApp mark beside it because the
+ * support line and the WhatsApp account are the same number — listing it
+ * twice under two headings would imply two channels that do not exist. It is
+ * a tel: link with a wa.me link alongside, so both do the obvious thing on a
+ * phone.
+ */
+function EntityDetails() {
+  return (
+    <div className="mt-10 border-t border-hairline pt-5">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+        Operated by
+      </p>
+
+      <dl className="mt-2 flex flex-col gap-1.5 text-xs text-muted">
+        <div className="flex gap-2">
+          <dt className="w-32 shrink-0 text-faint">Platform</dt>
+          <dd className="font-medium text-ink">{LEGAL_ENTITY.name}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 shrink-0 text-faint">Legal representative</dt>
+          <dd>
+            {LEGAL_ENTITY.representative}
+            <span className="text-faint"> — {LEGAL_ENTITY.representativeCapacity}</span>
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 shrink-0 text-faint">Registered address</dt>
+          <dd>{LEGAL_ENTITY.address}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 shrink-0 text-faint">Email</dt>
+          <dd>
+            <a
+              href={`mailto:${LEGAL_ENTITY.email}`}
+              className="font-semibold text-clay-deep underline"
+            >
+              {LEGAL_ENTITY.email}
+            </a>
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 shrink-0 text-faint">Telephone</dt>
+          <dd className="flex items-center gap-1.5">
+            <a
+              href={`tel:${LEGAL_ENTITY.phoneE164}`}
+              className="font-semibold text-clay-deep underline"
+            >
+              {LEGAL_ENTITY.phone}
+            </a>
+            <a
+              href={`https://wa.me/${LEGAL_ENTITY.phoneE164}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-[#25D366]"
+              aria-label="Message this number on WhatsApp"
+              title="Also on WhatsApp"
+            >
+              <i className="ti ti-brand-whatsapp text-base" aria-hidden />
+            </a>
+          </dd>
+        </div>
+      </dl>
+
+      <p className="mt-4 text-xs text-faint">
         Questions about this document? Contact{" "}
-        <a href="mailto:admin@fann-leb.com" className="font-semibold text-clay-deep underline">
-          admin@fann-leb.com
+        <a
+          href={`mailto:${LEGAL_ENTITY.email}`}
+          className="font-semibold text-clay-deep underline"
+        >
+          {LEGAL_ENTITY.email}
         </a>
         .
       </p>
