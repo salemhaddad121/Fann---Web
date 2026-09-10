@@ -14,6 +14,7 @@ import { badgeColor } from "@/lib/badge-colors";
 import { MessageList } from "@/components/messaging/MessageList";
 import { AppShell } from "@/components/shell/AppShell";
 import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
+import { ReportDialog } from "@/components/support/ReportDialog";
 import type { Message } from "@/types/messaging";
 
 const POLL_MS = 4000;
@@ -238,6 +239,18 @@ export default function ThreadPage() {
           ) : (
             <MessageList messages={messages} currentUserId={user.id} accent={accent} accentText={accentText} />
           )}
+        </div>
+
+        {/* The point of item 36: the button belongs where the harassment is.
+            Sits above the composer so it is in reach mid-conversation rather
+            than behind a menu. Both sides can report — an artist being abused
+            by a planner needs it as much as the other way round. */}
+        <div className="px-3.5 pb-1 shrink-0">
+          <ReportDialog
+            kind="conversation"
+            targetId={conversationId}
+            targetName={otherParty?.displayName ?? null}
+          />
         </div>
 
         {planNotice && (

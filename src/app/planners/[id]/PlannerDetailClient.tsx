@@ -9,6 +9,7 @@ import { getPlanner } from "@/lib/planners-api";
 import { requestConversation } from "@/lib/messaging-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { PlannerProfileView } from "@/components/profile/PlannerProfileView";
+import { ReportDialog } from "@/components/support/ReportDialog";
 import type { PlannerDetail } from "@/types/planners";
 import { ApiError } from "@/lib/api";
 
@@ -107,6 +108,16 @@ function Content({ id }: { id: string }) {
         isOwnProfile={isOwnProfile}
         accountStatus={isOwnProfile ? user?.status : undefined}
       />
+
+      {!isOwnProfile && (
+        <div className="px-4 pb-3 pt-1">
+          <ReportDialog
+            kind="planner"
+            targetId={planner.user_id}
+            targetName={planner.display_name}
+          />
+        </div>
+      )}
 
       {isOwnProfile ? (
         <div className="sticky bottom-0 bg-surface border-t border-hairline p-3 max-w-lg mx-auto">
