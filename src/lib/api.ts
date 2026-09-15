@@ -2,6 +2,8 @@ import type { ApiErrorBody } from "@/types/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
+import { clearSessionHint, sessionMayExist } from "@/lib/session-hint";
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -27,12 +29,27 @@ function extractMessage(body: ApiErrorBody | undefined, fallback: string): strin
 let refreshInFlight: Promise<boolean> | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
+  // A visitor who has never signed in on this browser has no refresh cookie,
+  // so this call can only 401. Skipping it removes the second of the two
+  // requests every public page load used to make, and stops guests spending
+  // the 30/min per-IP refresh budget on calls that cannot succeed.
+  //
+  // Only ever skips: sessionMayExist() returns true whenever it is unsure
+  // (server render, storage unreadable), so an uncertain case still tries and
+  // a real user is never signed out by this.
+  if (!sessionMayExist()) return false;
+
   if (!refreshInFlight) {
     refreshInFlight = fetch(`${API_URL}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     })
-      .then((res) => res.ok)
+      .then((res) => {
+        // A failed refresh means there is nothing left to renew. Clearing the
+        // hint is what stops the next page load trying again.
+        if (!res.ok) clearSessionHint();
+        return res.ok;
+      })
       .catch(() => false)
       .finally(() => {
         refreshInFlight = null;
