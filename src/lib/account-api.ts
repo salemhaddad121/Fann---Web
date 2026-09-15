@@ -76,3 +76,18 @@ export async function acceptDocuments(
     body: { documents },
   });
 }
+
+/**
+ * Withdraw marketing consent from an email link, with no session.
+ *
+ * auth:false because the caller has not logged in and should not have to —
+ * the token in the link is the proof. Sending a session here would also make
+ * a 401 trigger a pointless refresh for someone who has none.
+ */
+export async function unsubscribe(token: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>("/consent/unsubscribe", {
+    method: "POST",
+    body: { token },
+    auth: false,
+  });
+}
