@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api";
 import type {
+  ReportTargetKind,
   SupportTicket,
   SupportTicketDetail,
   SupportTicketStatus,
@@ -13,6 +14,10 @@ export interface CreateSupportTicketPayload {
   guestName?: string;
   /** Normalised route, never a real URL — matches the API's validation. */
   sourcePath?: string;
+  // What the ticket is a report about, when it is one. Sent as a pair or not
+  // at all; the API rejects one without the other.
+  reportedKind?: ReportTargetKind;
+  reportedId?: string;
 }
 
 // Open to guests: the people most likely to need help are the ones who

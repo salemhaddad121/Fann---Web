@@ -99,6 +99,11 @@ export function ReportDialog({
         ]
           .filter(Boolean)
           .join("\n"),
+        // The structured pair, which is what admins can filter and count on.
+        // The prose line above stays: it is what a human reads first, and it
+        // keeps older tickets and newer ones looking the same in the thread.
+        reportedKind: kind,
+        reportedId: targetId,
         ...(user ? {} : { guestEmail: guestEmail.trim() }),
         sourcePath: SOURCE_PATH[kind],
       });

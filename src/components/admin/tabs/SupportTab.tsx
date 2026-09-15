@@ -192,12 +192,29 @@ export function SupportTab() {
               className="flex w-full items-start justify-between gap-3 text-left"
             >
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-ink">{t.subject}</p>
+                <p className="truncate text-[13px] font-semibold text-ink">
+                  {/* A report is a different kind of work from a support
+                      question and should be visible as one without opening
+                      the ticket. */}
+                  {t.reported_id && (
+                    <span className="mr-1.5 rounded bg-danger-bg px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-danger">
+                      Report
+                    </span>
+                  )}
+                  {t.subject}
+                </p>
                 <p className="truncate text-xs text-muted">
                   {requesterOf(t)}
                   {t.user_role ? ` · ${t.user_role}` : " · guest"}
                   {t.source_path && ` · from ${t.source_path}`}
                 </p>
+                {t.reported_id && (
+                  // The id, not a name: it is what identifies the account
+                  // across tickets, and a masked display name would not.
+                  <p className="truncate font-mono text-[11px] text-faint">
+                    about {t.reported_kind} {t.reported_id}
+                  </p>
+                )}
               </div>
               <div className="shrink-0 text-right">
                 <span
