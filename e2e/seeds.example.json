@@ -1,8 +1,10 @@
 {
-  "_comment": "Copy to e2e/seeds.json and fill in ids that exist in your dev database. Routes without a seed are reported as unverified, never as passing.",
+  "_comment": "Copy to e2e/seeds.json and fill in ids that exist in your dev database. Routes without a seed are reported as unverified, never as passing. The two version routes take a date from CONSENT_VERSIONS, not a database id.",
   "/artists/[id]": "/artists/REPLACE-WITH-REAL-ID",
   "/planners/[id]": "/planners/REPLACE-WITH-REAL-ID",
   "/bookings/[id]": "/bookings/REPLACE-WITH-REAL-ID",
   "/messages/[id]": "/messages/REPLACE-WITH-REAL-ID",
-  "/admin/users/[id]": "/admin/users/REPLACE-WITH-REAL-ID"
+  "/admin/users/[id]": "/admin/users/REPLACE-WITH-REAL-ID",
+  "/terms/[version]": "/terms/REPLACE-WITH-A-PUBLISHED-VERSION",
+  "/privacy/[version]": "/privacy/REPLACE-WITH-A-PUBLISHED-VERSION"
 }

@@ -99,6 +99,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/refund-policy`, changeFrequency: "yearly", priority: 0.3 },
+    // The current version of each document is already above. Archived
+    // versions are deliberately NOT listed: they carry noindex once
+    // superseded, and a sitemap entry for a page telling crawlers to ignore
+    // it is a contradiction.
   ];
 
   // Artists only.
