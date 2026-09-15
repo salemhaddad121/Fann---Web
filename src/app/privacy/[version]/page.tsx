@@ -4,14 +4,14 @@ import {
   archivedMetadata,
 } from "@/components/legal/ArchivedDocumentPage";
 import { CONSENT_VERSIONS } from "@/lib/consent-versions";
-import { TERMS_ARCHIVE, termsVersions } from "@/lib/terms-archive";
+import { PRIVACY_ARCHIVE, privacyVersions } from "@/lib/privacy-archive";
 
 /**
  * Every published version is pre-rendered, which is what makes these URLs
  * permanent: they keep resolving with no database and no running API.
  */
 export function generateStaticParams() {
-  return termsVersions().map((version) => ({ version }));
+  return privacyVersions().map((version) => ({ version }));
 }
 
 export async function generateMetadata({
@@ -22,15 +22,15 @@ export async function generateMetadata({
   const { version } = await params;
 
   return archivedMetadata({
-    title: "Terms of Service",
+    title: "Privacy Policy",
     version,
-    currentVersion: CONSENT_VERSIONS.terms,
-    basePath: "/terms",
-    exists: Boolean(TERMS_ARCHIVE[version]),
+    currentVersion: CONSENT_VERSIONS.privacy,
+    basePath: "/privacy",
+    exists: Boolean(PRIVACY_ARCHIVE[version]),
   });
 }
 
-export default async function ArchivedTermsPage({
+export default async function ArchivedPrivacyPage({
   params,
 }: {
   params: Promise<{ version: string }>;
@@ -39,11 +39,11 @@ export default async function ArchivedTermsPage({
 
   return (
     <ArchivedDocumentPage
-      title="Terms of Service"
+      title="Privacy Policy"
       version={version}
-      currentVersion={CONSENT_VERSIONS.terms}
-      body={TERMS_ARCHIVE[version]}
-      currentHref="/terms"
+      currentVersion={CONSENT_VERSIONS.privacy}
+      body={PRIVACY_ARCHIVE[version]}
+      currentHref="/privacy"
     />
   );
 }

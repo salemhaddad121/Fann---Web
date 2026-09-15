@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { getCategories } from "@/lib/artists-api";
 import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { SiteFooter } from "@/components/landing/SiteFooter";
+import { LandingPlans } from "@/components/landing/LandingPlans";
 import { StoreBadges } from "@/components/landing/StoreBadges";
 
 // Copy comes from Salem's "Landing Page.docx". Note the deliberate cross-sell:
@@ -65,11 +67,24 @@ function NoFees({ freeToUse = false }: { freeToUse?: boolean }) {
  * them out of the HTML entirely. Each falls back to an empty list on
  * failure, and Pills renders nothing for an empty list, so a flaky API
  * costs a row rather than the page.
+ *
+ * Cached per endpoint rather than as a pair, so that per-row fallback
+ * survives: caching them together would make either failure cost both rows.
+ * The cache is what replaces the route's old `revalidate` — the page reads
+ * the TWA cookie now, which makes it dynamic, and without this every view
+ * would re-fetch a taxonomy that changes about weekly.
  */
+const loadCategories = unstable_cache(getCategories, ["landing-categories"], {
+  revalidate: 3600,
+});
+const loadEventTypes = unstable_cache(getEventTypes, ["landing-event-types"], {
+  revalidate: 3600,
+});
+
 async function loadTaxonomy() {
   const [groups, eventTypes] = await Promise.all([
-    getCategories().catch(() => []),
-    getEventTypes().catch(() => []),
+    loadCategories().catch(() => []),
+    loadEventTypes().catch(() => []),
   ]);
 
   const artistCategories = groups
@@ -79,7 +94,15 @@ async function loadTaxonomy() {
   return { artistCategories, eventTypes };
 }
 
-export async function LandingPage() {
+interface LandingPageProps {
+  /**
+   * False inside the Play app. Decided at the route so the prices are never
+   * serialised into the HTML — see app/page.tsx.
+   */
+  showPricing?: boolean;
+}
+
+export async function LandingPage({ showPricing = true }: LandingPageProps) {
   const { artistCategories, eventTypes } = await loadTaxonomy();
 
   return (
@@ -206,6 +229,11 @@ export async function LandingPage() {
               <JoinNow role="planner" />
             </section>
           </div>
+
+          {/* Pricing. Sits after both role sections because it only applies
+              to one of them — an artist reading down the page is told twice
+              that listing is free before a price appears. */}
+          {showPricing && <LandingPlans />}
 
           {/* Mid-page store badges, driven by the same config as the footer
               so there is one place to fill in the URLs when the apps ship. */}
