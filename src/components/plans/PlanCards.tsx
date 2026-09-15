@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { PlanCode, SubscriptionPlan } from "@/types/subscriptions";
 
 /**
@@ -93,6 +94,16 @@ function Check({ featured }: { featured: boolean }) {
 interface PlanCardsProps {
   plans: SubscriptionPlan[];
   onChoose?: (planCode: PlanCode, quantity: number) => void;
+  /**
+   * Where a card's action goes when there is no purchase flow on the page —
+   * the landing page shows the same cards but cannot start a payment, so it
+   * sends people to /plans instead. Ignored when onChoose is given.
+   *
+   * Keep this pointing at /plans: the CSS rule that hides pricing links
+   * inside the Play app matches on the href, so a link anywhere else would
+   * walk straight past it.
+   */
+  ctaHref?: string;
   /** Label for the per-card action. Guests get a sign-in prompt instead. */
   ctaLabel?: string;
   busyPlan?: PlanCode | null;
@@ -102,6 +113,7 @@ interface PlanCardsProps {
 export function PlanCards({
   plans,
   onChoose,
+  ctaHref,
   ctaLabel = "Choose this plan",
   busyPlan = null,
   disabled = false,
@@ -219,6 +231,17 @@ export function PlanCards({
                     ? `${ctaLabel} — $${(plan.price_usd * dayQuantity).toFixed(0)}`
                     : ctaLabel}
               </button>
+            )}
+
+            {!onChoose && ctaHref && (
+              <Link
+                href={ctaHref}
+                className={`mt-4 w-full rounded-[10px] py-2.5 text-center text-sm font-semibold transition-opacity hover:opacity-90 ${
+                  featured ? "bg-white text-ink" : "bg-clay-deep text-white"
+                }`}
+              >
+                {ctaLabel}
+              </Link>
             )}
           </div>
         );
