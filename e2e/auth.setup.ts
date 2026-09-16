@@ -22,7 +22,11 @@ setup("authenticate", async ({ page }) => {
 
   await page.goto("/auth/login");
   await page.getByLabel(/email/i).fill(email!);
-  await page.getByLabel(/password/i).fill(password!);
+  // Scoped to the field rather than /password/i, which also matches the
+  // reveal toggle's "Show password" — two controls whose accessible names
+  // both contain the word, which is correct for each of them and ambiguous
+  // for a regex.
+  await page.locator('input[name="password"]').fill(password!);
   await page.getByRole("button", { name: /log ?in|sign ?in/i }).click();
 
   // The redirect away from /auth/login is the only reliable success signal.
