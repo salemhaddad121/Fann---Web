@@ -8,6 +8,7 @@ import { FormField } from "@/components/auth/FormField";
 import { Button } from "@/components/auth/Button";
 import { Banner } from "@/components/auth/Banner";
 import { RoleToggle } from "@/components/auth/RoleToggle";
+import { SocialButtons } from "@/components/auth/SocialButtons";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import type { RegisterPayload } from "@/types/auth";
@@ -187,6 +188,17 @@ function RegisterForm() {
           Create account
         </Button>
       </form>
+
+      {/* These were only ever on /auth/login, which meant the social path
+          bypassed the toggle above entirely — and the API's `state` default
+          made every social sign-up an artist. Here they carry whichever side
+          the user actually picked.
+
+          The consent notice is required, not polite: the API records a Terms
+          and Privacy acceptance for a social sign-up, and recording one for
+          someone who was never shown the documents would be worse than
+          recording none. */}
+      <SocialButtons role={role} consentNotice />
     </AuthShell>
   );
 }
