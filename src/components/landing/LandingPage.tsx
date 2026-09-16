@@ -1,28 +1,50 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { getCategories } from "@/lib/artists-api";
+import type { ArtistSearchResponse } from "@/types/artists";
 import { getEventTypes } from "@/lib/planners-api";
 import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { LandingPlans } from "@/components/landing/LandingPlans";
+import { ArtistStrip } from "@/components/landing/ArtistStrip";
 import { StoreBadges } from "@/components/landing/StoreBadges";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 // Copy comes from Salem's "Landing Page.docx". Note the deliberate cross-sell:
 // the artist section lists the *event* types an artist could get booked for,
 // and the planner section lists the *artist* categories they can hire —
 // each audience is shown what they'd find on the other side.
 
-function Pills({ items }: { items: string[] }) {
+/**
+ * A chip row.
+ *
+ * Chips with an `href` render as links. They are pill-shaped, bordered and
+ * sit on a card next to real buttons, so the ones that did nothing read as
+ * broken controls — and they are the most specific intent signal on the
+ * page. /search?categories=<slug> already works; the footer uses it.
+ *
+ * `href` stays optional because the event-type row has no honest
+ * destination: event types describe the PLANNER directory, which a
+ * logged-out visitor on /search does not get, so linking them would send
+ * someone hunting for weddings into a list of artists.
+ */
+function Pills({ items }: { items: { label: string; href?: string }[] }) {
   if (items.length === 0) return null;
+  const chip =
+    "font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-2";
   return (
     <ul className="flex flex-wrap gap-1.5 mt-4">
-      {items.map((label) => (
-        <li
-          key={label}
-          className="font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-1"
-        >
-          {label}
+      {items.map(({ label, href }) => (
+        <li key={label}>
+          {href ? (
+            <Link href={href} className={`block ${chip} hover:border-clay`}>
+              {label}
+            </Link>
+          ) : (
+            <span className={`block ${chip}`}>{label}</span>
+          )}
         </li>
       ))}
     </ul>
@@ -81,6 +103,32 @@ const loadEventTypes = unstable_cache(getEventTypes, ["landing-event-types"], {
   revalidate: 3600,
 });
 
+/**
+ * How many artists the button offers to show.
+ *
+ * Only the count is wanted, so this asks for a single row and reads
+ * meta.total rather than pulling the roster twice — ArtistStrip makes its
+ * own (verified-only) request for the cards themselves.
+ *
+ * 0 on failure, and the button falls back to "Browse artists": a label that
+ * names a count has to be right, and "Browse all 0 artists" is worse than no
+ * number at all.
+ */
+const loadArtistCount = unstable_cache(
+  async () => {
+    try {
+      const res = await fetch(`${API_URL}/artists?limit=1`, { headers: { "Content-Type": "application/json" } });
+      if (!res.ok) return 0;
+      const body = (await res.json()) as ArtistSearchResponse;
+      return body.meta.total ?? 0;
+    } catch {
+      return 0;
+    }
+  },
+  ["landing-artist-count"],
+  { revalidate: 3600 },
+);
+
 async function loadTaxonomy() {
   const [groups, eventTypes] = await Promise.all([
     loadCategories().catch(() => []),
@@ -88,11 +136,40 @@ async function loadTaxonomy() {
   ]);
 
   const artistCategories = groups
-    .flatMap((g) => g.categories.map((c) => c.name))
-    .filter((n) => !n.toLowerCase().startsWith("other"));
+    .flatMap((g) => g.categories)
+    .filter((c) => !c.name.toLowerCase().startsWith("other"));
 
   return { artistCategories, eventTypes };
 }
+
+/**
+ * The chips the "Hire from" row actually shows.
+ *
+ * The row used to print the whole leaf taxonomy — 37 equal-weight chips,
+ * about two phone screens of them, with no hierarchy and therefore no
+ * signal. These ten are the headline categories, listed in editorial order.
+ *
+ * Editorial, explicitly: there is no booking-volume data to rank by yet, so
+ * this is a judgement call written down where it can be argued with, rather
+ * than a measurement dressed up as one. Revisit it when there are searches
+ * to count.
+ *
+ * Resolved against the live taxonomy rather than hardcoded with labels, so a
+ * slug that is renamed or retired drops out of the row instead of rendering
+ * a chip that leads to an empty search.
+ */
+const HEADLINE_CATEGORY_SLUGS = [
+  "dj",
+  "photographer",
+  "band-group",
+  "singer-vocalist",
+  "videographer",
+  "mc-host",
+  "catering",
+  "sound-lighting",
+  "magician",
+  "photo-booth",
+];
 
 interface LandingPageProps {
   /**
@@ -103,7 +180,20 @@ interface LandingPageProps {
 }
 
 export async function LandingPage({ showPricing = true }: LandingPageProps) {
-  const { artistCategories, eventTypes } = await loadTaxonomy();
+  const [{ artistCategories, eventTypes }, artistCount] = await Promise.all([
+    loadTaxonomy(),
+    loadArtistCount(),
+  ]);
+
+  // Keeps HEADLINE_CATEGORY_SLUGS' order rather than the taxonomy's, so the
+  // row reads in the order it was written. A slug with no match is dropped.
+  const bySlug = new Map(artistCategories.map((c) => [c.slug, c]));
+  const headlineCategories = HEADLINE_CATEGORY_SLUGS.flatMap((slug) => {
+    const category = bySlug.get(slug);
+    return category
+      ? [{ label: category.name, href: `/search?categories=${category.slug}` }]
+      : [];
+  });
 
   return (
     <div className="min-h-screen relative">
@@ -112,69 +202,62 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
         <PublicHeader />
 
         <main className="px-5 pb-16 max-w-5xl mx-auto">
-          {/* Banner */}
-          <section className="pt-10 pb-12 lg:pt-16 lg:pb-16 max-w-3xl">
+          {/* Banner.
+
+              One sentence and one action. This previously ran headline, a
+              five-line paragraph, a trust-badge row, a second four-line
+              paragraph, and only then the CTA at roughly 510px down — with
+              "Join as an Artist" and "Join as a Planner" immediately under
+              it. Nine lines of prose and, counting Log in / Sign up, five
+              competing actions before a visitor saw a single artist.
+
+              What is left: the headline, one sentence, one filled button.
+              The two role CTAs are demoted to the text link below, because
+              both roles already get a full JOIN NOW section further down
+              this page — they were competing with the browse action for the
+              first screen and winning on colour while losing on relevance.
+
+              The button stays the ONLY filled button in the hero. It used to
+              be bg-ink next to a saturated clay and a saturated teal, which
+              made the no-commitment action the least prominent thing on the
+              page. Do not reintroduce a second filled button here. */}
+          <section className="pt-10 pb-8 lg:pt-16 lg:pb-10 max-w-3xl">
             <h1 className="font-display text-[30px] leading-[1.15] lg:text-[44px] font-bold text-ink">
               Book Lebanon&apos;s live talent.
             </h1>
             <p className="mt-4 text-[15px] lg:text-base text-ink/80 leading-relaxed">
-              Fann connects event planners &amp; talented artists across Lebanon — DJs,
-              photographers, bands, MCs, and more — all in one place. Browse verified profiles,
-              compare portfolios and availability, and book the right performer for your event
-              with confidence.
+              DJs, photographers, bands, MCs and more — browse verified profiles,
+              compare portfolios and availability, and book direct.
             </p>
-            <NoFees />
-            <p className="mt-4 text-sm text-muted leading-relaxed">
-              Whether you&apos;re planning a wedding, a corporate event, or looking for a
-              performance at your venue, Fann makes it easy to find, message, and hire local
-              artists without the back-and-forth.
-            </p>
-            {/* Dual role CTAs, per the design's landing hero — each side gets
-                its own accent and lands on the register form pre-set to that
-                role. "Planner" is the product's single word for this role: it
-                matches the database, the API, the register form and the
-                section further down this page, so there is no second label to
-                keep in sync. This page previously carried both "Planner" and
-                "Booker" for the one role; Salem settled it on 2026-08-15. */}
-            {/* Search entry.
-                Above the join buttons deliberately. Browsing is now open to
-                anyone — profiles load without an account, just with contact
-                details withheld — so the page's first ask should be "look
-                around", not "sign up". Asking someone to register before
-                they have seen a single artist is the harder sell.
 
-                A button, not a search field. The field here could only hand a
-                query string to /search, and typing a genre into a box on the
-                landing page is a worse first move than seeing the full roster
-                and filtering it — /search already owns the categories, the
-                filters and the pagination. The caption stays: it is the only
-                copy on the page telling a stranger they can look without an
-                account, which is the entire point of the guest tier. */}
-            <div className="mt-6 text-center">
+            {/* "No account needed." sits beside the button rather than under
+                it: it is a caption on the action, not a step after it, and
+                below the button it pushed everything past it down a line for
+                no reason. It is also the only copy on the page telling a
+                stranger they can look around without signing up, which is
+                the entire point of the guest tier. */}
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
               <Link
                 href="/search"
-                className="inline-block rounded-[10px] bg-ink px-5 py-3 text-sm font-semibold text-white"
+                className="inline-flex h-14 items-center rounded-[10px] bg-ink px-6 text-[15px] font-semibold text-white"
               >
-                Browse Artists Now
+                {artistCount > 0 ? `Browse all ${artistCount} artists` : "Browse artists"}
               </Link>
-              <p className="mt-2 text-xs text-faint">No account needed to browse.</p>
+              <p className="text-sm text-muted">No account needed.</p>
             </div>
 
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Link
-                href="/auth/register?role=artist"
-                className="bg-clay-deep text-white text-sm font-semibold px-5 py-3 rounded-[10px]"
-              >
-                Join as an Artist
+            <p className="mt-4 text-sm">
+              <Link href="/auth/register?role=artist" className="font-semibold text-clay-deep">
+                Are you a performer? List free →
               </Link>
-              <Link
-                href="/auth/register?role=planner"
-                className="bg-teal text-white text-sm font-semibold px-5 py-3 rounded-[10px]"
-              >
-                Join as a Planner
-              </Link>
-            </div>
+            </p>
           </section>
+
+          {/* The proof that there is anybody here, directly under the hero
+              and above every word of explanation. */}
+          <ArtistStrip />
+
+          <div className="pt-10" />
 
           <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
             {/* For Artists */}
@@ -197,7 +280,8 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
                 Get booked for
               </p>
-              <Pills items={eventTypes} />
+              {/* No href — see Pills. */}
+              <Pills items={eventTypes.map((label) => ({ label }))} />
               <JoinNow role="artist" />
             </section>
 
@@ -225,7 +309,14 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
                 Hire from
               </p>
-              <Pills items={artistCategories} />
+              <Pills items={headlineCategories} />
+              {artistCategories.length > headlineCategories.length && (
+                <p className="mt-3 text-[13px]">
+                  <Link href="/search" className="font-semibold text-clay-deep">
+                    See all {artistCategories.length} categories →
+                  </Link>
+                </p>
+              )}
               <JoinNow role="planner" />
             </section>
           </div>
