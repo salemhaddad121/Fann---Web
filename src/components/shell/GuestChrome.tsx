@@ -21,7 +21,12 @@ export function GuestChrome({
   showSearchLink?: boolean;
 }) {
   return (
-    <div className="min-h-dvh bg-paper">
+    // --sticky-header-h tells anything that pins inside this shell how far
+    // down to start. The header below is sticky at EVERY width (unlike
+    // AppShell's TopNav, which is lg:hidden), so a child pinning at top-0
+    // would sit underneath it. 65px = py-3.5 (28) + the Sign in button (36)
+    // + the 1px bottom border; keep it in step with that row.
+    <div className="min-h-dvh bg-paper" style={{ "--sticky-header-h": "65px" } as React.CSSProperties}>
       <header className="sticky top-0 z-30 border-b border-hairline bg-surface/90 px-5 py-3.5 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <Link href="/" aria-label="Fann home">

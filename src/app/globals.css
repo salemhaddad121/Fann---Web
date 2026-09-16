@@ -56,6 +56,14 @@
   --success: #166534;
   --success-bg: #dcfce7;
 
+  /* How tall the page's own sticky header is, for anything that pins
+     below it. 0 by default: most shells have no sticky header at desktop
+     width (AppShell hides TopNav at lg). GuestChrome overrides it, because
+     its header IS sticky at every width — without this the search filter
+     rail pinned at 16px and slid its heading under that bar for every
+     signed-out visitor, which is most of /search's audience. */
+  --sticky-header-h: 0px;
+
   /* System font stacks — no external fetch required. The display stack
      leans on whatever serif ships with the OS (Georgia on Windows/macOS,
      a serif fallback elsewhere), which is what the design's wordmark and
