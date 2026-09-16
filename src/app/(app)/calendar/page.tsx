@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useRequireRole } from "@/lib/use-require-role";
 import {
   getArtistAvailability,
   createAvailabilityBlock,
@@ -10,7 +10,6 @@ import {
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { AddBlockForm } from "@/components/calendar/AddBlockForm";
 import { BlockedDatesList } from "@/components/calendar/BlockedDatesList";
-import { ComingSoon } from "@/components/shell/ComingSoon";
 import { todayKey } from "@/lib/calendar";
 import type { AvailabilityBlock } from "@/types/artists";
 
@@ -137,17 +136,13 @@ function ArtistCalendar({ userId }: { userId: string }) {
 }
 
 export default function CalendarPage() {
-  const { user, isLoading } = useAuth();
-  if (isLoading || !user) return null;
+  // Artists only. It rendered a "nothing to show for a planner account"
+  // panel instead, which protected the content but left the route a
+  // planner's to land on — reachable by typing the URL or following a
+  // stale link. useRequireRole sends them to their own home.
+  const { user, ready } = useRequireRole("artist");
 
-  if (user.role !== "artist") {
-    return (
-      <ComingSoon
-        title="Calendar"
-        blurb="This page manages an artist's availability — nothing to show for a planner account."
-      />
-    );
-  }
+  if (!ready || !user) return null;
 
   return <ArtistCalendar userId={user.id} />;
 }
