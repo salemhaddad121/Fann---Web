@@ -48,4 +48,21 @@ export interface ApiErrorBody {
   message: string | string[];
   error?: string;
   statusCode?: number;
+  /**
+   * A machine-readable reason, set by the API on the errors a client has to
+   * do something different about. Only EMAIL_NOT_VERIFIED so far.
+   *
+   * It exists because prose is not a contract: "wrong password" and "you
+   * have not verified your email yet" are both a 401 on /auth/login and
+   * need completely different screens, and matching on the message text
+   * breaks the first time someone rewords it.
+   */
+  code?: string;
 }
+
+/**
+ * Login was refused because the address has never been verified. The screen
+ * for this offers to resend the link; it is not a credentials problem and
+ * must not be shown as one.
+ */
+export const EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
