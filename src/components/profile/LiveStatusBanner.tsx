@@ -13,7 +13,10 @@ const COPY: Record<Exclude<UserStatus, "active">, Record<Role, { heading: string
     },
     planner: {
       heading: "Awaiting Payment & Admin Confirmation",
-      body: "Transfer your membership fee via OMT, Wish, or Western Union, then wait for an admin to confirm it. Once confirmed, your profile goes live and you can message artists.",
+      // Whish only. OMT and Western Union are still in the payment_service
+      // enum for historical rows, but they are not offered — naming them
+      // here sent buyers to a service that cannot be selected on /plans.
+      body: "Transfer your membership fee via Whish Money, then tell us the reference number. Once an admin confirms it, your profile goes live and you can message artists.",
     },
   },
   suspended: {
