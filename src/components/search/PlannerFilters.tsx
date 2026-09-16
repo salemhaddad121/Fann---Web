@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import type { SearchPlannersParams } from "@/types/planners";
 
-interface Props {
+export type PlannerFilters = Pick<SearchPlannersParams, "city" | "country" | "sort">;
+
+/** Sort is excluded — see the note on countActiveFilters in SearchFilters. */
+export function countActivePlannerFilters(filters: PlannerFilters): number {
+  return (filters.city ? 1 : 0) + (filters.country ? 1 : 0);
+}
+
+interface TopBarProps {
   query: string;
   onQueryChange: (q: string) => void;
   eventTypes: string[];
@@ -13,43 +19,42 @@ interface Props {
   // toggling each one in a loop: the selection lives in the URL, so every
   // toggle reads the same value and only the last write would survive.
   onClearEventTypes: () => void;
-  filters: Pick<SearchPlannersParams, "city" | "country" | "sort">;
-  onFiltersChange: (next: Props["filters"]) => void;
+  onOpenFilters: () => void;
+  activeFilterCount: number;
 }
 
-export function PlannerFilters({
+/** The planner directory's mirror of SearchTopBar. */
+export function PlannerTopBar({
   query,
   onQueryChange,
   eventTypes,
   selectedEventTypes,
   onToggleEventType,
   onClearEventTypes,
-  filters,
-  onFiltersChange,
-}: Props) {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const activeFilterCount = (filters.city ? 1 : 0) + (filters.country ? 1 : 0);
-
+  onOpenFilters,
+  activeFilterCount,
+}: TopBarProps) {
   return (
-    <div className="bg-surface border-b border-hairline">
+    <div className="border-b border-hairline bg-surface">
       <div className="flex items-center gap-2 px-4 pt-3">
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
-          <i className="ti ti-search text-faint text-base" />
+        <div className="flex flex-1 items-center gap-2 rounded-[10px] border border-hairline bg-sand px-3 py-2">
+          <i className="ti ti-search text-base text-faint" />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search by name or keyword…"
-            className="flex-1 bg-transparent outline-none text-sm text-ink placeholder:text-faint"
+            aria-label="Search planners"
+            className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint"
           />
         </div>
         <button
-          onClick={() => setPanelOpen((v) => !v)}
-          className="relative flex items-center gap-1.5 px-3 py-2 rounded-[10px] border border-hairline text-xs font-medium text-muted"
+          onClick={onOpenFilters}
+          className="relative flex items-center gap-1.5 rounded-[10px] border border-hairline px-3 py-2 text-xs font-medium text-muted lg:hidden"
         >
           <i className="ti ti-adjustments-horizontal text-sm" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-teal text-white text-[9px] flex items-center justify-center">
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-teal text-[9px] text-white">
               {activeFilterCount}
             </span>
           )}
@@ -60,9 +65,9 @@ export function PlannerFilters({
         <div className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
           <button
             onClick={onClearEventTypes}
-            className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
+            className={`shrink-0 rounded-2xl border px-3 py-2 text-xs ${
               selectedEventTypes.length === 0
-                ? "bg-[#dfeceb] text-teal border-[#7fb3b0] font-semibold"
+                ? "border-[#7fb3b0] bg-[#dfeceb] font-semibold text-teal"
                 : "border-hairline text-muted"
             }`}
           >
@@ -72,9 +77,9 @@ export function PlannerFilters({
             <button
               key={type}
               onClick={() => onToggleEventType(type)}
-              className={`shrink-0 px-3 py-1 rounded-2xl text-xs border ${
+              className={`shrink-0 rounded-2xl border px-3 py-2 text-xs ${
                 selectedEventTypes.includes(type)
-                  ? "bg-[#dfeceb] text-teal border-[#7fb3b0] font-semibold"
+                  ? "border-[#7fb3b0] bg-[#dfeceb] font-semibold text-teal"
                   : "border-hairline text-muted"
               }`}
             >
@@ -83,42 +88,38 @@ export function PlannerFilters({
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      {panelOpen && (
-        <div className="px-4 pb-4 pt-1 grid grid-cols-2 gap-3 border-t border-hairline">
-          <label className="text-xs">
-            <span className="block font-semibold text-ink mb-1">City</span>
-            <input
-              value={filters.city ?? ""}
-              onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
-              placeholder="e.g. Beirut"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
-            />
-          </label>
-          <label className="text-xs">
-            <span className="block font-semibold text-ink mb-1">Country</span>
-            <input
-              value={filters.country ?? ""}
-              onChange={(e) => onFiltersChange({ ...filters, country: e.target.value || undefined })}
-              placeholder="e.g. Lebanon"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
-            />
-          </label>
-          <label className="col-span-2 text-xs">
-            <span className="block font-semibold text-ink mb-1">Sort by</span>
-            <select
-              value={filters.sort ?? "newest"}
-              onChange={(e) =>
-                onFiltersChange({ ...filters, sort: e.target.value as SearchPlannersParams["sort"] })
-              }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal bg-surface"
-            >
-              <option value="newest">Newest</option>
-              <option value="name_asc">Name: A to Z</option>
-            </select>
-          </label>
-        </div>
-      )}
+/** Rendered by FilterRail at >=1024px and FilterSheet below it. */
+export function PlannerFilterFields({
+  filters,
+  onFiltersChange,
+}: {
+  filters: PlannerFilters;
+  onFiltersChange: (next: PlannerFilters) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <label className="block text-xs">
+        <span className="mb-1 block font-semibold text-ink">City</span>
+        <input
+          value={filters.city ?? ""}
+          onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
+          placeholder="e.g. Beirut"
+          className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
+        />
+      </label>
+      <label className="block text-xs">
+        <span className="mb-1 block font-semibold text-ink">Country</span>
+        <input
+          value={filters.country ?? ""}
+          onChange={(e) => onFiltersChange({ ...filters, country: e.target.value || undefined })}
+          placeholder="e.g. Lebanon"
+          className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-teal"
+        />
+      </label>
     </div>
   );
 }

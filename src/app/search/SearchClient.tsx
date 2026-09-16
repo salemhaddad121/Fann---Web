@@ -8,8 +8,21 @@ import { searchArtists, getCategories } from "@/lib/artists-api";
 import { searchPlanners, getEventTypes } from "@/lib/planners-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
-import { SearchFilters } from "@/components/search/SearchFilters";
-import { PlannerFilters } from "@/components/search/PlannerFilters";
+import {
+  SearchTopBar,
+  ArtistFilterFields,
+  countActiveFilters,
+  type ArtistFilters,
+} from "@/components/search/SearchFilters";
+import {
+  PlannerTopBar,
+  PlannerFilterFields,
+  countActivePlannerFilters,
+  type PlannerFilters as PlannerFiltersState,
+} from "@/components/search/PlannerFilters";
+import { FilterRail, FilterSheet } from "@/components/search/FilterShell";
+import { ResultBar, type ActiveChip } from "@/components/search/ResultBar";
+import { CardSkeletonGrid } from "@/components/search/CardSkeleton";
 import { ArtistCard } from "@/components/search/ArtistCard";
 import { PlannerCard } from "@/components/search/PlannerCard";
 import {
@@ -25,8 +38,25 @@ import {
 import type { ArtistCard as ArtistCardType, CategoryGroup, SearchArtistsParams } from "@/types/artists";
 import type { PlannerCard as PlannerCardType, SearchPlannersParams } from "@/types/planners";
 
-type Filters = Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
-type PlannerFiltersState = Pick<SearchPlannersParams, "city" | "country" | "sort">;
+type Filters = ArtistFilters;
+
+/**
+ * The page size the API is asked for, mirrored here so the loading grid
+ * shows the number of placeholders a full page would actually contain.
+ * searchArtists/searchPlanners hardcode limit=20.
+ */
+const PAGE_SIZE = 20;
+
+/** Shared grid geometry. See item 12 for why it stops at four columns. */
+const GRID_CLASS = "grid grid-cols-2 gap-2.5 pb-6 sm:grid-cols-3 xl:grid-cols-4";
+
+/** A price filter as one chip: a range, a floor, or a ceiling. */
+function priceChipLabel(min?: number, max?: number): string | null {
+  if (min !== undefined && max !== undefined) return `$${min}–$${max}`;
+  if (min !== undefined) return `From $${min}`;
+  if (max !== undefined) return `Up to $${max}`;
+  return null;
+}
 
 /*
  * The query string is the state, not a copy of it.
@@ -76,6 +106,7 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   function replaceUrl(next: { q: string; categories: string[]; page: number }) {
     const qs = buildArtistSearchQuery(next);
@@ -252,9 +283,64 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
     replaceUrl({ q: query, categories: selectionToUrlSlugs(selection), page: next });
   }
 
+  /**
+   * Resets every filter, but keeps the text query.
+   *
+   * "Clear all filters" should undo exactly what the chips above it show,
+   * and the category selection is one of them. The typed query is not a
+   * filter in that sense — someone who searched "jazz" and then narrowed it
+   * wants the narrowing gone, not their search.
+   *
+   * Sort is kept for the same reason: it removes nothing, so clearing it
+   * would be a change nobody asked for.
+   */
+  function clearAllFilters() {
+    setFilters(filters.sort ? { sort: filters.sort } : {});
+    replaceUrl({ q: query, categories: [], page: 1 });
+  }
+
+  const priceLabel = priceChipLabel(filters.minPrice, filters.maxPrice);
+  const chips: ActiveChip[] = [
+    selectedGroup
+      ? {
+          key: "category",
+          label:
+            selectedSubs.length > 0
+              ? `${groups.find((g) => g.slug === selectedGroup)?.name ?? selectedGroup} (${selectedSubs.length})`
+              : (groups.find((g) => g.slug === selectedGroup)?.name ?? selectedGroup),
+          onRemove: () => selectGroup(null),
+        }
+      : null,
+    filters.city
+      ? {
+          key: "city",
+          label: filters.city,
+          onRemove: () => updateFilters({ ...filters, city: undefined }),
+        }
+      : null,
+    priceLabel
+      ? {
+          key: "price",
+          label: priceLabel,
+          onRemove: () => updateFilters({ ...filters, minPrice: undefined, maxPrice: undefined }),
+        }
+      : null,
+    filters.verifiedOnly
+      ? {
+          key: "verified",
+          label: "Verified",
+          onRemove: () => updateFilters({ ...filters, verifiedOnly: undefined }),
+        }
+      : null,
+  ].filter((c): c is ActiveChip => c !== null);
+
+  const resultLabel = loading
+    ? "Show results"
+    : `Show ${meta.total} artist${meta.total === 1 ? "" : "s"}`;
+
   return (
     <div>
-      <SearchFilters
+      <SearchTopBar
         query={rawQuery}
         onQueryChange={setRawQuery}
         groups={groups}
@@ -263,57 +349,100 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         selectedSubs={selectedSubs}
         onToggleSub={toggleSub}
         onClearSubs={clearSubs}
-        filters={filters}
-        onFiltersChange={updateFilters}
+        onOpenFilters={() => setSheetOpen(true)}
+        activeFilterCount={countActiveFilters(filters)}
       />
 
-      <div className="flex items-center justify-between px-4 pt-3 pb-1.5">
-        <span className="text-xs text-faint">
-          {loading ? "Searching…" : `${meta.total} artist${meta.total === 1 ? "" : "s"} found`}
-        </span>
+      {/* The rail and the grid are siblings, so the grid holds its position
+          while filters change instead of being pushed down by a panel. */}
+      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 lg:px-5">
+        <FilterRail>
+          <ArtistFilterFields filters={filters} onFiltersChange={updateFilters} />
+        </FilterRail>
+
+        <div className="min-w-0 flex-1">
+          <div className="-mx-4 lg:mx-0">
+            <ResultBar
+              loading={loading}
+              total={meta.total}
+              noun="artist"
+              chips={chips}
+              onClearAll={clearAllFilters}
+              sort={filters.sort ?? "newest"}
+              sortOptions={[
+                { value: "newest", label: "Newest" },
+                { value: "price_asc", label: "Price: low to high" },
+                { value: "price_desc", label: "Price: high to low" },
+              ]}
+              onSortChange={(next) =>
+                updateFilters({ ...filters, sort: next as SearchArtistsParams["sort"] })
+              }
+              accent="clay"
+            />
+          </div>
+
+          {error && <p className="py-6 text-sm text-danger">{error}</p>}
+
+          {!error && !loading && results.length === 0 && (
+            <div className="flex flex-col items-center px-8 py-16 text-center">
+              <i className="ti ti-mood-empty mb-2 text-2xl text-faint" />
+              <p className="text-sm text-muted">No artists match those filters yet.</p>
+              {/* An empty state with nothing to tap is a dead end — this is
+                  the way back out of it. */}
+              {chips.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="mt-4 rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className={GRID_CLASS}>
+            {loading ? (
+              <CardSkeletonGrid count={Math.min(PAGE_SIZE, 8)} />
+            ) : (
+              results.map((artist) => (
+                <ArtistCard
+                  key={artist.id}
+                  artist={artist}
+                  isSaved={isPlanner ? savedIds.has(artist.id) : undefined}
+                  onToggleSave={isPlanner ? () => toggleSave(artist.id) : undefined}
+                />
+              ))
+            )}
+          </div>
+
+          {meta.pages > 1 && (
+            <div className="flex items-center justify-center gap-4 pb-8 text-sm">
+              <button
+                disabled={page <= 1}
+                onClick={() => goToPage(page - 1)}
+                className="rounded-[10px] border border-hairline px-3 py-1.5 text-muted disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-muted">
+                Page {page} of {meta.pages}
+              </span>
+              <button
+                disabled={page >= meta.pages}
+                onClick={() => goToPage(page + 1)}
+                className="rounded-[10px] border border-hairline px-3 py-1.5 text-muted disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {error && <p className="px-4 py-6 text-sm text-danger">{error}</p>}
-
-      {!error && !loading && results.length === 0 && (
-        <div className="flex flex-col items-center text-center px-8 py-16">
-          <i className="ti ti-mood-empty text-2xl text-faint mb-2" />
-          <p className="text-sm text-muted">No artists match those filters yet.</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
-        {results.map((artist) => (
-          <ArtistCard
-            key={artist.id}
-            artist={artist}
-            isSaved={isPlanner ? savedIds.has(artist.id) : undefined}
-            onToggleSave={isPlanner ? () => toggleSave(artist.id) : undefined}
-          />
-        ))}
-      </div>
-
-      {meta.pages > 1 && (
-        <div className="flex items-center justify-center gap-4 pb-8 text-sm">
-          <button
-            disabled={page <= 1}
-            onClick={() => goToPage(page - 1)}
-            className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <span className="text-faint">
-            Page {page} of {meta.pages}
-          </span>
-          <button
-            disabled={page >= meta.pages}
-            onClick={() => goToPage(page + 1)}
-            className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <FilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} resultLabel={resultLabel}>
+        <ArtistFilterFields filters={filters} onFiltersChange={updateFilters} />
+      </FilterSheet>
     </div>
   );
 }
@@ -339,6 +468,7 @@ function PlannerDirectory() {
   const [meta, setMeta] = useState({ total: 0, pages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   function replaceUrl(next: { q: string; eventTypes: string[]; page: number }) {
     const qs = buildPlannerSearchQuery(next);
@@ -435,61 +565,134 @@ function PlannerDirectory() {
     replaceUrl({ q: query, eventTypes: selectedEventTypes, page: next });
   }
 
+  /** Same contract as the artist directory's — see the note there. */
+  function clearAllFilters() {
+    setFilters(filters.sort ? { sort: filters.sort } : {});
+    replaceUrl({ q: query, eventTypes: [], page: 1 });
+  }
+
+  const chips: ActiveChip[] = [
+    selectedEventTypes.length > 0
+      ? {
+          key: "eventTypes",
+          label:
+            selectedEventTypes.length === 1
+              ? selectedEventTypes[0]
+              : `${selectedEventTypes.length} event types`,
+          onRemove: clearEventTypes,
+        }
+      : null,
+    filters.city
+      ? {
+          key: "city",
+          label: filters.city,
+          onRemove: () => updateFilters({ ...filters, city: undefined }),
+        }
+      : null,
+    filters.country
+      ? {
+          key: "country",
+          label: filters.country,
+          onRemove: () => updateFilters({ ...filters, country: undefined }),
+        }
+      : null,
+  ].filter((c): c is ActiveChip => c !== null);
+
+  const resultLabel = loading
+    ? "Show results"
+    : `Show ${meta.total} planner${meta.total === 1 ? "" : "s"}`;
+
   return (
     <div>
-      <PlannerFilters
+      <PlannerTopBar
         query={rawQuery}
         onQueryChange={setRawQuery}
         eventTypes={eventTypes}
         selectedEventTypes={selectedEventTypes}
         onToggleEventType={toggleEventType}
         onClearEventTypes={clearEventTypes}
-        filters={filters}
-        onFiltersChange={updateFilters}
+        onOpenFilters={() => setSheetOpen(true)}
+        activeFilterCount={countActivePlannerFilters(filters)}
       />
 
-      <div className="flex items-center justify-between px-4 pt-3 pb-1.5">
-        <span className="text-xs text-faint">
-          {loading ? "Searching…" : `${meta.total} planner${meta.total === 1 ? "" : "s"} found`}
-        </span>
+      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 lg:px-5">
+        <FilterRail>
+          <PlannerFilterFields filters={filters} onFiltersChange={updateFilters} />
+        </FilterRail>
+
+        <div className="min-w-0 flex-1">
+          <div className="-mx-4 lg:mx-0">
+            <ResultBar
+              loading={loading}
+              total={meta.total}
+              noun="planner"
+              chips={chips}
+              onClearAll={clearAllFilters}
+              sort={filters.sort ?? "newest"}
+              sortOptions={[
+                { value: "newest", label: "Newest" },
+                { value: "name_asc", label: "Name: A to Z" },
+              ]}
+              onSortChange={(next) =>
+                updateFilters({ ...filters, sort: next as SearchPlannersParams["sort"] })
+              }
+              accent="teal"
+            />
+          </div>
+
+          {error && <p className="py-6 text-sm text-danger">{error}</p>}
+
+          {!error && !loading && results.length === 0 && (
+            <div className="flex flex-col items-center px-8 py-16 text-center">
+              <i className="ti ti-mood-empty mb-2 text-2xl text-faint" />
+              <p className="text-sm text-muted">No planners match those filters yet.</p>
+              {chips.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="mt-4 rounded-[10px] bg-teal px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className={GRID_CLASS}>
+            {loading ? (
+              <CardSkeletonGrid count={Math.min(PAGE_SIZE, 8)} />
+            ) : (
+              results.map((planner) => <PlannerCard key={planner.id} planner={planner} />)
+            )}
+          </div>
+
+          {meta.pages > 1 && (
+            <div className="flex items-center justify-center gap-4 pb-8 text-sm">
+              <button
+                disabled={page <= 1}
+                onClick={() => goToPage(page - 1)}
+                className="rounded-[10px] border border-hairline px-3 py-1.5 text-muted disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-muted">
+                Page {page} of {meta.pages}
+              </span>
+              <button
+                disabled={page >= meta.pages}
+                onClick={() => goToPage(page + 1)}
+                className="rounded-[10px] border border-hairline px-3 py-1.5 text-muted disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {error && <p className="px-4 py-6 text-sm text-danger">{error}</p>}
-
-      {!error && !loading && results.length === 0 && (
-        <div className="flex flex-col items-center text-center px-8 py-16">
-          <i className="ti ti-mood-empty text-2xl text-faint mb-2" />
-          <p className="text-sm text-muted">No planners match those filters yet.</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 px-4 pb-6">
-        {results.map((planner) => (
-          <PlannerCard key={planner.id} planner={planner} />
-        ))}
-      </div>
-
-      {meta.pages > 1 && (
-        <div className="flex items-center justify-center gap-4 pb-8 text-sm">
-          <button
-            disabled={page <= 1}
-            onClick={() => goToPage(page - 1)}
-            className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <span className="text-faint">
-            Page {page} of {meta.pages}
-          </span>
-          <button
-            disabled={page >= meta.pages}
-            onClick={() => goToPage(page + 1)}
-            className="px-3 py-1.5 rounded-[10px] border border-hairline text-muted disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <FilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} resultLabel={resultLabel}>
+        <PlannerFilterFields filters={filters} onFiltersChange={updateFilters} />
+      </FilterSheet>
     </div>
   );
 }
