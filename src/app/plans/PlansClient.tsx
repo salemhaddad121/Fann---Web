@@ -17,17 +17,109 @@ import { formatUsd, formatVatRate } from "@/lib/format";
 import {
   TRANSFER_SERVICES,
   type PaymentIntent,
+  type PaymentRecipient,
   type PlanCode,
   type SubscriptionPlan,
   type TransferService,
 } from "@/types/subscriptions";
 
+// Only what is offered. The admin panel keeps its own map covering OMT and
+// Western Union so historical payments still render — see PaymentsTab.tsx.
 const SERVICE_LABELS: Record<TransferService, string> = {
-  OMT: "OMT",
   Wish: "Whish Money",
-  WesternUnion: "Western Union",
   other: "Other",
 };
+
+/**
+ * Where the money goes.
+ *
+ * Rendered from the API's structured `recipient` rather than parsed out of
+ * the instruction string, so the account number can be given its own line,
+ * its own weight and a copy button.
+ *
+ * When the API sends no recipient — the WHISH_* environment variables are
+ * unset — this says so plainly instead of rendering an empty card. A
+ * heading above two blank lines reads as a broken page; a buyer who is
+ * told the details are missing at least knows to ask, and the API logs the
+ * same condition at error level.
+ */
+function RecipientBlock({ recipient }: { recipient: PaymentRecipient | null }) {
+  const [copied, setCopied] = useState(false);
+
+  if (!recipient) {
+    return (
+      <div className="mt-4 rounded-xl border border-[#FCA5A5] bg-danger-bg p-4">
+        <p className="text-sm font-semibold text-danger">
+          Payment details are temporarily unavailable
+        </p>
+        <p className="mt-1 text-sm text-danger">
+          Don&apos;t transfer anything yet. Contact support with reference code{" "}
+          <span className="font-mono font-semibold">above</span> and we&apos;ll send
+          you the account details.
+        </p>
+      </div>
+    );
+  }
+
+  async function copyNumber() {
+    try {
+      await navigator.clipboard.writeText(recipient!.accountNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard is blocked in some browsers and every insecure origin.
+      // The number is on screen and selectable either way, so there is
+      // nothing to tell the user — the button just does not confirm.
+    }
+  }
+
+  return (
+    <div className="mt-4 rounded-xl border-2 border-clay bg-sand p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-clay-deep">
+        Send the transfer to
+      </p>
+
+      <dl className="mt-2.5 space-y-2">
+        <div>
+          <dt className="text-xs text-faint">Service</dt>
+          <dd className="text-sm font-semibold text-ink">{recipient.service}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-faint">Account name</dt>
+          <dd className="text-sm font-semibold text-ink">{recipient.accountName}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-faint">Account number</dt>
+          <dd className="flex items-center gap-2">
+            <span className="font-mono text-base font-bold tracking-wide text-ink">
+              {recipient.accountNumber}
+            </span>
+            <button
+              type="button"
+              onClick={copyNumber}
+              className="rounded-md border border-hairline bg-surface px-2 py-1 text-xs font-semibold text-clay-deep"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </dd>
+        </div>
+        {recipient.reference && (
+          <div>
+            <dt className="text-xs text-faint">Branch / reference</dt>
+            <dd className="text-sm font-semibold text-ink">{recipient.reference}</dd>
+          </div>
+        )}
+      </dl>
+
+      {/* What happens if it goes wrong. A transfer is irreversible from the
+          buyer's side, so "what if this fails" is the question they are
+          holding when they decide whether to send it. */}
+      <p className="mt-3 border-t border-hairline pt-2.5 text-xs text-muted">
+        {recipient.ifItFails}
+      </p>
+    </div>
+  );
+}
 
 /**
  * Payment instructions.
@@ -37,7 +129,9 @@ const SERVICE_LABELS: Record<TransferService, string> = {
  * transfer that arrives without it has to be reconciled by hand.
  */
 function TransferInstructions({ intent }: { intent: PaymentIntent }) {
-  const [service, setService] = useState<TransferService>("OMT");
+  // Whish is the only service offered, so it is the default rather than
+  // something the buyer has to notice and change.
+  const [service, setService] = useState<TransferService>("Wish");
   const [reference, setReference] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
@@ -137,6 +231,12 @@ function TransferInstructions({ intent }: { intent: PaymentIntent }) {
           </div>
         )}
       </dl>
+
+      {/* Who to pay. The most prominent block after the amount, because
+          without it this screen tells a buyer exactly how much to transfer
+          and nothing about where — which is where every booker who decided
+          to buy stopped. */}
+      <RecipientBlock recipient={intent.recipient} />
 
       {error && <Banner kind="error">{error}</Banner>}
 

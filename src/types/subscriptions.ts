@@ -39,6 +39,14 @@ export interface ActiveSubscription {
   expires_at: string | null;
   requires_id_doc: boolean;
   message_cap: number | null;
+  /**
+   * How many messages this plan still allows, or null when it is uncapped.
+   *
+   * null and 0 are different answers and must stay that way: an uncapped
+   * plan shows no counter at all, a spent day pass shows "0 left". Counted
+   * per period, so buying another pass resets it.
+   */
+  messages_remaining: number | null;
 }
 
 export interface MySubscriptions {
@@ -70,6 +78,30 @@ export interface PaymentIntent {
   created_at: string;
   /** The reconciliation code the buyer must quote on the transfer. */
   account_code: string | null;
+  /**
+   * Who to send the money to, for a flow where the buyer moves it
+   * themselves. Null for a provider that takes the payment itself.
+   *
+   * Structured rather than folded into `instructions`, and that is the
+   * point of it: an account number inside a sentence cannot be made the
+   * most prominent thing on the screen, given a copy button, or checked
+   * for presence. The payment step shipped saying "Transfer $5.55. Quote
+   * reference PLN-000015." and never once saying who to send it to.
+   */
+  recipient: PaymentRecipient | null;
+}
+
+export interface PaymentRecipient {
+  /** Which service the transfer is made through, e.g. "Whish Money". */
+  service: string;
+  /** The name the account is registered under. Buyers check this. */
+  accountName: string;
+  /** Account number, or the phone number a wallet is keyed by. */
+  accountNumber: string;
+  /** Branch, IBAN or anything else the service needs. Often absent. */
+  reference?: string;
+  /** What to do if the transfer fails, bounces or is reversed. */
+  ifItFails: string;
 }
 
 export interface MyPayment {
@@ -90,5 +122,21 @@ export interface MyPayment {
   created_at: string;
 }
 
-export const TRANSFER_SERVICES = ["OMT", "Wish", "WesternUnion", "other"] as const;
+/**
+ * The transfer services a buyer may SELECT today. Whish only.
+ *
+ * Mirrors TRANSFER_SERVICES in the API's subscriptions.dto.ts, and is
+ * deliberately narrower than the payment_service enum behind it. That enum
+ * still carries 'OMT' and 'WesternUnion' and is not migrated: historical
+ * rows reference them, and the admin panel keeps its own label map
+ * (PaymentsTab.tsx) covering all four so old payments stay readable. What a
+ * new purchase may claim and what an old one already says are different
+ * questions.
+ *
+ * Note the spelling. 'Wish' is wrong and is known to be wrong — it is the
+ * enum value with seed data behind it, and both this page and the admin
+ * panel map it to "Whish Money" for display. Do not add a second
+ * misspelling, and do not fix this one here.
+ */
+export const TRANSFER_SERVICES = ["Wish", "other"] as const;
 export type TransferService = (typeof TRANSFER_SERVICES)[number];
