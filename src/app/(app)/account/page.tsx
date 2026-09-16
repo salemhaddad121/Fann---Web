@@ -454,12 +454,18 @@ export default function AccountPage() {
                 user.phoneVerifiedAt ? (
                   <i className="ti ti-rosette-discount-check text-success text-sm" />
                 ) : (
-                  <Link href="/auth/verify-phone" className="text-xs font-semibold text-clay">
+                  <Link
+                    href="/auth/verify-phone"
+                    className="-my-3 flex h-11 items-center px-1 text-xs font-semibold text-clay"
+                  >
                     Verify
                   </Link>
                 )
               ) : (
-                <Link href="/auth/verify-phone" className="text-xs font-semibold text-clay">
+                <Link
+                  href="/auth/verify-phone"
+                  className="-my-3 flex h-11 items-center px-1 text-xs font-semibold text-clay"
+                >
                   Add
                 </Link>
               )

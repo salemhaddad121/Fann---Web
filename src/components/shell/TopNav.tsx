@@ -31,7 +31,7 @@ export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNo
       <div className="flex items-center gap-2.5">
         <Link
           href="/notifications"
-          className="relative w-[34px] h-[34px] rounded-full border border-hairline flex items-center justify-center text-muted"
+          className="relative w-10 h-10 rounded-full border border-hairline flex items-center justify-center text-muted"
           aria-label={unreadNotifications > 0 ? `${unreadNotifications} unread notifications` : "Notifications"}
         >
           <i className="ti ti-bell text-[17px]" />
@@ -41,7 +41,7 @@ export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNo
         </Link>
         <Link
           href="/account"
-          className={`w-[34px] h-[34px] rounded-full flex items-center justify-center text-xs font-semibold border ${avatarClass}`}
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold border ${avatarClass}`}
           aria-label="Account settings"
         >
           {initials(user)}
