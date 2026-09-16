@@ -3,17 +3,6 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
-- `src/app/(app)/messages/page.tsx:71,73` — a conversation that is an
-  incoming request renders TWICE: once under "Message requests" from
-  `requests`, and again in the main list from `filtered`. Both are filters
-  over the same `conversations` array and `filtered` does not exclude
-  requests, so both `.map()`s emit `key={c.id}` for the same row. React logs
-  "Encountered two children with the same key", and the e2e "loads clean"
-  check fails on /messages for any account with a pending incoming request
-  (reproduced as marwan.abikhalil@gmail.com; karim.nassar@gmail.com has none,
-  which is why it passes there). The comment at :191 says "Requests aren't
-  conversations yet", so excluding them from `filtered` looks like the
-  intended behaviour that was never written.
 - `playwright.config.ts` — the local default of 4 workers makes "links
   resolve" flaky against `next dev`. That test does a sequential
   `page.request.get()` for every internal link on a page (the footer alone
