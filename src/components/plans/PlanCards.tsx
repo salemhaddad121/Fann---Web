@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { PlanCode, SubscriptionPlan } from "@/types/subscriptions";
+import { PLAN_COPY } from "@/lib/plan-copy";
 
 /**
  * The three-card pricing block.
@@ -15,25 +16,12 @@ import type { PlanCode, SubscriptionPlan } from "@/types/subscriptions";
  * day passes, the ID requirement on the longer plans, and what each works
  * out to per day — plus the honest saving on the yearly.
  *
+ * Names and taglines come from lib/plan-copy.ts, which the landing page's
+ * summary block reads too.
+ *
  * Everything except the wording is derived from the plan rows the API
  * returns, so a price or cap change in the database moves the page.
  */
-
-const PLAN_COPY: Record<PlanCode, { name: string; tagline: string; featured?: boolean }> = {
-  day: {
-    name: "Day pass",
-    tagline: "For one event you're booking right now.",
-  },
-  month: {
-    name: "Monthly",
-    tagline: "For planners with something on every few weeks.",
-  },
-  year: {
-    name: "Yearly",
-    tagline: "For venues and agencies booking all year round.",
-    featured: true,
-  },
-};
 
 function perDay(plan: SubscriptionPlan): string {
   return `$${(plan.price_usd / plan.duration_days).toFixed(2)} per day`;
