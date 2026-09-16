@@ -32,7 +32,7 @@ export function MessageList({
     <div className="flex flex-col gap-0.5">
       {groups.map((group) => (
         <div key={group.day}>
-          <div className="flex items-center gap-2 text-[11px] text-faint py-2">
+          <div className="flex items-center gap-2 text-[12px] text-faint py-2">
             <span className="flex-1 h-px bg-hairline" />
             {group.day}
             <span className="flex-1 h-px bg-hairline" />
@@ -50,7 +50,7 @@ export function MessageList({
                 >
                   {m.body}
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-faint mt-0.5 px-1">
+                <div className="flex items-center gap-1 text-[12px] text-faint mt-0.5 px-1">
                   {formatTime(m.created_at)}
                   {isMine && (
                     <i className={`ti ${m.read_at ? "ti-checks" : "ti-check"} text-xs ${accentText}`} />

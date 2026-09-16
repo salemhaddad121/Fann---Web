@@ -59,7 +59,7 @@ export function ArtistCard({
         )}
         {primaryCategory && (
           <span
-            className={`absolute top-1.5 left-1.5 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-lg ${badgeColor(primaryCategory.slug)}`}
+            className={`absolute top-1.5 left-1.5 z-10 text-[12px] font-semibold px-2 py-0.5 rounded-lg ${badgeColor(primaryCategory.slug)}`}
           >
             {primaryCategory.name}
           </span>

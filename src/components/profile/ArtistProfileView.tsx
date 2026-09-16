@@ -187,7 +187,7 @@ export function ArtistProfileView({
             </div>
           </div>
           <span
-            className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-2xl border ${
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-2xl border ${
               unavailableToday
                 ? "border-hairline text-faint"
                 : "border-[#86EFAC] text-success"
@@ -348,7 +348,7 @@ function Stat({ icon, value, label, last }: { icon: string; value: string; label
     <div className={`flex-1 py-2.5 text-center ${last ? "" : "border-r border-hairline"}`}>
       <i className={`ti ${icon} text-base text-clay block mb-1`} />
       <div className="text-base font-bold text-ink">{value}</div>
-      <div className="text-[10px] text-faint">{label}</div>
+      <div className="text-[12px] text-faint">{label}</div>
     </div>
   );
 }
