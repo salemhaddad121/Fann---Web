@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -22,6 +23,21 @@ import type { CategoryGroup, MediaItem } from "@/types/artists";
 
 const SOCIAL_PLATFORMS = ["instagram", "youtube", "spotify", "tiktok", "facebook", "website"] as const;
 
+/**
+ * Six URL fields, one per platform.
+ *
+ * Each had a placeholder and nothing else: no label, no id, no name. A
+ * placeholder is not a label — it is announced inconsistently, it
+ * disappears the moment anyone types, and it leaves the field nameless to
+ * autofill. These are the six inputs that made /profile/edit's
+ * accessibility finding what it was.
+ *
+ * A visible <label> per row would triple the height of the block for six
+ * fields whose purpose is obvious from the icon-free placeholder, so the
+ * name is carried on aria-label and the group keeps its heading. The
+ * grouping is a fieldset/legend so the heading is announced as the thing
+ * these six belong to rather than as loose text above them.
+ */
 function SocialLinksEditor({
   value,
   onChange,
@@ -30,18 +46,63 @@ function SocialLinksEditor({
   onChange: (next: Record<string, string>) => void;
 }) {
   return (
-    <div className="mb-4">
-      <span className="block text-xs font-semibold text-ink mb-1.5">Social links</span>
+    <fieldset className="mb-4 border-0 p-0">
+      <legend className="block text-xs font-semibold text-ink mb-1.5">Social links</legend>
       <div className="flex flex-col gap-2">
-        {SOCIAL_PLATFORMS.map((platform) => (
-          <input
-            key={platform}
-            value={value[platform] ?? ""}
-            onChange={(e) => onChange({ ...value, [platform]: e.target.value })}
-            placeholder={`${platform[0].toUpperCase()}${platform.slice(1)} URL`}
-            className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
-          />
-        ))}
+        {SOCIAL_PLATFORMS.map((platform) => {
+          const name = `${platform[0].toUpperCase()}${platform.slice(1)}`;
+          return (
+            <input
+              key={platform}
+              name={`social-${platform}`}
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              aria-label={`${name} URL`}
+              value={value[platform] ?? ""}
+              onChange={(e) => onChange({ ...value, [platform]: e.target.value })}
+              placeholder={`${name} URL`}
+              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
+            />
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+/**
+ * What a failed load looks like now.
+ *
+ * It used to look like "Loading…", for ever. `loaded` was only set on
+ * success and the catch set `error`, which is rendered inside the form —
+ * a branch the early return never reached. So every failure, including the
+ * missing profile row that was B1, presented as a hang: no message, no
+ * retry, no way to tell a slow network from a broken account.
+ *
+ * The retry matters as much as the message. The most common cause of a
+ * failed load here is transient, and without a control the only recovery
+ * on offer is a full page reload the user has to think of themselves.
+ */
+function LoadFailed({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto max-w-lg px-4 py-10 text-center" role="alert">
+      <p className="text-sm font-semibold text-ink">Couldn&apos;t load your profile</p>
+      <p className="mt-1 text-sm text-muted">
+        This is usually a connection problem. Try again — if it keeps happening,
+        let us know and we&apos;ll look into it.
+      </p>
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
+        >
+          Try again
+        </button>
+        <Link href="/help" className="text-sm font-semibold text-clay-deep underline">
+          Get help
+        </Link>
       </div>
     </div>
   );
@@ -52,6 +113,10 @@ function ArtistEditForm({ accent }: { accent: string }) {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Re-runs the load effect. A counter rather than calling the fetch
+  // directly, so the retry path is the same code as the first attempt —
+  // and so nothing sets state from inside an effect body.
+  const [reloadCount, setReloadCount] = useState(0);
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
 
   const [displayName, setDisplayName] = useState("");
@@ -85,11 +150,13 @@ function ArtistEditForm({ accent }: { accent: string }) {
         setCategoryGroups(groups);
         setLoaded(true);
       })
-      .catch(() => setError("Couldn't load your profile."));
+      .catch(() => {
+        if (!cancelled) setError("Couldn't load your profile.");
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadCount]);
 
   // Recomputed on every render so the notice tracks uploads and deletions
   // immediately, rather than waiting for a save round trip.
@@ -131,16 +198,36 @@ function ArtistEditForm({ accent }: { accent: string }) {
     }
   }
 
-  if (!loaded) return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
+  // A failed load used to leave this on "Loading…" for ever: `loaded` was
+  // only set on success, and the catch set `error`, which is rendered
+  // INSIDE the form below — a branch this return never reached. That is
+  // what B1 looked like from the outside, and it is why a missing profile
+  // row read as a hang rather than as a fault.
+  if (error && !loaded) {
+    return (
+      <LoadFailed
+        onRetry={() => {
+          setError(null);
+          setReloadCount((n) => n + 1);
+        }}
+      />
+    );
+  }
+  if (!loaded) return <p className="px-4 py-10 text-sm text-muted" role="status">Loading…</p>;
 
   return (
     <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto pb-24">
+      {/* The page had no heading of any level — 14 fields and nothing
+          naming the form. A screen-reader user landing here had no way to
+          tell what they were editing without reading every label. */}
+      <h1 className="mb-4 text-lg font-bold text-ink">Edit your artist profile</h1>
       {error && <Banner kind="error">{error}</Banner>}
 
-      <FormField label="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+      <FormField label="Display name" name="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
       <label className="block mb-4">
         <span className="block text-xs font-semibold text-ink mb-1.5">Bio</span>
         <textarea
+          name="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={4}
@@ -148,12 +235,13 @@ function ArtistEditForm({ accent }: { accent: string }) {
         />
       </label>
       <div className="grid grid-cols-2 gap-3">
-        <FormField label="City" value={city} onChange={(e) => setCity(e.target.value)} />
-        <FormField label="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
+        <FormField label="City" name="locationCity" value={city} onChange={(e) => setCity(e.target.value)} />
+        <FormField label="Country" name="locationCountry" value={country} onChange={(e) => setCountry(e.target.value)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <FormField
           label="Starting price (USD)"
+          name="basePriceUsd"
           type="number"
           min={0}
           value={price}
@@ -165,6 +253,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
             on save and read as "no deposit". */}
         <FormField
           label="Deposit (USD)"
+          name="depositUsd"
           inputMode="decimal"
           value={deposit}
           onChange={(e) => setDeposit(decimalOnly(e.target.value))}
@@ -180,6 +269,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
           Cancellation policy
         </span>
         <textarea
+          name="cancellationPolicy"
           value={cancellationPolicy}
           onChange={(e) => setCancellationPolicy(e.target.value)}
           rows={3}
@@ -248,6 +338,10 @@ function PlannerEditForm({ accent }: { accent: string }) {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Re-runs the load effect. A counter rather than calling the fetch
+  // directly, so the retry path is the same code as the first attempt —
+  // and so nothing sets state from inside an effect body.
+  const [reloadCount, setReloadCount] = useState(0);
 
   const [displayName, setDisplayName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -275,11 +369,13 @@ function PlannerEditForm({ accent }: { accent: string }) {
         setMedia(profile.media ?? []);
         setLoaded(true);
       })
-      .catch(() => setError("Couldn't load your profile."));
+      .catch(() => {
+        if (!cancelled) setError("Couldn't load your profile.");
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadCount]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -304,17 +400,34 @@ function PlannerEditForm({ accent }: { accent: string }) {
     }
   }
 
-  if (!loaded) return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
+  // A failed load used to leave this on "Loading…" for ever: `loaded` was
+  // only set on success, and the catch set `error`, which is rendered
+  // INSIDE the form below — a branch this return never reached. That is
+  // what B1 looked like from the outside, and it is why a missing profile
+  // row read as a hang rather than as a fault.
+  if (error && !loaded) {
+    return (
+      <LoadFailed
+        onRetry={() => {
+          setError(null);
+          setReloadCount((n) => n + 1);
+        }}
+      />
+    );
+  }
+  if (!loaded) return <p className="px-4 py-10 text-sm text-muted" role="status">Loading…</p>;
 
   return (
     <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto pb-24">
+      <h1 className="mb-4 text-lg font-bold text-ink">Edit your planner profile</h1>
       {error && <Banner kind="error">{error}</Banner>}
 
-      <FormField label="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-      <FormField label="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+      <FormField label="Display name" name="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+      <FormField label="Company name" name="companyName" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
       <label className="block mb-4">
         <span className="block text-xs font-semibold text-ink mb-1.5">Bio</span>
         <textarea
+          name="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={4}
@@ -322,8 +435,8 @@ function PlannerEditForm({ accent }: { accent: string }) {
         />
       </label>
       <div className="grid grid-cols-2 gap-3">
-        <FormField label="City" value={city} onChange={(e) => setCity(e.target.value)} />
-        <FormField label="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
+        <FormField label="City" name="locationCity" value={city} onChange={(e) => setCity(e.target.value)} />
+        <FormField label="Country" name="locationCountry" value={country} onChange={(e) => setCountry(e.target.value)} />
       </div>
 
       <label className="block mb-4">
