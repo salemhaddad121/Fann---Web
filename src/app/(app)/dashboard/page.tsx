@@ -30,6 +30,21 @@ export default function DashboardPage() {
     // one layout on the site that got measurably worse the wider the screen.
     // Same ladder as the other working surfaces: phone width, opening out
     // once the sidebar appears at lg.
+    //
+    // DELIBERATELY NOT FILLED. The 2026-09-15 UX review (item 23) asked for
+    // either activity tiles here — recent activity, saved artists, suggested
+    // artists — or a constrained, centred column. Salem settled it on
+    // 2026-09-16: skip it, keep the column.
+    //
+    // The reason is not that the review is wrong. It is that the tiles it
+    // describes are already built and deliberately parked: the Option-3 bento
+    // dashboard on `feat/artist-dashboard`, held out of the merge on
+    // 2026-07-25 for a named "Dashboard Premium" task. Building a second set
+    // here would either duplicate that work or collide with it on the way
+    // back in.
+    //
+    // So: do not add tiles to this page as a tidy-up. If this screen is to
+    // grow, it grows by landing that branch.
     <div className="mx-auto max-w-lg p-4 lg:max-w-3xl">
       <div className="mb-5">
         <h1 className="text-[17px] font-bold text-ink mb-0.5">
