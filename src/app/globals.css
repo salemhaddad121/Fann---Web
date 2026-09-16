@@ -153,3 +153,17 @@ html.is-twa a[href="/plans"],
 html.is-twa a[href^="/plans?"] {
   display: none !important;
 }
+
+/* The other half of that rule.
+   Hiding every route into the purchase flow can leave a prompt with no
+   action left in it — the locked-profile bar is a sentence about plans
+   above a button that the rule above removes. An element marked .twa-only
+   is the substitute action for that case: hidden everywhere by default,
+   shown only inside the app. Keep these paired with whatever the rule
+   above hides, and never put a price in one. */
+.twa-only {
+  display: none !important;
+}
+html.is-twa .twa-only {
+  display: inline-flex !important;
+}
