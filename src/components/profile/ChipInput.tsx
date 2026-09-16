@@ -1,19 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
+/**
+ * A tag input. The label has to reach the input it labels.
+ *
+ * It was a bare <label> with no htmlFor next to an <input> with no id, so
+ * the two were never associated: a screen reader announced the field as
+ * "edit text, blank", and clicking the word "Languages" did nothing.
+ *
+ * `name` is here for the same reason it is on FormField — an input without
+ * one is invisible to autofill and to anything that reads the form
+ * generically. Defaults to a slug of the label so no call site has to
+ * remember, while staying overridable.
+ */
 export function ChipInput({
   label,
   values,
   onChange,
   placeholder,
+  name,
 }: {
   label: string;
   values: string[];
   onChange: (next: string[]) => void;
   placeholder?: string;
+  name?: string;
 }) {
   const [draft, setDraft] = useState("");
+  const inputId = useId();
+  const inputName = name ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
   function commit() {
     const trimmed = draft.trim();
@@ -23,7 +39,9 @@ export function ChipInput({
 
   return (
     <div className="mb-4">
-      <label className="block text-xs font-semibold text-ink mb-1.5">{label}</label>
+      <label htmlFor={inputId} className="block text-xs font-semibold text-ink mb-1.5">
+        {label}
+      </label>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {values.map((v) => (
           <span
@@ -38,6 +56,8 @@ export function ChipInput({
         ))}
       </div>
       <input
+        id={inputId}
+        name={inputName}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
