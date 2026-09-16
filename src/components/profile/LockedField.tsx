@@ -106,21 +106,47 @@ export function LockedName({
  */
 export function UnlockCta({ tier }: { tier?: ViewerTier }) {
   if (tier === "subscribed") return null;
-  const isGuest = tier !== "registered";
 
+  /*
+   * One ask, not two.
+   *
+   * The guest version used to read "Sign in and pick a plan to see the full
+   * name, contact details and to message." over a button labelled "Sign in"
+   * — two requests in one bar, and the button named the smaller one. What
+   * is actually on offer is the plan; signing in is a step on the way to
+   * it, and /plans handles that step itself.
+   *
+   * So both tiers now get the same offer and the same destination, and the
+   * button carries the price, because "from $5" is the fact that decides
+   * whether the tap is worth making.
+   *
+   * That $5 is written here rather than read from the plan list: this bar
+   * renders on every locked profile view and is not worth a request for one
+   * number. It is therefore a figure that can drift — if the day pass price
+   * moves, this string has to move with it. Logged in ISSUES.md.
+   */
   return (
     <div className="sticky bottom-0 z-20 border-t border-hairline bg-surface/95 px-4 py-3 backdrop-blur">
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
         <p className="text-[13px] leading-snug text-muted">
-          {isGuest
-            ? "Sign in and pick a plan to see the full name, contact details and to message."
-            : "A plan unlocks the full name, contact details and messaging — from $5."}
+          A plan unlocks the full name, contact details and messaging.
         </p>
         <Link
-          href={isGuest ? "/auth/login" : "/plans"}
+          href="/plans"
           className="shrink-0 rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
         >
-          {isGuest ? "Sign in" : "See plans"}
+          See plans — from $5
+        </Link>
+        {/* Inside the Play app the link above is hidden by the global
+            href-matching rule, which would otherwise leave this bar as a
+            sentence with no way out of it. This is the same bar's action
+            for that context, and it is hidden everywhere else. See the
+            .is-twa block in globals.css. */}
+        <Link
+          href="/auth/login"
+          className="twa-only shrink-0 rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
+        >
+          Sign in
         </Link>
       </div>
     </div>

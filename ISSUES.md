@@ -3,6 +3,15 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `src/components/profile/LockedField.tsx:~130` — UnlockCta's button says
+  "from $5" as a literal. It renders on every locked profile view, so it is
+  not worth a plan-list request for one number, but it will be wrong the day
+  the day-pass price changes. Either accept the coupling or thread the price
+  down from a caller that already has the plans.
+- `src/components/search/SearchFilters.tsx` — the City field fires a search
+  per keystroke (no debounce), unlike the text query, which is debounced at
+  400ms in SearchClient. Pre-existing, but the mobile filter sheet now shows
+  a live result count, which makes it much more visible.
 - `src/components/plans/PlanCards.tsx:~250` — the `ctaHref` prop and its
   `{!onChoose && ctaHref && ...}` branch now have no caller. The landing page
   was the only one, and item 6 replaced it with a summary block. Either

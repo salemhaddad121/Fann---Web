@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { badgeColor } from "@/lib/badge-colors";
-import { MediaStrip } from "@/components/profile/MediaStrip";
 import { MediaLightbox } from "@/components/profile/MediaLightbox";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { LiveStatusBanner } from "@/components/profile/LiveStatusBanner";
@@ -11,6 +10,15 @@ import { AvailabilityCalendar } from "@/components/profile/AvailabilityCalendar"
 import { LockedField, LockedName } from "@/components/profile/LockedField";
 import type { ArtistDetail } from "@/types/artists";
 import type { UserStatus } from "@/types/admin";
+
+/**
+ * Below this, the booking count is replaced by "New to Fann".
+ *
+ * 1 means only a genuine zero is suppressed. Raise it if a single booking
+ * also reads as thin, but do not raise it far: hiding a real 3 is its own
+ * kind of dishonesty.
+ */
+const MIN_BOOKINGS_TO_SHOW = 1;
 
 function isUnavailableToday(artist: ArtistDetail): boolean {
   const today = new Date().toISOString().slice(0, 10);
@@ -47,7 +55,6 @@ export function ArtistProfileView({
   // availability calendar clickable to start a booking request.
   onPickDate?: (dateKey: string) => void;
 }) {
-  const primaryCategory = artist.categories[0];
   const unavailableToday = isUnavailableToday(artist);
   const photos = artist.media.filter((m) => m.media_type === "photo");
   const videos = artist.media.filter((m) => m.media_type === "video");
@@ -59,31 +66,88 @@ export function ArtistProfileView({
   return (
     <div className="max-w-lg mx-auto pb-6">
       {isOwnProfile && accountStatus && <LiveStatusBanner role="artist" status={accountStatus} />}
-      {/* Hero */}
-      <div className="grid grid-cols-2 gap-2 p-4">
-        {[0, 1].map((i) => {
-          const photo = photos[i];
-          return (
-            <div key={i} className="rounded-2xl overflow-hidden h-36 border border-hairline bg-sand">
-              {photo ? (
+      {/* Gallery.
+
+          One gallery, not two. The top strip and the "Media" section
+          further down showed the same photos from the same array — the
+          second one was a duplicate, and on a phone it meant scrolling past
+          the portfolio twice. The strip is the one that survives, now with
+          a counter and tap-to-open, which is what the lower section's
+          horizontal rail was really providing.
+
+          Indexes are into artist.media, not into `photos`, because the
+          lightbox walks the whole media list — including videos, which the
+          hero frames do not show. */}
+      {photos.length > 0 ? (
+        <div className="p-4">
+          <div className="grid grid-cols-2 gap-2">
+            {[0, 1].map((i) => {
+              const photo = photos[i];
+              if (!photo) {
+                return (
+                  <div
+                    key={i}
+                    className="flex h-36 items-center justify-center rounded-2xl border border-hairline bg-sand text-[#e9d9c1]"
+                  >
+                    <i className="ti ti-microphone text-3xl" />
+                  </div>
+                );
+              }
+              const isLastTile = i === 1;
+              const hidden = artist.media.length - 2;
+              return (
                 <button
+                  key={i}
                   type="button"
                   onClick={() => setViewerIndex(artist.media.indexOf(photo))}
-                  aria-label="View photo"
-                  className="w-full h-full"
+                  aria-label={`View media ${artist.media.indexOf(photo) + 1} of ${artist.media.length}`}
+                  className="relative h-36 overflow-hidden rounded-2xl border border-hairline bg-sand"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.cdn_url} alt="" className="w-full h-full object-cover" />
+                  <img src={photo.cdn_url} alt="" className="h-full w-full object-cover" />
+                  {/* "+N more" on the second tile, so the rest of the
+                      portfolio is discoverable now that the duplicate strip
+                      below is gone. */}
+                  {isLastTile && hidden > 0 && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-ink/50 text-sm font-bold text-white">
+                      +{hidden} more
+                    </span>
+                  )}
                 </button>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#e9d9c1]">
-                  <i className="ti ti-microphone text-3xl" />
-                </div>
-              )}
+              );
+            })}
+          </div>
+
+          {/* Counts what is actually there. The running "3 / 8" position
+              belongs to the lightbox, which already draws it — printing a
+              fixed "1 / 8" under a two-tile grid would just be wrong. */}
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-xs text-muted">
+              {photos.length} photo{photos.length === 1 ? "" : "s"}
+              {videos.length > 0 &&
+                ` · ${videos.length} video${videos.length === 1 ? "" : "s"}`}
+            </span>
+            <button
+              type="button"
+              onClick={() => setViewerIndex(0)}
+              className="py-1.5 text-xs font-semibold text-clay"
+            >
+              View all {videos.length > 0 ? "media" : "photos"} →
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 p-4">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="flex h-36 items-center justify-center rounded-2xl border border-hairline bg-sand text-[#e9d9c1]"
+            >
+              <i className="ti ti-microphone text-3xl" />
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Identity */}
       <div className="px-4 pb-4">
@@ -100,11 +164,19 @@ export function ArtistProfileView({
               {artist.is_verified && <i className="ti ti-rosette-discount-check text-clay text-lg" />}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted flex-wrap">
-              {primaryCategory && (
-                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-2xl ${badgeColor(primaryCategory.slug)}`}>
-                  {primaryCategory.name}
+              {/* Every category, not just the first. The "Categories"
+                  section lower down used to repeat these in full while this
+                  row showed one of them; with that section gone, this is
+                  the only place they appear, so it has to carry all of
+                  them. */}
+              {artist.categories.map((c) => (
+                <span
+                  key={c.id}
+                  className={`rounded-2xl px-2.5 py-1 text-xs font-semibold ${badgeColor(c.slug)}`}
+                >
+                  {c.name}
                 </span>
-              )}
+              ))}
               {artist.location_city && (
                 <span className="flex items-center gap-1">
                   <i className="ti ti-map-pin text-xs" />
@@ -129,11 +201,20 @@ export function ArtistProfileView({
         {/* Stats — the star rating and review count were removed in favour of
             a plain count of completed bookings. */}
         <div className="flex border border-hairline rounded-xl overflow-hidden">
-          <Stat
-            icon="ti-calendar-check"
-            value={String(artist.bookings_count ?? 0)}
-            label={artist.bookings_count === 1 ? "Booking" : "Bookings"}
-          />
+          {/* A zero in a prominent stat box actively costs the booking: it
+              is read as "nobody has hired them" when it usually means "this
+              profile is new, and Fann is new". Below the threshold the cell
+              says so instead. The number is never invented — "New to Fann"
+              is a fact about the account, not a stand-in figure. */}
+          {(artist.bookings_count ?? 0) >= MIN_BOOKINGS_TO_SHOW ? (
+            <Stat
+              icon="ti-calendar-check"
+              value={String(artist.bookings_count)}
+              label={artist.bookings_count === 1 ? "Booking" : "Bookings"}
+            />
+          ) : (
+            <Stat icon="ti-sparkles" value="New" label="to Fann" />
+          )}
           {/* The exact figure is only sent to subscribers; everyone else
               gets a band instead. Showing the band rather than "—" is the
               point — a booker with a $300 budget needs to know whether to
@@ -152,45 +233,19 @@ export function ArtistProfileView({
         </div>
 
         {artist.joined_at && (
-          <p className="mt-2 text-[10px] text-faint text-center">
+          <p className="mt-2 text-xs text-faint text-center">
             Date joined {formatJoined(artist.joined_at)}
           </p>
         )}
       </div>
 
-      {(photos.length > 0 || videos.length > 0) && (
-        <Section title="Media">
-          <MediaStrip media={artist.media} onSelect={setViewerIndex} />
-        </Section>
-      )}
+      {/* Availability, directly under the stats.
 
-      {/* "About Karim" for a subscriber, "About this artist" otherwise —
-          the first word of the name is no longer available to build a
-          friendlier heading out of, and inventing one would be a leak. */}
-      {artist.bio && (
-        <Section
-          title={
-            artist.display_name
-              ? `About ${artist.display_name.split(" ")[0]}`
-              : "About this artist"
-          }
-        >
-          <p className="text-[13px] text-muted leading-relaxed">{artist.bio}</p>
-        </Section>
-      )}
-
-      {artist.categories.length > 0 && (
-        <Section title="Categories">
-          <div className="flex flex-wrap gap-1.5">
-            {artist.categories.map((c) => (
-              <span key={c.id} className="text-xs px-3 py-1 rounded-2xl border border-hairline text-muted">
-                {c.name}
-              </span>
-            ))}
-          </div>
-        </Section>
-      )}
-
+          It was five sections down, below About and Categories. Checking
+          whether someone is free on your date before investing an evening
+          in messaging them is the argument Fann's own wedding page makes
+          for using Fann — that is the differentiator, and it was buried
+          under the parts every directory has. */}
       <Section
         title="Availability"
         action={
@@ -214,6 +269,22 @@ export function ArtistProfileView({
           <AvailabilityCalendar blocks={artist.availability} onPickDate={onPickDate} />
         </div>
       </Section>
+
+
+      {/* "About Karim" for a subscriber, "About this artist" otherwise —
+          the first word of the name is no longer available to build a
+          friendlier heading out of, and inventing one would be a leak. */}
+      {artist.bio && (
+        <Section
+          title={
+            artist.display_name
+              ? `About ${artist.display_name.split(" ")[0]}`
+              : "About this artist"
+          }
+        >
+          <p className="text-[13px] text-muted leading-relaxed">{artist.bio}</p>
+        </Section>
+      )}
 
       {/* Booking terms are public — every tier gets them, including guests.
           They are what a booker needs to judge whether an artist is worth
