@@ -224,7 +224,27 @@ for (const r of visitable) {
             childList: true,
             characterData: true,
             attributes: true,
-            attributeFilter: ["aria-expanded", "aria-selected", "aria-hidden", "data-state", "open", "hidden"],
+            // aria-pressed belongs here next to aria-expanded and
+            // aria-selected: it is the third ARIA state attribute a button
+            // flips, and this suite already READS it above to skip toggles
+            // that are on. Without it a correct toggle button whose only
+            // structural change is its pressed state — the password reveal
+            // on the auth forms, for one — is scored as a dead control,
+            // intermittently, depending on whether React happens to also
+            // replace a child node on that render.
+            attributeFilter: [
+              "aria-expanded",
+              "aria-selected",
+              "aria-pressed",
+              "aria-hidden",
+              "data-state",
+              "open",
+              "hidden",
+              // The reveal toggle's actual effect. A password field
+              // becoming readable is the point of the control, and it is
+              // invisible to every other entry in this list.
+              "type",
+            ],
           });
         });
 

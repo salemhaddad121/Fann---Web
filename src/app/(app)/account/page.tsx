@@ -416,6 +416,33 @@ function DeleteAccountSection() {
   );
 }
 
+/**
+ * A settings section that opens on demand (item 25).
+ *
+ * The three change-forms — email, number, password — were all expanded at
+ * once, which is how this page came to be about four screens long. Almost
+ * nobody arrives wanting to change all three, and an open form is a
+ * standing invitation to type in the wrong one.
+ *
+ * <details> rather than useState: it is open/closed state that the browser
+ * already owns, it is keyboard- and screen-reader-correct without help, and
+ * it survives this component re-rendering underneath it.
+ */
+function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="group mb-3 rounded-[10px] border border-hairline">
+      <summary className="flex list-none items-center justify-between px-3.5 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+        {title}
+        <i
+          className="ti ti-chevron-down text-base text-faint transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <div className="border-t border-hairline px-3.5 pb-4 pt-3.5">{children}</div>
+    </details>
+  );
+}
+
 export default function AccountPage() {
   const { user } = useAuth();
   if (!user) return null;
@@ -425,10 +452,18 @@ export default function AccountPage() {
     : null;
 
   return (
-    <div className="max-w-lg mx-auto pb-10">
-      <h1 className="text-lg font-bold text-ink px-4 pt-4 pb-1">Settings</h1>
+    // Two columns above 1024px (item 24). Eight sections stacked in one
+    // narrow column left the right half of a 1280px screen empty while the
+    // page ran four screens deep. Account and Subscription on the left,
+    // Security and the danger zone on the right — grouped by what they are
+    // about, not by how they happened to be ordered.
+    //
+    // Below lg it is the single column it always was, in the same order.
+    <div className="mx-auto max-w-lg pb-10 lg:max-w-5xl">
+      <h1 className="px-4 pb-1 pt-4 text-lg font-bold text-ink">Settings</h1>
 
-      <div className="p-4">
+      <div className="p-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+        <div>
         <p className="text-xs font-bold text-ink mb-2">Account</p>
         <div className="mb-5">
           <Row
@@ -441,7 +476,7 @@ export default function AccountPage() {
             }
           />
           {user.pendingEmail && (
-            <p className="text-[11px] text-faint -mt-1.5 mb-1">
+            <p className="text-xs text-faint -mt-1.5 mb-1">
               Pending confirmation for <span className="font-medium text-muted">{user.pendingEmail}</span> —
               check that inbox for the verification link.
             </p>
@@ -454,12 +489,18 @@ export default function AccountPage() {
                 user.phoneVerifiedAt ? (
                   <i className="ti ti-rosette-discount-check text-success text-sm" />
                 ) : (
-                  <Link href="/auth/verify-phone" className="text-xs font-semibold text-clay">
+                  <Link
+                    href="/auth/verify-phone"
+                    className="-my-3 flex h-11 items-center px-1 text-xs font-semibold text-clay"
+                  >
                     Verify
                   </Link>
                 )
               ) : (
-                <Link href="/auth/verify-phone" className="text-xs font-semibold text-clay">
+                <Link
+                  href="/auth/verify-phone"
+                  className="-my-3 flex h-11 items-center px-1 text-xs font-semibold text-clay"
+                >
                   Add
                 </Link>
               )
@@ -485,6 +526,11 @@ export default function AccountPage() {
           </>
         )}
 
+        <p className="text-xs font-bold text-ink mb-2">Communication</p>
+        <div className="mb-6">
+          <CommunicationPreferences />
+        </div>
+
         {/* The signed-in route to /help. The guest route is the header
             link in GuestChrome and the footer's Support column. */}
         <Link
@@ -494,25 +540,20 @@ export default function AccountPage() {
           <span className="font-medium text-ink">Help &amp; support</span>
           <i className="ti ti-chevron-right text-base text-faint" aria-hidden />
         </Link>
-
-        <p className="text-xs font-bold text-ink mb-2">Communication</p>
-        <div className="mb-6">
-          <CommunicationPreferences />
         </div>
 
-        <p className="text-xs font-bold text-ink mb-2">Change email</p>
+        <div>
+        <p className="text-xs font-bold text-ink mb-2">Security</p>
         <div className="mb-6">
-          <ChangeEmailForm />
-        </div>
-
-        <p className="text-xs font-bold text-ink mb-2">Change number</p>
-        <div className="mb-6">
-          <ChangeNumberForm />
-        </div>
-
-        <p className="text-xs font-bold text-ink mb-2">Change password</p>
-        <div className="mb-6">
-          <ChangePasswordForm />
+          <Disclosure title="Change email">
+            <ChangeEmailForm />
+          </Disclosure>
+          <Disclosure title="Change number">
+            <ChangeNumberForm />
+          </Disclosure>
+          <Disclosure title="Change password">
+            <ChangePasswordForm />
+          </Disclosure>
         </div>
 
         {/* Admins have no self-service delete — the destructive section is
@@ -523,6 +564,7 @@ export default function AccountPage() {
             <DeleteAccountSection />
           </div>
         )}
+        </div>
       </div>
     </div>
   );

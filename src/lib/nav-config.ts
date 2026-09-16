@@ -17,21 +17,25 @@ export interface NavItem {
 // "Home" is deliberately absent: the dashboard is no longer a nav
 // destination, only the landing page behind the wordmark.
 
-// Artist: Search, My Bookings, Messages, Calendar, Profile
+// Artist: Search, Bookings, Messages, Calendar, Profile
+//
+// "Bookings", not "My Bookings": it was the only two-word label in a
+// five-item bottom nav set at ~10px, and it wrapped. Everything in a
+// personal nav is already "my".
 // Calendar is where artists block out dates, so it stays in the nav —
 // the public profile's availability calendar reads from it.
 const ARTIST_NAV: NavItem[] = [
   { href: "/search", label: "Search", icon: "search" },
-  { href: "/bookings", label: "My Bookings", icon: "calendar-event" },
+  { href: "/bookings", label: "Bookings", icon: "calendar-event" },
   { href: "/messages", label: "Messages", icon: "message-circle", badge: "messages" },
   { href: "/calendar", label: "Calendar", icon: "calendar" },
   { href: "/profile", label: "Profile", icon: "user" },
 ];
 
-// Planner: Search, My Bookings, Messages, Saved, Profile
+// Planner: Search, Bookings, Messages, Saved, Profile
 const PLANNER_NAV: NavItem[] = [
   { href: "/search", label: "Search", icon: "search" },
-  { href: "/bookings", label: "My Bookings", icon: "calendar-event" },
+  { href: "/bookings", label: "Bookings", icon: "calendar-event" },
   { href: "/messages", label: "Messages", icon: "message-circle", badge: "messages" },
   { href: "/saved", label: "Saved", icon: "heart" },
   { href: "/profile", label: "Profile", icon: "user" },

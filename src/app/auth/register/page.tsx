@@ -148,7 +148,7 @@ function RegisterForm() {
             documents are versioned independently server-side, so a user has
             to be able to have accepted one version of each. Links open in a
             new tab so reading them doesn't discard a part-filled form. */}
-        <div className="mb-4 flex flex-col gap-2.5">
+        <div className="mb-4 flex flex-col">
           <ConsentCheckbox
             name="acceptedTerms"
             checked={acceptedTerms}
@@ -231,18 +231,22 @@ function ConsentCheckbox({
 }) {
   return (
     <div className={className}>
-      <label className="flex items-start gap-2.5 text-xs text-muted cursor-pointer">
+      {/* The whole row is the label and the box is 24x24, so the target is
+          the sentence rather than a 16px square beside it. These two are the
+          only controls on the form that gate submission, and they were the
+          smallest things on it. */}
+      <label className="flex cursor-pointer items-start gap-2.5 py-2 text-xs text-muted">
         <input
           type="checkbox"
           name={name}
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
           aria-invalid={!!error}
-          className="mt-0.5 w-4 h-4 accent-clay-deep shrink-0"
+          className="h-6 w-6 shrink-0 accent-clay-deep"
         />
-        <span>{children}</span>
+        <span className="pt-0.5">{children}</span>
       </label>
-      {error && <p className="mt-1 ml-6 text-xs text-danger">{error}</p>}
+      {error && <p className="ml-8 mt-1 text-xs text-danger">{error}</p>}
     </div>
   );
 }

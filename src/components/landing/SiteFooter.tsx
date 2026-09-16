@@ -16,11 +16,14 @@ import { StoreBadges } from "@/components/landing/StoreBadges";
  * sitemap of what is coming.
  */
 function FooterLink({ link }: { link: SiteLink }) {
+  // py-2 takes the row from ~19px to 36px. A footer is a wall of small
+  // links, which is exactly where a 19px target is hardest to hit — and
+  // where a near-miss lands on a different link rather than on nothing.
   if (!link.href) {
-    return <span className="text-sm text-faint">{link.label}</span>;
+    return <span className="block py-2 text-sm text-faint">{link.label}</span>;
   }
   return (
-    <Link href={link.href} className="text-sm text-ink-soft hover:text-clay-deep">
+    <Link href={link.href} className="block py-2 text-sm text-ink-soft hover:text-clay-deep">
       {link.label}
     </Link>
   );
@@ -38,7 +41,7 @@ export function SiteFooter() {
               <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wide text-ink">
                 {column.heading}
               </p>
-              <ul className="space-y-1.5">
+              <ul className="-my-1">
                 {column.links.map((link) => (
                   <li key={link.label}>
                     <FooterLink link={link} />
@@ -61,7 +64,7 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="-mx-2.5 flex items-center">
             {SOCIAL_LINKS.map((social) =>
               social.href ? (
                 <a
@@ -70,14 +73,18 @@ export function SiteFooter() {
                   aria-label={social.label}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-ink-soft hover:text-clay-deep"
+                  className="flex h-11 w-11 items-center justify-center text-ink-soft hover:text-clay-deep"
                 >
                   <i className={`ti ti-${social.icon} text-[19px]`} aria-hidden />
                 </a>
               ) : (
                 // No account yet. Rendered but inert, and hidden from
                 // screen readers rather than announced as a dead control.
-                <span key={social.label} aria-hidden className="text-hairline">
+                <span
+                  key={social.label}
+                  aria-hidden
+                  className="flex h-11 w-11 items-center justify-center text-hairline"
+                >
                   <i className={`ti ti-${social.icon} text-[19px]`} />
                 </span>
               ),
@@ -85,7 +92,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="mt-5 flex flex-wrap items-center gap-x-5">
           {LEGAL_LINKS.map((link) => (
             <FooterLink key={link.label} link={link} />
           ))}

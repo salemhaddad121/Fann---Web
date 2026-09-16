@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { listMyBookings } from "@/lib/bookings-api";
 import { usePublicInfoMap } from "@/lib/use-public-info-map";
@@ -68,9 +69,16 @@ export default function BookingsPage() {
         <p className="text-[15px] font-bold text-ink mb-1.5">No bookings yet</p>
         <p className="text-[13px] text-muted leading-relaxed max-w-[260px]">
           {isArtist
-            ? "Booking requests from planners will show up here."
+            ? "Booking requests from planners will show up here. A complete profile is what gets you found."
             : "Propose a booking from a conversation with an artist to get started."}
         </p>
+        {/* Each side gets the control that fills this screen. A planner
+            needs an artist, so the route in is search; an artist cannot
+            create a booking at all — only receive one — so theirs goes to
+            the profile that decides whether they get found. */}
+        <Link href={isArtist ? "/profile" : "/search"} className="mt-5 inline-flex h-11 items-center rounded-[10px] bg-clay-deep px-4 text-sm font-semibold text-white">
+          {isArtist ? "Check your profile" : "Find an artist"}
+        </Link>
       </div>
     );
   }
