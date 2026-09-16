@@ -471,7 +471,7 @@ export default function AccountPage() {
             value={user.email}
             trailing={
               user.emailVerifiedAt ? (
-                <i className="ti ti-rosette-discount-check text-success text-sm" />
+                <i className="ti ti-discount-check text-success text-sm" />
               ) : undefined
             }
           />
@@ -487,7 +487,7 @@ export default function AccountPage() {
             trailing={
               user.phone ? (
                 user.phoneVerifiedAt ? (
-                  <i className="ti ti-rosette-discount-check text-success text-sm" />
+                  <i className="ti ti-discount-check text-success text-sm" />
                 ) : (
                   <Link
                     href="/auth/verify-phone"

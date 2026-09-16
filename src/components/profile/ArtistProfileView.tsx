@@ -161,7 +161,7 @@ export function ArtistProfileView({
                   <LockedName width="9rem" />
                 </span>
               )}
-              {artist.is_verified && <i className="ti ti-rosette-discount-check text-clay text-lg" />}
+              {artist.is_verified && <i className="ti ti-discount-check text-clay text-lg" />}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted flex-wrap">
               {/* Every category, not just the first. The "Categories"

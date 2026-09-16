@@ -91,7 +91,7 @@ export function ArtistCard({
             )}
             {artist.is_verified && (
               <>
-                <i className="ti ti-rosette-discount-check text-sm shrink-0" aria-hidden="true" />
+                <i className="ti ti-discount-check text-sm shrink-0" aria-hidden="true" />
                 <span className="sr-only">Verified</span>
               </>
             )}
