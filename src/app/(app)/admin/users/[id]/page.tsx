@@ -179,7 +179,7 @@ function AdminUserDetailContent({ id }: { id: string }) {
             <p className="font-mono text-base font-bold text-ink tracking-wide break-all">
               {tempPassword}
             </p>
-            <p className="text-[11px] text-[#166534] mt-2 leading-relaxed">
+            <p className="text-[12px] text-[#166534] mt-2 leading-relaxed">
               Give this to {name} over a channel you trust. It isn&apos;t stored anywhere, so it
               can&apos;t be shown again — you&apos;d have to reset once more. Ask them to change it
               from Account settings after signing in.

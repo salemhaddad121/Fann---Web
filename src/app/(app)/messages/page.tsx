@@ -118,7 +118,7 @@ export default function MessagesPage() {
 
       {requests.length > 0 && (
         <div className="border-b border-hairline">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint px-4 pt-4 pb-2">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-faint px-4 pt-4 pb-2">
             Message requests
           </p>
           {requests.map((c) => {
@@ -217,7 +217,7 @@ export default function MessagesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-0.5">
                     <span className="text-[13px] font-semibold text-ink truncate">{name}</span>
-                    <span className="text-[11px] text-faint shrink-0">
+                    <span className="text-[12px] text-faint shrink-0">
                       {/* The sender's own outgoing request — they can't
                           action it, so flag the wait instead of a time. */}
                       {c.status === "pending"
@@ -235,7 +235,7 @@ export default function MessagesPage() {
                 </div>
                 {unread && (
                   <span
-                    className={`min-w-[18px] h-[18px] rounded-full text-white text-[10px] font-semibold flex items-center justify-center px-1 shrink-0 ${
+                    className={`min-w-[18px] h-[18px] rounded-full text-white text-[12px] font-semibold flex items-center justify-center px-1 shrink-0 ${
                       user?.role === "planner" ? "bg-teal" : "bg-clay"
                     }`}
                   >

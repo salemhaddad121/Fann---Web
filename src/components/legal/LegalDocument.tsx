@@ -94,7 +94,7 @@ export function LegalDocument({
 function EntityDetails() {
   return (
     <div className="mt-10 border-t border-hairline pt-5">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+      <p className="text-[12px] font-semibold uppercase tracking-wide text-faint">
         Operated by
       </p>
 

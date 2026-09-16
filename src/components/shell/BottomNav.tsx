@@ -28,7 +28,7 @@ export function BottomNav({
           <Link
             key={item.href}
             href={item.href}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-[3px] py-2 pb-2.5 text-[10px] ${
+            className={`relative flex-1 flex flex-col items-center justify-center gap-[3px] py-2 pb-2.5 text-[12px] ${
               active ? activeColor : "text-faint"
             }`}
           >

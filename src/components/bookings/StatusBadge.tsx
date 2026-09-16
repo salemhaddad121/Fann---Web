@@ -18,7 +18,7 @@ const LABELS: Record<BookingStatus, string> = {
 
 export function StatusBadge({ status }: { status: BookingStatus }) {
   return (
-    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg ${STYLES[status]}`}>
+    <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-lg ${STYLES[status]}`}>
       {LABELS[status]}
     </span>
   );

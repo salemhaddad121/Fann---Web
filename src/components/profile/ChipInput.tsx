@@ -32,7 +32,7 @@ export function ChipInput({
           >
             {v}
             <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} aria-label={`Remove ${v}`}>
-              <i className="ti ti-x text-[10px] text-faint" />
+              <i className="ti ti-x text-[12px] text-faint" />
             </button>
           </span>
         ))}

@@ -86,7 +86,7 @@ export function VerificationsTab() {
         <p className="px-4 py-10 text-sm text-muted text-center">No records match.</p>
       ) : (
         <>
-          <p className="px-4 pt-3 text-[11px] text-faint">{total} record{total === 1 ? "" : "s"}</p>
+          <p className="px-4 pt-3 text-[12px] text-faint">{total} record{total === 1 ? "" : "s"}</p>
           {rows.map((r) => (
             <VerificationRow
               key={r.id}
@@ -116,12 +116,12 @@ function VerificationRow({
         <div className="flex items-center justify-between gap-2">
           <span className="text-[13px] font-semibold text-ink truncate">{record.user_email}</span>
           <span
-            className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-2xl border ${RESULT_STYLE[record.result]}`}
+            className={`shrink-0 text-[12px] font-semibold px-2 py-0.5 rounded-2xl border ${RESULT_STYLE[record.result]}`}
           >
             {RESULT_LABEL[record.result]}
           </span>
         </div>
-        <p className="text-[11px] text-faint mt-0.5">
+        <p className="text-[12px] text-faint mt-0.5">
           {record.user_account_code} · {record.user_role} · opened{" "}
           {formatRelativeTime(record.created_at)}
           {record.completed_at && ` · settled ${formatRelativeTime(record.completed_at)}`}
@@ -129,7 +129,7 @@ function VerificationRow({
       </button>
 
       {open && (
-        <div className="px-4 pb-4 flex flex-col gap-3 text-[11px]">
+        <div className="px-4 pb-4 flex flex-col gap-3 text-[12px]">
           <Field label="Account ID" value={record.user_id} mono />
           <Field label="Verification transaction ID" value={record.provider_transaction_id} mono />
           <Field label="Provider" value={record.provider} />
@@ -210,7 +210,7 @@ function Field({
     <div>
       <p className="font-semibold text-ink">{label}</p>
       {value ? (
-        <p className={`text-muted break-all ${mono ? "font-mono text-[10px]" : ""}`}>{value}</p>
+        <p className={`text-muted break-all ${mono ? "font-mono text-[12px]" : ""}`}>{value}</p>
       ) : (
         <p className="text-faint italic">Not recorded</p>
       )}

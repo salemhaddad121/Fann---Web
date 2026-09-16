@@ -71,13 +71,13 @@ export function FlagsTab() {
       {rows.map((f) => (
         <div key={f.id} className="px-4 py-3.5 border-b border-hairline">
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-sand text-muted">
+            <span className="text-[12px] font-semibold px-2 py-0.5 rounded-lg bg-sand text-muted">
               {TARGET_LABELS[f.target_type] ?? f.target_type}
             </span>
-            <span className="text-[11px] text-faint">{formatRelativeTime(f.created_at)}</span>
+            <span className="text-[12px] text-faint">{formatRelativeTime(f.created_at)}</span>
           </div>
           <p className="text-sm text-ink mb-1.5">{f.reason}</p>
-          <p className="text-[11px] text-faint mb-2.5">
+          <p className="text-[12px] text-faint mb-2.5">
             Reported by {f.reporter_email} ({f.reporter_account_code}) ·{" "}
             {f.target_type === "profile" && directory[f.target_id]?.profileId ? (
               <>

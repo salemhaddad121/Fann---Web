@@ -64,7 +64,7 @@ export function CalendarGrid({
 
       <div className="grid grid-cols-7 gap-0.5 px-4 mb-1">
         {DOW.map((d) => (
-          <div key={d} className="text-center text-[11px] font-semibold text-faint py-1">
+          <div key={d} className="text-center text-[12px] font-semibold text-faint py-1">
             {d}
           </div>
         ))}
@@ -129,7 +129,7 @@ export function CalendarGrid({
 
 function Legend({ swatch, label }: { swatch: string; label: string }) {
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-muted">
+    <div className="flex items-center gap-1.5 text-[12px] text-muted">
       <span className={`w-2.5 h-2.5 rounded-full ${swatch}`} />
       {label}
     </div>

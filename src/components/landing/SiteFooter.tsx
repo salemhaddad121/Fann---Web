@@ -38,7 +38,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
           {FOOTER_COLUMNS.map((column) => (
             <nav key={column.heading} aria-label={column.heading}>
-              <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wide text-ink">
+              <p className="mb-2.5 text-[12px] font-bold uppercase tracking-wide text-ink">
                 {column.heading}
               </p>
               <ul className="-my-1">

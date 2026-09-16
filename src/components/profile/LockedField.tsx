@@ -29,7 +29,7 @@ export function LockedField({
 
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">{label}</p>
+      <p className="text-[12px] font-semibold uppercase tracking-wide text-faint">{label}</p>
 
       <div className="mt-1 flex items-start gap-2">
         <div aria-hidden className="flex-1 space-y-1.5">

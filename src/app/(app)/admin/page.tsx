@@ -233,7 +233,7 @@ function AdminHome({ userName }: { userName: string }) {
                   {auditSentence(entry)}
                   {entry.note && <span className="text-faint"> — {entry.note}</span>}
                 </span>
-                <span className="text-[11px] text-faint shrink-0">{formatRelativeTime(entry.created_at)}</span>
+                <span className="text-[12px] text-faint shrink-0">{formatRelativeTime(entry.created_at)}</span>
               </div>
             ))}
           </div>
@@ -262,7 +262,7 @@ function StatCard({
         <i className={`ti ${icon}`} />
       </div>
       <div className="text-2xl font-bold text-ink">{value.toLocaleString()}</div>
-      <div className="text-[11px] text-faint">{label}</div>
+      <div className="text-[12px] text-faint">{label}</div>
     </div>
   );
 }

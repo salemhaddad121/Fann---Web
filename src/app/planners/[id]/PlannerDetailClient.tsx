@@ -48,7 +48,7 @@ function MessageRequestCta({ planner }: { planner: PlannerDetail }) {
         <i className="ti ti-message-circle text-sm" />
         {sending ? "Sending…" : "Message"}
       </button>
-      <p className="mt-1.5 text-[11px] text-faint text-center">
+      <p className="mt-1.5 text-[12px] text-faint text-center">
         They&apos;ll need to accept before they can reply.
       </p>
     </div>

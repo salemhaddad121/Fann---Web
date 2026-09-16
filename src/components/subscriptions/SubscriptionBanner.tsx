@@ -64,7 +64,7 @@ export function SubscriptionBanner() {
       <div className="mb-4 rounded-2xl border border-hairline bg-ink p-5 text-white">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-clay-light">
+            <p className="text-[12px] font-bold uppercase tracking-wide text-clay-light">
               Active
             </p>
             <p className="mt-1 text-base font-bold capitalize">
@@ -105,7 +105,7 @@ export function SubscriptionBanner() {
     const next = credits.rows[0];
     return (
       <div className="mb-4 rounded-2xl border border-hairline bg-surface p-5">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-clay-deep">
+        <p className="text-[12px] font-bold uppercase tracking-wide text-clay-deep">
           Ready to use
         </p>
         <p className="mt-1 text-base font-bold text-ink">

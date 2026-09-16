@@ -73,7 +73,7 @@ export function MediaManager({
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-semibold text-ink">Photos &amp; videos</span>
-        <span className="text-[11px] text-faint">{media.length}/{MAX_ITEMS}</span>
+        <span className="text-[12px] text-faint">{media.length}/{MAX_ITEMS}</span>
       </div>
 
       {error && <p className="text-xs text-danger mb-2">{error}</p>}
@@ -89,7 +89,7 @@ export function MediaManager({
               </div>
             )}
             {m.is_primary && (
-              <span className="absolute top-1 left-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-clay-deep text-white">
+              <span className="absolute top-1 left-1 text-[12px] font-semibold px-1.5 py-0.5 rounded bg-clay-deep text-white">
                 Primary
               </span>
             )}
@@ -125,7 +125,7 @@ export function MediaManager({
             className="aspect-square rounded-xl border border-dashed border-hairline flex flex-col items-center justify-center gap-1 text-faint"
           >
             <i className="ti ti-plus text-lg" />
-            <span className="text-[10px]">Add</span>
+            <span className="text-[12px]">Add</span>
           </button>
         )}
       </div>
@@ -138,7 +138,7 @@ export function MediaManager({
         />
       )}
 
-      <p className="text-[11px] text-faint mt-1.5">
+      <p className="text-[12px] text-faint mt-1.5">
         JPG/PNG/WEBP up to 10MB, at least {MIN_PHOTO_SHORT_SIDE}px on the short side. MP4/MOV up to
         250MB and {MAX_VIDEO_SECONDS} seconds, at least {MIN_VIDEO_SHORT_SIDE}p.
       </p>

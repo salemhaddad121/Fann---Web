@@ -117,7 +117,7 @@ export function CategoriesTab() {
                 <div className="flex items-center gap-2">
                   {g.icon && <i className={`ti ${g.icon} text-clay`} />}
                   <span className="text-sm font-bold text-ink">{g.name}</span>
-                  <span className="text-[11px] text-faint">({g.category_count})</span>
+                  <span className="text-[12px] text-faint">({g.category_count})</span>
                 </div>
                 <button
                   disabled={busy || g.category_count > 0}
@@ -143,7 +143,7 @@ export function CategoriesTab() {
                       title={c.artist_count > 0 ? "Still in use — can't delete" : "Delete category"}
                       className="disabled:opacity-30"
                     >
-                      <i className="ti ti-x text-[10px] text-faint" />
+                      <i className="ti ti-x text-[12px] text-faint" />
                     </button>
                   </span>
                 ))}

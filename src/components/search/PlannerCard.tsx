@@ -32,7 +32,7 @@ export function PlannerCard({ planner }: { planner: PlannerCardType }) {
         )}
         {primaryEventType && (
           <span
-            className={`absolute top-1.5 left-1.5 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-lg ${badgeColor(primaryEventType)}`}
+            className={`absolute top-1.5 left-1.5 z-10 text-[12px] font-semibold px-2 py-0.5 rounded-lg ${badgeColor(primaryEventType)}`}
           >
             {primaryEventType}
           </span>

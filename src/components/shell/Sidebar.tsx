@@ -36,7 +36,7 @@ function NavLink({
       <i className={`ti ti-${icon} text-[19px]`} />
       <span>{label}</span>
       {badge > 0 && (
-        <span className="ml-auto bg-[#EF4444] text-white text-[10px] font-semibold min-w-[18px] text-center px-1 rounded-full">
+        <span className="ml-auto bg-[#EF4444] text-white text-[12px] font-semibold min-w-[18px] text-center px-1 rounded-full">
           {badge > 9 ? "9+" : badge}
         </span>
       )}
@@ -104,7 +104,7 @@ export function Sidebar({
           </div>
           <div className="min-w-0">
             <div className="text-[13px] font-semibold text-ink truncate">{user.email.split("@")[0]}</div>
-            <div className="text-[11px] text-faint capitalize">{user.role}</div>
+            <div className="text-[12px] text-faint capitalize">{user.role}</div>
           </div>
         </Link>
 

@@ -21,13 +21,13 @@ const LABELS: Record<UserStatus, string> = {
 export function UserStatusBadge({ status, deletedAt }: { status: UserStatus; deletedAt?: string | null }) {
   if (deletedAt) {
     return (
-      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-[#F1F5F9] text-[#334155]">
+      <span className="text-[12px] font-semibold px-2.5 py-1 rounded-lg bg-[#F1F5F9] text-[#334155]">
         Deleted
       </span>
     );
   }
   return (
-    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg ${STYLES[status]}`}>
+    <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-lg ${STYLES[status]}`}>
       {LABELS[status]}
     </span>
   );

@@ -39,7 +39,7 @@ export function VerificationBanner() {
 
   return (
     <div className="mb-4 rounded-2xl border border-hairline bg-surface p-5">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-clay-deep">
+      <p className="text-[12px] font-bold uppercase tracking-wide text-clay-deep">
         {rejected ? "Action needed" : "Before you go live"}
       </p>
       <p className="mt-1 text-base font-bold text-ink">

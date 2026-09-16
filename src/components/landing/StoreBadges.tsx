@@ -17,7 +17,7 @@ export function StoreBadges({ heading }: { heading?: string }) {
   return (
     <div>
       {heading && (
-        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wide text-ink">
+        <p className="mb-2.5 text-[12px] font-bold uppercase tracking-wide text-ink">
           {heading}
         </p>
       )}
@@ -28,7 +28,7 @@ export function StoreBadges({ heading }: { heading?: string }) {
             <>
               <i className={`ti ti-${badge.icon} text-[22px]`} aria-hidden />
               <span className="text-left leading-tight">
-                <span className="block text-[10px] text-faint">{badge.label}</span>
+                <span className="block text-[12px] text-faint">{badge.label}</span>
                 <span className="block text-[13px] font-semibold">{badge.sublabel}</span>
               </span>
             </>

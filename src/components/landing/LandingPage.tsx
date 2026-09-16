@@ -262,7 +262,7 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
           <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
             {/* For Artists */}
             <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-clay">
+              <span className="text-[12px] font-semibold uppercase tracking-wide text-clay">
                 For Artists
               </span>
               <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
@@ -287,7 +287,7 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
 
             {/* For Planners */}
             <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-teal">
+              <span className="text-[12px] font-semibold uppercase tracking-wide text-teal">
                 For Planners
               </span>
               <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">

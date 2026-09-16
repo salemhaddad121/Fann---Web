@@ -87,7 +87,7 @@ export function DocumentsTab() {
                       same person — so the reviewer has to be told which
                       one they are looking at. */}
                   <span
-                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide ${
                       doc.kind === "selfie"
                         ? "border-[#93C5FD] bg-[#DBEAFE] text-[#1E40AF]"
                         : "border-hairline bg-surface text-muted"
