@@ -6,9 +6,16 @@ import { clearSessionHint, sessionMayExist } from "@/lib/session-hint";
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /**
+   * The API's machine-readable reason, when it sent one. Carried so a
+   * caller can branch on the reason rather than on the wording — see
+   * ApiErrorBody.code.
+   */
+  code?: string;
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -93,7 +100,11 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     } catch {
       // no JSON body — fall through to generic message
     }
-    throw new ApiError(res.status, extractMessage(payload, "Something went wrong. Please try again."));
+    throw new ApiError(
+      res.status,
+      extractMessage(payload, "Something went wrong. Please try again."),
+      payload?.code,
+    );
   }
 
   if (res.status === 204) return undefined as T;
