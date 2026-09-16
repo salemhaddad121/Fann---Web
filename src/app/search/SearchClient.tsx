@@ -440,7 +440,12 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         </div>
       </div>
 
-      <FilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} resultLabel={resultLabel}>
+      <FilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        resultLabel={resultLabel}
+        accent="clay"
+      >
         <ArtistFilterFields filters={filters} onFiltersChange={updateFilters} />
       </FilterSheet>
     </div>
@@ -690,7 +695,12 @@ function PlannerDirectory() {
         </div>
       </div>
 
-      <FilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} resultLabel={resultLabel}>
+      <FilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        resultLabel={resultLabel}
+        accent="teal"
+      >
         <PlannerFilterFields filters={filters} onFiltersChange={updateFilters} />
       </FilterSheet>
     </div>

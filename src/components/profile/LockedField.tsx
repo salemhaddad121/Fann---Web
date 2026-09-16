@@ -106,6 +106,9 @@ export function LockedName({
  */
 export function UnlockCta({ tier }: { tier?: ViewerTier }) {
   if (tier === "subscribed") return null;
+  // Signed in but not subscribed. Matters only for the Play-app fallback
+  // below — the web offer is the same for both tiers.
+  const isRegistered = tier === "registered";
 
   /*
    * One ask, not two.
@@ -141,13 +144,24 @@ export function UnlockCta({ tier }: { tier?: ViewerTier }) {
             href-matching rule, which would otherwise leave this bar as a
             sentence with no way out of it. This is the same bar's action
             for that context, and it is hidden everywhere else. See the
-            .is-twa block in globals.css. */}
-        <Link
-          href="/auth/login"
-          className="twa-only shrink-0 rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
-        >
-          Sign in
-        </Link>
+            .is-twa block in globals.css.
+
+            Guests only. This first shipped ungated, which meant a signed-in
+            planner who simply has no plan — the ordinary in-app cohort,
+            since Play's billing policy means they can never buy in the app
+            — was shown a button telling them to sign in, landing on a login
+            form that does not redirect an authenticated user. That is the
+            same two-asks-in-one-bar mismatch this item existed to remove.
+            There is no in-app action for that tier, so they get the
+            sentence and no button, which is the honest answer. */}
+        {!isRegistered && (
+          <Link
+            href="/auth/login"
+            className="twa-only shrink-0 rounded-[10px] bg-clay-deep px-4 py-2.5 text-sm font-semibold text-white"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </div>
   );

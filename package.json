@@ -13,7 +13,8 @@
     "check:dead-ends": "node scripts/check-dead-ends.mjs",
     "pretest:e2e": "node scripts/check-dead-ends.mjs --emit-only",
     "test:e2e": "playwright test",
-    "verify": "npm run lint && npm run typecheck && npm run check:dead-ends && npm run test && npm run test:e2e"
+    "verify": "npm run lint && npm run typecheck && npm run check:dead-ends && npm run check:icons && npm run test && npm run test:e2e",
+    "check:icons": "node scripts/check-icons.mjs"
   },
   "dependencies": {
     "@uppy/aws-s3": "^5.1.0",

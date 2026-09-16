@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/auth/Button";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import type { AdminCategoryGroup, AdminCategory } from "@/types/admin";
+import { categoryIcon } from "@/lib/category-icons";
 
 export function CategoriesTab() {
   const [groups, setGroups] = useState<AdminCategoryGroup[] | null>(null);
@@ -115,7 +116,7 @@ export function CategoriesTab() {
             <div key={g.id} className="border border-hairline rounded-xl p-3.5">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  {g.icon && <i className={`ti ${g.icon} text-clay`} />}
+                  {categoryIcon(g.icon) && <i className={`ti ${categoryIcon(g.icon)} text-clay`} />}
                   <span className="text-sm font-bold text-ink">{g.name}</span>
                   <span className="text-[12px] text-faint">({g.category_count})</span>
                 </div>

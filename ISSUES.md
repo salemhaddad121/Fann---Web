@@ -3,6 +3,18 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- **Item 23 of the UX review (dashboard) is not done, and needs a decision.**
+  The spec offers two routes: fill the planner dashboard (recent activity,
+  saved artists, suggested artists) or constrain and centre the column. The
+  column is already `mx-auto max-w-lg lg:max-w-3xl` — but that is the code
+  the reviewer was looking at when they wrote the item, so it is not an
+  answer to it. Filling it is the live question, and it overlaps work that
+  was deliberately held: the Option-3 bento artist dashboard on
+  `feat/artist-dashboard`, kept out of a merge on 2026-07-25 for a named
+  future "Dashboard Premium" task. Building activity tiles now would either
+  duplicate or conflict with that. Left untouched on purpose rather than
+  improvised around; the cheapest resolution may be to record a deliberate
+  skip. `src/app/(app)/dashboard/page.tsx` is unchanged from f4bc369.
 - `src/components/profile/LockedField.tsx:~130` — UnlockCta's button says
   "from $5" as a literal. It renders on every locked profile view, so it is
   not worth a plan-list request for one number, but it will be wrong the day

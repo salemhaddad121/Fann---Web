@@ -113,7 +113,7 @@ export function UsersTab() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-semibold text-ink truncate">{name}</span>
-                      {u.is_verified && <i className="ti ti-rosette-discount-check text-clay text-xs" />}
+                      {u.is_verified && <i className="ti ti-discount-check text-clay text-xs" />}
                     </div>
                     <div className="text-xs text-muted truncate">
                       {u.role[0].toUpperCase() + u.role.slice(1)} · {u.account_code} · Joined{" "}
