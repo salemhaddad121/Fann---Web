@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { TopNav } from "@/components/shell/TopNav";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { Sidebar } from "@/components/shell/Sidebar";
@@ -34,6 +35,10 @@ export function AppShell({
   const { unreadMessages, unreadNotifications } = useNavBadges(user.role);
   const hasNav = navItems.length > 0;
   const showMobileNav = chrome === "full";
+  // /account carries a real "Log out" row of its own, so the floating
+  // fallback stands down there. Without this the two land on top of each
+  // other at 390px — literally overlapping rectangles saying the same word.
+  const pageHasOwnLogout = usePathname() === "/account";
   const resolvedBackground = background ?? (user.role === "planner" ? "planner" : "artist");
 
   return (
@@ -68,10 +73,28 @@ export function AppShell({
           )}
         </div>
 
-        {/* No sidebar means no logout, since that is where it lives. Admin
-            is the only role in that position, and had no way to sign out
-            at all — TopNav links to /account, which has none either. */}
-        {!hasNav && <FloatingLogout />}
+        {/* Logout lives at the foot of the Sidebar, and the Sidebar is
+            lg:-only — so below that breakpoint nobody could sign out, on a
+            product whose primary surface is a phone. Two cases, and they
+            need different positions:
+
+            Admin has no sidebar at any width, so its button is the only
+            logout there is and sits in the corner.
+
+            Artists and planners have the sidebar from lg up; below that the
+            floating button stands in for it, raised to clear the BottomNav
+            it would otherwise sit on top of. Only on shells that show that
+            nav — a sidebar-only page (the message thread) owns the bottom of
+            the screen for its composer, and a logout pill over it would be
+            worse than the problem.
+
+            /account carries a plain Log out control for every role, which is
+            where people actually look — and where this fallback suppresses
+            itself, so the two never overlap. */}
+        {!hasNav && !pageHasOwnLogout && <FloatingLogout />}
+        {hasNav && showMobileNav && !pageHasOwnLogout && (
+          <FloatingLogout placement="above-nav" />
+        )}
       </div>
     </div>
   );
