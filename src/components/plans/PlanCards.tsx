@@ -44,6 +44,22 @@ function savingAgainstMonthly(plan: SubscriptionPlan, all: SubscriptionPlan[]): 
 }
 
 /**
+ * The subline under the headline price.
+ *
+ * "$0.50 per day", "$0.27 per day" and "Saves $80 against paying monthly"
+ * are the strongest persuasion on this page, and they used to sit as the
+ * seventh and eighth checkmark rows of a twenty-one row list, set in 12px
+ * grey. They belong against the number they are talking about.
+ *
+ * Nothing for the day pass: it is one day, so "per day" is the price again.
+ */
+function priceSubline(plan: SubscriptionPlan, all: SubscriptionPlan[]): string | null {
+  if (plan.code === "day") return null;
+  const saving = savingAgainstMonthly(plan, all);
+  return saving ? `${perDay(plan)} · ${saving}` : perDay(plan);
+}
+
+/**
  * What every plan includes, listed ONCE below the grid.
  *
  * The three cards used to carry twenty-one feature rows between them while
@@ -144,6 +160,7 @@ export function PlanCards({
         const copy = PLAN_COPY[plan.code];
         const featured = Boolean(copy?.featured);
         const quantity = plan.code === "day" ? dayQuantity : 1;
+        const subline = priceSubline(plan, plans);
 
         return (
           <div
@@ -177,7 +194,18 @@ export function PlanCards({
               </span>
             </p>
 
-            <p className={`mt-1 text-sm ${featured ? "text-white/75" : "text-muted"}`}>
+            {/* Directly under the number it is about — see priceSubline. */}
+            {subline && (
+              <p
+                className={`mt-1 text-[13px] font-semibold ${
+                  featured ? "text-clay-light" : "text-clay-deep"
+                }`}
+              >
+                {subline}
+              </p>
+            )}
+
+            <p className={`mt-1.5 text-sm ${featured ? "text-white/75" : "text-muted"}`}>
               {copy?.tagline}
             </p>
 
