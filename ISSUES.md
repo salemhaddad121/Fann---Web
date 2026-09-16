@@ -3,6 +3,14 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `scripts/check-dead-ends.mjs` — reports
+  `src/app/layout.tsx:94 href points at "/fonts/tabler-subset.woff2" — no
+  such route`. False positive: that is a `<link rel="preload" as="font">`,
+  not a navigation, and `public/fonts/tabler-subset.woff2` is present. The
+  checker treats every `href` as a route. Introduced by 82dd6d5 (self-host
+  the icon font), and it makes `npm run verify` red on `main` for anyone who
+  runs it. Probably one condition: skip `<link>` elements, or skip an href
+  with a file extension.
 - `playwright.config.ts` — the local default of 4 workers makes "links
   resolve" flaky against `next dev`. That test does a sequential
   `page.request.get()` for every internal link on a page (the footer alone
