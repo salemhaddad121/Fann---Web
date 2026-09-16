@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRemaining, planLabel } from "./subscription-format";
+import { formatMessagesLeft, formatRemaining, planLabel } from "./subscription-format";
 
 const NOW = new Date("2026-08-15T12:00:00Z").getTime();
 const at = (iso: string) => formatRemaining(iso, NOW);
@@ -50,5 +50,39 @@ describe("planLabel()", () => {
 
   it("falls back to the raw code for anything unexpected", () => {
     expect(planLabel("lifetime")).toBe("lifetime");
+  });
+});
+
+describe("formatMessagesLeft", () => {
+  // C2 — the day pass includes 15 and the server enforces it exactly, but
+  // nothing told the buyer how many they had left. The first they knew of
+  // the cap was being refused by it.
+  it("counts down a day pass", () => {
+    expect(formatMessagesLeft(11, 15)).toBe("11 of 15 messages left");
+  });
+
+  it("says none left rather than '0 of 15'", () => {
+    expect(formatMessagesLeft(0, 15)).toBe("No messages left on this plan");
+  });
+
+  it("renders nothing for an uncapped plan", () => {
+    // A counter that never moves teaches people to ignore counters, and
+    // "unlimited messages left" is noise on a monthly plan.
+    expect(formatMessagesLeft(null, null)).toBeNull();
+  });
+
+  it("renders nothing when the cap is absent, whatever the count says", () => {
+    expect(formatMessagesLeft(5, null)).toBeNull();
+  });
+
+  it("keeps null and zero apart", () => {
+    // They are different answers: one plan has no cap, the other has spent
+    // it. Collapsing them would hide a spent pass behind silence.
+    expect(formatMessagesLeft(null, 15)).toBeNull();
+    expect(formatMessagesLeft(0, 15)).not.toBeNull();
+  });
+
+  it("agrees in number for a single message", () => {
+    expect(formatMessagesLeft(1, 15)).toBe("1 of 15 messages left");
   });
 });

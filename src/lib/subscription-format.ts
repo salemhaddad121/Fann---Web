@@ -38,3 +38,22 @@ export function planLabel(planCode: string): string {
   if (planCode === "year") return "yearly plan";
   return planCode;
 }
+
+/**
+ * How many messages are left on a capped plan, in words.
+ *
+ * Returns null for an uncapped plan so the caller renders nothing at all —
+ * "unlimited messages left" on a monthly plan is noise, and a counter that
+ * never moves teaches people to ignore counters.
+ *
+ * The day pass includes 15 and the server enforces that exactly. Until this
+ * existed the buyer's first sight of the cap was being refused by it.
+ */
+export function formatMessagesLeft(
+  messagesRemaining: number | null,
+  messageCap: number | null,
+): string | null {
+  if (messagesRemaining === null || messageCap === null) return null;
+  if (messagesRemaining === 0) return "No messages left on this plan";
+  return `${messagesRemaining} of ${messageCap} messages left`;
+}

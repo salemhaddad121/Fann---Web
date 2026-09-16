@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ApiError } from "@/lib/api";
 import { activateSubscription, getMySubscriptions } from "@/lib/subscriptions-api";
-import { formatRemaining, planLabel } from "@/lib/subscription-format";
+import { formatMessagesLeft, formatRemaining, planLabel } from "@/lib/subscription-format";
 import type { MySubscriptions, SubscriptionRow } from "@/types/subscriptions";
 
 function shortDate(iso: string | null): string {
@@ -86,6 +86,11 @@ export function SubscriptionSection() {
           <p className="mt-0.5 text-xs text-muted">
             {formatRemaining(active.expires_at)} · ends {shortDate(active.expires_at)}
           </p>
+          {formatMessagesLeft(active.messages_remaining, active.message_cap) && (
+            <p className="mt-0.5 text-xs text-muted">
+              {formatMessagesLeft(active.messages_remaining, active.message_cap)}
+            </p>
+          )}
         </div>
       ) : (
         <p className="mb-3 text-sm text-muted">No plan running right now.</p>

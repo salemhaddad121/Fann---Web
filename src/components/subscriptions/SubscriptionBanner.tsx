@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ApiError } from "@/lib/api";
 import { activateSubscription, getMySubscriptions } from "@/lib/subscriptions-api";
-import { formatRemaining, planLabel } from "@/lib/subscription-format";
+import { formatMessagesLeft, formatRemaining, planLabel } from "@/lib/subscription-format";
 import type { MySubscriptions } from "@/types/subscriptions";
 
 /**
@@ -73,6 +73,16 @@ export function SubscriptionBanner() {
             <p className="mt-0.5 text-sm text-white/75">
               {formatRemaining(active.expires_at)}
             </p>
+            {/* The day pass includes 15 messages and the server enforces it
+                exactly. Without this the buyer's first sight of the cap was
+                being refused by it. Renders nothing on an uncapped plan —
+                a counter that never moves teaches people to ignore
+                counters. */}
+            {formatMessagesLeft(active.messages_remaining, active.message_cap) && (
+              <p className="mt-0.5 text-sm text-white/75">
+                {formatMessagesLeft(active.messages_remaining, active.message_cap)}
+              </p>
+            )}
           </div>
           <Link
             href="/search"
