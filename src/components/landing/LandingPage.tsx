@@ -13,16 +13,34 @@ import { StoreBadges } from "@/components/landing/StoreBadges";
 // and the planner section lists the *artist* categories they can hire —
 // each audience is shown what they'd find on the other side.
 
-function Pills({ items }: { items: string[] }) {
+/**
+ * A chip row.
+ *
+ * Chips with an `href` render as links. They are pill-shaped, bordered and
+ * sit on a card next to real buttons, so the ones that did nothing read as
+ * broken controls — and they are the most specific intent signal on the
+ * page. /search?categories=<slug> already works; the footer uses it.
+ *
+ * `href` stays optional because the event-type row has no honest
+ * destination: event types describe the PLANNER directory, which a
+ * logged-out visitor on /search does not get, so linking them would send
+ * someone hunting for weddings into a list of artists.
+ */
+function Pills({ items }: { items: { label: string; href?: string }[] }) {
   if (items.length === 0) return null;
+  const chip =
+    "font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-2";
   return (
     <ul className="flex flex-wrap gap-1.5 mt-4">
-      {items.map((label) => (
-        <li
-          key={label}
-          className="font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-1"
-        >
-          {label}
+      {items.map(({ label, href }) => (
+        <li key={label}>
+          {href ? (
+            <Link href={href} className={`block ${chip} hover:border-clay`}>
+              {label}
+            </Link>
+          ) : (
+            <span className={`block ${chip}`}>{label}</span>
+          )}
         </li>
       ))}
     </ul>
@@ -88,11 +106,40 @@ async function loadTaxonomy() {
   ]);
 
   const artistCategories = groups
-    .flatMap((g) => g.categories.map((c) => c.name))
-    .filter((n) => !n.toLowerCase().startsWith("other"));
+    .flatMap((g) => g.categories)
+    .filter((c) => !c.name.toLowerCase().startsWith("other"));
 
   return { artistCategories, eventTypes };
 }
+
+/**
+ * The chips the "Hire from" row actually shows.
+ *
+ * The row used to print the whole leaf taxonomy — 37 equal-weight chips,
+ * about two phone screens of them, with no hierarchy and therefore no
+ * signal. These ten are the headline categories, listed in editorial order.
+ *
+ * Editorial, explicitly: there is no booking-volume data to rank by yet, so
+ * this is a judgement call written down where it can be argued with, rather
+ * than a measurement dressed up as one. Revisit it when there are searches
+ * to count.
+ *
+ * Resolved against the live taxonomy rather than hardcoded with labels, so a
+ * slug that is renamed or retired drops out of the row instead of rendering
+ * a chip that leads to an empty search.
+ */
+const HEADLINE_CATEGORY_SLUGS = [
+  "dj",
+  "photographer",
+  "band-group",
+  "singer-vocalist",
+  "videographer",
+  "mc-host",
+  "catering",
+  "sound-lighting",
+  "magician",
+  "photo-booth",
+];
 
 interface LandingPageProps {
   /**
@@ -104,6 +151,16 @@ interface LandingPageProps {
 
 export async function LandingPage({ showPricing = true }: LandingPageProps) {
   const { artistCategories, eventTypes } = await loadTaxonomy();
+
+  // Keeps HEADLINE_CATEGORY_SLUGS' order rather than the taxonomy's, so the
+  // row reads in the order it was written. A slug with no match is dropped.
+  const bySlug = new Map(artistCategories.map((c) => [c.slug, c]));
+  const headlineCategories = HEADLINE_CATEGORY_SLUGS.flatMap((slug) => {
+    const category = bySlug.get(slug);
+    return category
+      ? [{ label: category.name, href: `/search?categories=${category.slug}` }]
+      : [];
+  });
 
   return (
     <div className="min-h-screen relative">
@@ -197,7 +254,8 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
                 Get booked for
               </p>
-              <Pills items={eventTypes} />
+              {/* No href — see Pills. */}
+              <Pills items={eventTypes.map((label) => ({ label }))} />
               <JoinNow role="artist" />
             </section>
 
@@ -225,7 +283,14 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
                 Hire from
               </p>
-              <Pills items={artistCategories} />
+              <Pills items={headlineCategories} />
+              {artistCategories.length > headlineCategories.length && (
+                <p className="mt-3 text-[13px]">
+                  <Link href="/search" className="font-semibold text-clay-deep">
+                    See all {artistCategories.length} categories →
+                  </Link>
+                </p>
+              )}
               <JoinNow role="planner" />
             </section>
           </div>
