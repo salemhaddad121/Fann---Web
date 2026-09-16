@@ -58,11 +58,18 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
               aria-pressed={revealed}
               aria-controls={inputId}
               aria-label={revealed ? "Hide password" : "Show password"}
-              // Skipped by the keyboard: the field's own submit flow should
-              // not have to step over it, and it is reachable by pointer or
-              // by shift-tabbing back.
-              tabIndex={-1}
-              className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center self-center text-muted"
+              // In the tab order, deliberately. This carried tabIndex={-1}
+              // with a comment claiming it stayed "reachable by
+              // shift-tabbing back" — which is simply false: a negative
+              // tabindex removes an element from sequential navigation in
+              // BOTH directions. That made the control pointer-only, so a
+              // keyboard or switch user could not reveal the password at
+              // all — a WCAG 2.1.1 failure, and one that defeated the whole
+              // point of the toggle for the people who most need it, since
+              // the 8-character/three-class rule is stated but never shown
+              // back to them. One extra tab stop per password field is the
+              // correct trade, and is what GOV.UK's password input does.
+              className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center self-center rounded-[10px] text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay"
             >
               <i className={`ti ${revealed ? "ti-eye-off" : "ti-eye"} text-base`} aria-hidden />
             </button>
