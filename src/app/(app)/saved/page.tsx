@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { listSavedArtists, unsaveArtist } from "@/lib/saved-api";
 import { ArtistCard } from "@/components/search/ArtistCard";
@@ -48,6 +49,10 @@ function SavedList() {
         <p className="text-[13px] text-muted leading-relaxed max-w-[260px]">
           Tap the heart on an artist&apos;s card or profile while browsing to save them here.
         </p>
+        {/* The sentence named the next step but offered nothing to tap. */}
+        <Link href="/search" className="mt-5 inline-flex h-11 items-center rounded-[10px] bg-clay-deep px-4 text-sm font-semibold text-white">
+          Browse artists
+        </Link>
       </div>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { listConversations, respondToRequest } from "@/lib/messaging-api";
 import { formatRelativeTime, initialsFromName } from "@/lib/format";
@@ -171,8 +172,20 @@ export default function MessagesPage() {
           </div>
           <p className="text-[15px] font-bold text-ink mb-1.5">No messages yet</p>
           <p className="text-[13px] text-muted leading-relaxed max-w-[260px]">
-            Your conversations will appear here once you start messaging.
+            {user?.role === "planner"
+              ? "Find an artist and message them directly — no back-and-forth on Instagram."
+              : "Planners start the conversation. A complete profile is what gets you found."}
           </p>
+          {/* Only planners can open a conversation — the API 403s anyone
+              else (messaging.service.ts createConversation) — so an artist
+              gets the control that actually changes their odds rather than
+              a button that would 403 on arrival. */}
+          <Link
+            href={user?.role === "planner" ? "/search" : "/profile"}
+            className="mt-5 inline-flex h-11 items-center rounded-[10px] bg-clay-deep px-4 text-sm font-semibold text-white"
+          >
+            {user?.role === "planner" ? "Find an artist" : "Check your profile"}
+          </Link>
         </div>
       ) : filtered.length === 0 ? (
         /* Requests aren't conversations yet, so "no conversations" is the
