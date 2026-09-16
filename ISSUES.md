@@ -12,6 +12,17 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   per keystroke (no debounce), unlike the text query, which is debounced at
   400ms in SearchClient. Pre-existing, but the mobile filter sheet now shows
   a live result count, which makes it much more visible.
+- `src/lib/api.ts:100` — `return res.json()` on the success path is
+  unguarded, so a 200 with an empty or truncated body throws a raw
+  `SyntaxError: Unexpected end of JSON input` instead of an `ApiError`. The
+  failure path five lines above already try/catches exactly this. It shows up
+  as an intermittent **HTTP 500 on the archived legal pages**
+  (`/privacy/2026-08-11`, `/terms/2026-08-11`) during a full e2e run, which
+  is how it was found — those pages are statically generated and make no API
+  call of their own, so the throw is coming from the provider in the root
+  layout. Pre-existing: reproduced on `f4bc369` before any of the UX work.
+  Worth fixing properly, because a legal page that 500s is the one page that
+  has to resolve.
 - `src/components/plans/PlanCards.tsx:~250` — the `ctaHref` prop and its
   `{!onChoose && ctaHref && ...}` branch now have no caller. The landing page
   was the only one, and item 6 replaced it with a summary block. Either
