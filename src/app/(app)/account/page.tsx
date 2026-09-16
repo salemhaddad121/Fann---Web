@@ -443,6 +443,26 @@ function Disclosure({ title, children }: { title: string; children: React.ReactN
   );
 }
 
+/**
+ * Sign out. A plain row rather than a Button, so it reads as one more
+ * settings action rather than the page's primary call to action — the
+ * primary action on Settings is never "leave".
+ */
+function LogOutRow() {
+  const { logout } = useAuth();
+
+  return (
+    <button
+      type="button"
+      onClick={logout}
+      className="mb-6 flex w-full items-center justify-between rounded-[10px] border border-hairline px-3.5 py-3 text-sm"
+    >
+      <span className="font-medium text-ink">Log out</span>
+      <i className="ti ti-logout text-base text-faint" aria-hidden />
+    </button>
+  );
+}
+
 export default function AccountPage() {
   const { user } = useAuth();
   if (!user) return null;
@@ -540,6 +560,17 @@ export default function AccountPage() {
           <span className="font-medium text-ink">Help &amp; support</span>
           <i className="ti ti-chevron-right text-base text-faint" aria-hidden />
         </Link>
+
+        {/* Log out lived in exactly one place — the foot of the desktop
+            Sidebar, which is lg:-only — so at 390px no artist or planner
+            could sign out at all. Settings is where people look for it, and
+            this is the same control for every role, at every width.
+
+            Deliberately NOT next to Delete account: they are both "end my
+            session with this product" shaped, one is reversible and one is
+            not, and putting them side by side is how a mis-tap becomes a
+            deleted account. */}
+        <LogOutRow />
         </div>
 
         <div>
