@@ -3,6 +3,15 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `playwright.config.ts` — the local default of 4 workers makes "links
+  resolve" flaky against `next dev`. That test does a sequential
+  `page.request.get()` for every internal link on a page (the footer alone
+  is ~30), and four workers doing that at once starve the dev server until
+  the 30s test timeout fires. The failures are pure timeouts with no HTTP
+  status, they move to a different route each run, and every one of them
+  passes in isolation. `--workers=2` (what CI already uses) is reliably
+  green: 146/146. Either lower the local default or raise the timeout for
+  that test.
 - **Item 23 of the UX review (dashboard) is not done, and needs a decision.**
   The spec offers two routes: fill the planner dashboard (recent activity,
   saved artists, suggested artists) or constrain and centre the column. The
