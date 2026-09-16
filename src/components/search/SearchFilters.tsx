@@ -1,5 +1,6 @@
 "use client";
 
+import { categoryIcon } from "@/lib/category-icons";
 import type { CategoryGroup, SearchArtistsParams } from "@/types/artists";
 
 export type ArtistFilters = Pick<
@@ -123,7 +124,7 @@ export function SearchTopBar({
                     : "border-hairline text-muted"
                 }`}
               >
-                {g.icon && <i className={`ti ${g.icon} text-sm`} />}
+                {categoryIcon(g.icon) && <i className={`ti ${categoryIcon(g.icon)} text-sm`} />}
                 {g.name}
               </button>
             );
