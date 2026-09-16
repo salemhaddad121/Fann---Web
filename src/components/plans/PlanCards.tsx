@@ -27,50 +27,87 @@ function perDay(plan: SubscriptionPlan): string {
   return `$${(plan.price_usd / plan.duration_days).toFixed(2)} per day`;
 }
 
-function featuresFor(plan: SubscriptionPlan, all: SubscriptionPlan[]): string[] {
-  const features: string[] = [
-    plan.code === "day"
-      ? "Full access for 24 hours"
-      : `Full access for ${plan.duration_days} days`,
-    "Artist names, contact details and social links",
-    "Message artists directly",
+/**
+ * The saving on the yearly, or null.
+ *
+ * Only ever claims a saving that can be shown from the price list itself —
+ * twelve months at the monthly rate, less the yearly price. If the monthly
+ * plan is missing from the response, or the maths comes out at zero, the
+ * line is dropped rather than rounded into existence.
+ */
+function savingAgainstMonthly(plan: SubscriptionPlan, all: SubscriptionPlan[]): string | null {
+  if (plan.code !== "year") return null;
+  const month = all.find((p) => p.code === "month");
+  if (!month) return null;
+  const saving = month.price_usd * 12 - plan.price_usd;
+  return saving > 0 ? `Saves $${saving.toFixed(0)} against paying monthly` : null;
+}
+
+/**
+ * The subline under the headline price.
+ *
+ * "$0.50 per day", "$0.27 per day" and "Saves $80 against paying monthly"
+ * are the strongest persuasion on this page, and they used to sit as the
+ * seventh and eighth checkmark rows of a twenty-one row list, set in 12px
+ * grey. They belong against the number they are talking about.
+ *
+ * Nothing for the day pass: it is one day, so "per day" is the price again.
+ */
+function priceSubline(plan: SubscriptionPlan, all: SubscriptionPlan[]): string | null {
+  if (plan.code === "day") return null;
+  const saving = savingAgainstMonthly(plan, all);
+  return saving ? `${perDay(plan)} · ${saving}` : perDay(plan);
+}
+
+/**
+ * What every plan includes, listed ONCE below the grid.
+ *
+ * The three cards used to carry twenty-one feature rows between them while
+ * only three things actually differ. "Artist names, contact details and
+ * social links" and "Message artists directly" appeared, identically, on all
+ * three — so the eye had to diff three near-identical lists to find the one
+ * row that changed.
+ *
+ * Fann's plans unlock exactly the same thing; they differ in how long they
+ * last. Saying that once, plainly, is both shorter and more honest than
+ * repeating it three times and hoping nobody compares.
+ */
+const SHARED_FEATURES = [
+  "Artist names, contact details and social links",
+  "Message artists directly",
+  "No booking commissions, ever",
+];
+
+/**
+ * The rows that are actually different between plans.
+ *
+ * Deliberately NOT phrased as "Everything in Day Pass, plus —": the plans
+ * are not additive. The longer plans lift the day pass's message cap but
+ * also REQUIRE ID verification, which the day pass does not. Presenting a
+ * requirement as a bonus feature would be the kind of claim this page has
+ * otherwise been careful not to make.
+ */
+function differencesFor(plan: SubscriptionPlan): string[] {
+  const rows: string[] = [
+    plan.code === "day" ? "Full access for 24 hours" : `Full access for ${plan.duration_days} days`,
+    plan.message_cap === null ? "Unlimited messages" : `Up to ${plan.message_cap} messages`,
+    plan.requires_id_doc ? "ID verification required" : "No ID verification needed",
   ];
 
-  features.push(
-    plan.message_cap === null
-      ? "Unlimited messages"
-      : `Up to ${plan.message_cap} messages`,
+  rows.push(
+    plan.code === "day"
+      ? "Buy a pack — start each one whenever you need it"
+      : "Stacks on after your current plan, never overlaps it",
   );
 
-  features.push(
-    plan.requires_id_doc ? "ID verification required" : "No ID verification needed",
-  );
-
-  if (plan.code === "day") {
-    features.push("Buy a pack — start each one whenever you need it");
-  } else {
-    features.push("Stacks on after your current plan, never overlaps it");
-    features.push(perDay(plan));
-  }
-
-  // Only claim a saving we can actually show from the price list.
-  const month = all.find((p) => p.code === "month");
-  if (plan.code === "year" && month) {
-    const yearlyAtMonthlyRate = month.price_usd * 12;
-    const saving = yearlyAtMonthlyRate - plan.price_usd;
-    if (saving > 0) {
-      features.push(`Saves $${saving.toFixed(0)} against paying monthly`);
-    }
-  }
-
-  return features;
+  return rows;
 }
 
 function Check({ featured }: { featured: boolean }) {
   return (
     <span
       aria-hidden
-      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[12px] font-bold ${
         featured ? "bg-white/25 text-white" : "bg-clay/15 text-clay-deep"
       }`}
     >
@@ -123,6 +160,7 @@ export function PlanCards({
         const copy = PLAN_COPY[plan.code];
         const featured = Boolean(copy?.featured);
         const quantity = plan.code === "day" ? dayQuantity : 1;
+        const subline = priceSubline(plan, plans);
 
         return (
           <div
@@ -156,12 +194,23 @@ export function PlanCards({
               </span>
             </p>
 
-            <p className={`mt-1 text-sm ${featured ? "text-white/75" : "text-muted"}`}>
+            {/* Directly under the number it is about — see priceSubline. */}
+            {subline && (
+              <p
+                className={`mt-1 text-[13px] font-semibold ${
+                  featured ? "text-clay-light" : "text-clay-deep"
+                }`}
+              >
+                {subline}
+              </p>
+            )}
+
+            <p className={`mt-1.5 text-sm ${featured ? "text-white/75" : "text-muted"}`}>
               {copy?.tagline}
             </p>
 
             <ul className="mt-4 flex-1 space-y-2">
-              {featuresFor(plan, plans).map((feature) => (
+              {differencesFor(plan).map((feature) => (
                 <li key={feature} className="flex items-start gap-2 text-[13px]">
                   <Check featured={featured} />
                   <span className={featured ? "text-white/90" : "text-ink-soft"}>{feature}</span>
@@ -169,56 +218,62 @@ export function PlanCards({
               ))}
             </ul>
 
-            {plan.code === "day" && onChoose && (
-              <div
-                className={`mt-4 flex items-center justify-between rounded-[10px] border px-3 py-2 ${
-                  featured ? "border-white/25" : "border-hairline"
-                }`}
-              >
-                <span className={`text-[13px] ${featured ? "text-white/80" : "text-muted"}`}>
-                  How many?
-                </span>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    aria-label="One fewer day pass"
-                    disabled={dayQuantity <= 1}
-                    onClick={() => setDayQuantity((n) => Math.max(1, n - 1))}
-                    className="h-7 w-7 rounded-full border border-hairline text-base font-bold leading-none disabled:opacity-40"
-                  >
-                    −
-                  </button>
-                  <span className="w-5 text-center text-sm font-bold tabular-nums">
-                    {dayQuantity}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="One more day pass"
-                    disabled={dayQuantity >= 30}
-                    onClick={() => setDayQuantity((n) => Math.min(30, n + 1))}
-                    className="h-7 w-7 rounded-full border border-hairline text-base font-bold leading-none disabled:opacity-40"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-
+            {/* The quantity control, inside the CTA area rather than above
+                it as a fourth bordered block. It only exists on one of the
+                three cards, so as its own panel it gave that card a
+                different rhythm from its neighbours — a content block where
+                the others had none. Sitting on the button row it reads as
+                part of the action, which is what it is. */}
             {onChoose && (
-              <button
-                type="button"
-                disabled={disabled || busyPlan !== null}
-                onClick={() => onChoose(plan.code, quantity)}
-                className={`mt-4 w-full rounded-[10px] py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 ${
-                  featured ? "bg-white text-ink" : "bg-clay-deep text-white"
-                }`}
-              >
-                {busyPlan === plan.code
-                  ? "Setting up…"
-                  : plan.code === "day" && dayQuantity > 1
-                    ? `${ctaLabel} — $${(plan.price_usd * dayQuantity).toFixed(0)}`
-                    : ctaLabel}
-              </button>
+              <div className="mt-4 flex items-center gap-2">
+                {plan.code === "day" && (
+                  <div
+                    className={`flex shrink-0 items-center gap-1 rounded-[10px] border px-1.5 py-1 ${
+                      featured ? "border-white/25" : "border-hairline"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      aria-label="One fewer day pass"
+                      disabled={dayQuantity <= 1}
+                      onClick={() => setDayQuantity((n) => Math.max(1, n - 1))}
+                      className="h-8 w-8 rounded-lg text-base font-bold leading-none disabled:opacity-40"
+                    >
+                      −
+                    </button>
+                    <span
+                      className="w-5 text-center text-sm font-bold tabular-nums"
+                      aria-live="polite"
+                      aria-label={`${dayQuantity} day ${dayQuantity === 1 ? "pass" : "passes"}`}
+                    >
+                      {dayQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="One more day pass"
+                      disabled={dayQuantity >= 30}
+                      onClick={() => setDayQuantity((n) => Math.min(30, n + 1))}
+                      className="h-8 w-8 rounded-lg text-base font-bold leading-none disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  disabled={disabled || busyPlan !== null}
+                  onClick={() => onChoose(plan.code, quantity)}
+                  className={`min-w-0 flex-1 rounded-[10px] py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 ${
+                    featured ? "bg-white text-ink" : "bg-clay-deep text-white"
+                  }`}
+                >
+                  {busyPlan === plan.code
+                    ? "Setting up…"
+                    : plan.code === "day" && dayQuantity > 1
+                      ? `${ctaLabel} — $${(plan.price_usd * dayQuantity).toFixed(0)}`
+                      : ctaLabel}
+                </button>
+              </div>
             )}
 
             {!onChoose && ctaHref && (
@@ -234,6 +289,21 @@ export function PlanCards({
           </div>
         );
       })}
+    </div>
+
+    {/* Said once, under the grid, instead of three times inside it. */}
+    <div className="mt-4 rounded-2xl border border-hairline bg-surface p-5">
+      <p className="text-[13px] font-bold uppercase tracking-wide text-clay-deep">
+        Every plan includes
+      </p>
+      <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+        {SHARED_FEATURES.map((feature) => (
+          <li key={feature} className="flex items-start gap-2 text-[13px]">
+            <Check featured={false} />
+            <span className="text-ink-soft">{feature}</span>
+          </li>
+        ))}
+      </ul>
     </div>
 
     {/* One line under the grid rather than three identical ones inside it.
