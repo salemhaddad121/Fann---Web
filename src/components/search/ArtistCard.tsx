@@ -96,7 +96,7 @@ export function ArtistCard({
               </>
             )}
           </div>
-          <div className="text-[11px] opacity-90 mt-0.5 truncate">{subtitle}</div>
+          <div className="text-[12px] opacity-90 mt-0.5 truncate">{subtitle}</div>
         </div>
       </div>
     </Link>

@@ -43,7 +43,7 @@ export function PlannerCard({ planner }: { planner: PlannerCardType }) {
           style={{ backgroundImage: NAME_BANNER_GRADIENT }}
         >
           <div className="font-bold text-[15px] leading-[1.15] truncate">{planner.display_name}</div>
-          {subtitle && <div className="text-[11px] opacity-90 mt-0.5 truncate">{subtitle}</div>}
+          {subtitle && <div className="text-[12px] opacity-90 mt-0.5 truncate">{subtitle}</div>}
         </div>
       </div>
     </Link>
