@@ -218,56 +218,62 @@ export function PlanCards({
               ))}
             </ul>
 
-            {plan.code === "day" && onChoose && (
-              <div
-                className={`mt-4 flex items-center justify-between rounded-[10px] border px-3 py-2 ${
-                  featured ? "border-white/25" : "border-hairline"
-                }`}
-              >
-                <span className={`text-[13px] ${featured ? "text-white/80" : "text-muted"}`}>
-                  How many?
-                </span>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    aria-label="One fewer day pass"
-                    disabled={dayQuantity <= 1}
-                    onClick={() => setDayQuantity((n) => Math.max(1, n - 1))}
-                    className="h-7 w-7 rounded-full border border-hairline text-base font-bold leading-none disabled:opacity-40"
-                  >
-                    −
-                  </button>
-                  <span className="w-5 text-center text-sm font-bold tabular-nums">
-                    {dayQuantity}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="One more day pass"
-                    disabled={dayQuantity >= 30}
-                    onClick={() => setDayQuantity((n) => Math.min(30, n + 1))}
-                    className="h-7 w-7 rounded-full border border-hairline text-base font-bold leading-none disabled:opacity-40"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-
+            {/* The quantity control, inside the CTA area rather than above
+                it as a fourth bordered block. It only exists on one of the
+                three cards, so as its own panel it gave that card a
+                different rhythm from its neighbours — a content block where
+                the others had none. Sitting on the button row it reads as
+                part of the action, which is what it is. */}
             {onChoose && (
-              <button
-                type="button"
-                disabled={disabled || busyPlan !== null}
-                onClick={() => onChoose(plan.code, quantity)}
-                className={`mt-4 w-full rounded-[10px] py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 ${
-                  featured ? "bg-white text-ink" : "bg-clay-deep text-white"
-                }`}
-              >
-                {busyPlan === plan.code
-                  ? "Setting up…"
-                  : plan.code === "day" && dayQuantity > 1
-                    ? `${ctaLabel} — $${(plan.price_usd * dayQuantity).toFixed(0)}`
-                    : ctaLabel}
-              </button>
+              <div className="mt-4 flex items-center gap-2">
+                {plan.code === "day" && (
+                  <div
+                    className={`flex shrink-0 items-center gap-1 rounded-[10px] border px-1.5 py-1 ${
+                      featured ? "border-white/25" : "border-hairline"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      aria-label="One fewer day pass"
+                      disabled={dayQuantity <= 1}
+                      onClick={() => setDayQuantity((n) => Math.max(1, n - 1))}
+                      className="h-8 w-8 rounded-lg text-base font-bold leading-none disabled:opacity-40"
+                    >
+                      −
+                    </button>
+                    <span
+                      className="w-5 text-center text-sm font-bold tabular-nums"
+                      aria-live="polite"
+                      aria-label={`${dayQuantity} day ${dayQuantity === 1 ? "pass" : "passes"}`}
+                    >
+                      {dayQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="One more day pass"
+                      disabled={dayQuantity >= 30}
+                      onClick={() => setDayQuantity((n) => Math.min(30, n + 1))}
+                      className="h-8 w-8 rounded-lg text-base font-bold leading-none disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  disabled={disabled || busyPlan !== null}
+                  onClick={() => onChoose(plan.code, quantity)}
+                  className={`min-w-0 flex-1 rounded-[10px] py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 ${
+                    featured ? "bg-white text-ink" : "bg-clay-deep text-white"
+                  }`}
+                >
+                  {busyPlan === plan.code
+                    ? "Setting up…"
+                    : plan.code === "day" && dayQuantity > 1
+                      ? `${ctaLabel} — $${(plan.price_usd * dayQuantity).toFixed(0)}`
+                      : ctaLabel}
+                </button>
+              </div>
             )}
 
             {!onChoose && ctaHref && (
