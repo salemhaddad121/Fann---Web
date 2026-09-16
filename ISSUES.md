@@ -3,7 +3,11 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
-_Currently empty._
+- `src/components/plans/PlanCards.tsx:~250` — the `ctaHref` prop and its
+  `{!onChoose && ctaHref && ...}` branch now have no caller. The landing page
+  was the only one, and item 6 replaced it with a summary block. Either
+  delete the prop or leave it as supported component API — a decision, not a
+  defect, so it is logged rather than taken.
 
 Resolved 2026-09-09:
 
