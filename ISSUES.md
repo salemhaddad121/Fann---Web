@@ -20,18 +20,6 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   passes in isolation. `--workers=2` (what CI already uses) is reliably
   green: 146/146. Either lower the local default or raise the timeout for
   that test.
-- **Item 23 of the UX review (dashboard) is not done, and needs a decision.**
-  The spec offers two routes: fill the planner dashboard (recent activity,
-  saved artists, suggested artists) or constrain and centre the column. The
-  column is already `mx-auto max-w-lg lg:max-w-3xl` — but that is the code
-  the reviewer was looking at when they wrote the item, so it is not an
-  answer to it. Filling it is the live question, and it overlaps work that
-  was deliberately held: the Option-3 bento artist dashboard on
-  `feat/artist-dashboard`, kept out of a merge on 2026-07-25 for a named
-  future "Dashboard Premium" task. Building activity tiles now would either
-  duplicate or conflict with that. Left untouched on purpose rather than
-  improvised around; the cheapest resolution may be to record a deliberate
-  skip. `src/app/(app)/dashboard/page.tsx` is unchanged from f4bc369.
 - `src/components/profile/LockedField.tsx:~130` — UnlockCta's button says
   "from $5" as a literal. It renders on every locked profile view, so it is
   not worth a plan-list request for one number, but it will be wrong the day
@@ -57,6 +45,16 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   was the only one, and item 6 replaced it with a summary block. Either
   delete the prop or leave it as supported component API — a decision, not a
   defect, so it is logged rather than taken.
+
+Decided 2026-09-16:
+
+- **UX review item 23 (fill or constrain the planner dashboard) — skipped,
+  deliberately.** Salem's call. The activity tiles the item asks for are
+  already built on `feat/artist-dashboard` and parked for the "Dashboard
+  Premium" task; a second set here would duplicate or collide with them. The
+  column stays as it is. Recorded in the review file's own "Decisions taken"
+  section and in a comment on `src/app/(app)/dashboard/page.tsx`, so it is
+  not rediscovered as an oversight.
 
 Resolved 2026-09-09:
 
