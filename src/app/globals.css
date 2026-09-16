@@ -20,11 +20,22 @@
   --sand: #f7ede0;      /* soft fill — inputs, inactive chips */
   --sand-deep: #f3e2c8; /* the auth brand panel */
   --hairline: #e9d9c1;  /* borders */
-  --muted: #8a7360;     /* secondary text */
-  --faint: #a89680;     /* placeholder / tertiary text */
 
-  /* Secondary text sitting on --sand-deep. --muted only reaches 3.5:1 there,
-     under the 4.5:1 AA floor; this clears it at 6.25:1. */
+  /* Both of these were set by eye and both failed WCAG AA on every general
+     background. Measured against --paper / --surface / --sand, the old
+     --muted (#8a7360) ran 3.86-4.30:1 and the old --faint (#a89680) ran
+     2.47-2.76:1, against a 4.5:1 floor — and between them they carry ~350
+     usages, i.e. most of the secondary text in the product. Darkened to
+     clear the floor without changing hue: --muted now runs 5.15-5.74:1 and
+     --faint 4.66-5.19:1. Value edits only; no component changed. */
+  --muted: #775f4c;     /* secondary text */
+  --faint: #7d6653;     /* placeholder / tertiary text */
+
+  /* Secondary text sitting on --sand-deep, which is darker than the three
+     general backgrounds and so fails them all a step earlier. --faint still
+     does not clear AA there even after the darkening above (4.24:1); this
+     does, at 6.24:1. Hence the standing rule: never put --muted or --faint
+     on --sand-deep, use --ink-soft. The auth panel already follows it. */
   --ink-soft: #6b4a30;
 
   /* Role accents. The design keeps one base for both sides and swaps only
