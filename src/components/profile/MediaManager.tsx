@@ -89,7 +89,7 @@ export function MediaManager({
               </div>
             )}
             {m.is_primary && (
-              <span className="absolute top-1 left-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-clay-deep text-white">
+              <span className="absolute top-1 left-1 text-[12px] font-semibold px-1.5 py-0.5 rounded bg-clay-deep text-white">
                 Primary
               </span>
             )}

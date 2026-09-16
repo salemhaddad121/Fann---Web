@@ -40,7 +40,7 @@ function SignupChart({ data }: { data: SignupTrendPoint[] }) {
           );
         })}
       </div>
-      <div className="flex items-center gap-4 text-[11px] text-muted">
+      <div className="flex items-center gap-4 text-[12px] text-muted">
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-clay" /> Artists
         </span>
@@ -116,13 +116,13 @@ function EngagementGrid({ rows, label }: { rows: EngagementRow[]; label: string 
     <div className="grid grid-cols-2 gap-2.5">
       {rows.map((r) => (
         <div key={r.role} className="border border-hairline rounded-xl p-3">
-          <p className="text-[11px] text-faint capitalize mb-0.5">
+          <p className="text-[12px] text-faint capitalize mb-0.5">
             {r.role === "planner" ? "Planners" : "Artists"}
           </p>
           <p className="text-lg font-bold text-ink leading-tight">
             {formatDuration(r.avgMsPerActiveDay)}
           </p>
-          <p className="text-[10px] text-faint mt-0.5">
+          <p className="text-[12px] text-faint mt-0.5">
             per active day · {r.users} {r.users === 1 ? "person" : "people"}
           </p>
         </div>
@@ -237,7 +237,7 @@ export function AnalyticsTab() {
         )}
       </div>
 
-      <p className="text-[11px] text-faint pt-3 border-t border-hairline leading-relaxed">
+      <p className="text-[12px] text-faint pt-3 border-t border-hairline leading-relaxed">
         Time figures count FOREGROUND time only — a tab left open in the background does not
         accrue. They are an average per active day: someone with no activity in the window is
         excluded rather than counted as zero, so this measures how long engaged people stay,

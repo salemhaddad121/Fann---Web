@@ -70,7 +70,7 @@ function TicketThread({
               m.is_staff ? "bg-sand text-ink" : "bg-surface text-ink-soft"
             }`}
           >
-            <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <p className="mb-0.5 text-[12px] font-semibold uppercase tracking-wide text-faint">
               {m.is_staff ? (m.author_email ?? "Fann") : requesterOf(ticket)}
             </p>
             <p className="whitespace-pre-line">{m.body}</p>
@@ -197,7 +197,7 @@ export function SupportTab() {
                       question and should be visible as one without opening
                       the ticket. */}
                   {t.reported_id && (
-                    <span className="mr-1.5 rounded bg-danger-bg px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-danger">
+                    <span className="mr-1.5 rounded bg-danger-bg px-1.5 py-0.5 align-middle text-[12px] font-bold uppercase tracking-wide text-danger">
                       Report
                     </span>
                   )}
@@ -211,18 +211,18 @@ export function SupportTab() {
                 {t.reported_id && (
                   // The id, not a name: it is what identifies the account
                   // across tickets, and a masked display name would not.
-                  <p className="truncate font-mono text-[11px] text-faint">
+                  <p className="truncate font-mono text-[12px] text-faint">
                     about {t.reported_kind} {t.reported_id}
                   </p>
                 )}
               </div>
               <div className="shrink-0 text-right">
                 <span
-                  className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${STATUS_STYLES[t.status]}`}
+                  className={`rounded-full border px-2 py-0.5 text-[12px] font-bold ${STATUS_STYLES[t.status]}`}
                 >
                   {STATUS_LABELS[t.status]}
                 </span>
-                <p className="mt-1 text-[11px] text-faint">
+                <p className="mt-1 text-[12px] text-faint">
                   {new Date(t.created_at).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",

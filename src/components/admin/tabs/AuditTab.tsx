@@ -40,7 +40,7 @@ export function AuditTab() {
         <div key={entry.id} className="px-4 py-3 border-b border-hairline">
           <div className="flex items-center justify-between gap-2 mb-0.5">
             <span className="text-[13px] font-semibold text-ink">{entry.action}</span>
-            <span className="text-[11px] text-faint shrink-0">{formatRelativeTime(entry.created_at)}</span>
+            <span className="text-[12px] text-faint shrink-0">{formatRelativeTime(entry.created_at)}</span>
           </div>
           <p className="text-xs text-muted">
             By {entry.admin_email} ({entry.admin_account_code}) · Target: {entry.target_id.slice(0, 8)}…

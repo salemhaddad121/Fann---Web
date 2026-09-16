@@ -134,7 +134,7 @@ export function PaymentsTab() {
             </div>
             <div className="text-right shrink-0">
               <div className="text-base font-bold text-ink">${Number(p.amount_usd).toLocaleString()}</div>
-              <div className="text-[11px] text-faint">
+              <div className="text-[12px] text-faint">
                 {new Date(p.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
               </div>
             </div>

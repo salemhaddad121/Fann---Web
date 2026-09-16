@@ -58,12 +58,12 @@ export function ReviewsTab() {
                 ))}
               </div>
               {!r.is_visible && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-[#F1F5F9] text-[#334155]">
+                <span className="text-[12px] font-semibold px-2 py-0.5 rounded-lg bg-[#F1F5F9] text-[#334155]">
                   Hidden
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-faint">
+            <span className="text-[12px] text-faint">
               {new Date(r.submitted_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
             </span>
           </div>
