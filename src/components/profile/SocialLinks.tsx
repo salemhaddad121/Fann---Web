@@ -46,7 +46,7 @@ export function SocialLinks({ links }: { links: Record<string, string> | null | 
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-medium text-ink">{style.label}</div>
-              <div className="text-[11px] text-faint truncate">{displayHandle(url)}</div>
+              <div className="text-[12px] text-faint truncate">{displayHandle(url)}</div>
             </div>
             <i className="ti ti-chevron-right text-xs text-faint" />
           </a>

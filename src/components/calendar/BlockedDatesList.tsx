@@ -46,7 +46,7 @@ export function BlockedDatesList({
               <div className="text-[13px] font-semibold text-ink">
                 {formatBlockRange(b.start_date, b.end_date)}
               </div>
-              <div className="text-[11px] text-faint">
+              <div className="text-[12px] text-faint">
                 {days} day{days === 1 ? "" : "s"} blocked{b.note ? ` · ${b.note}` : ""}
               </div>
             </div>
