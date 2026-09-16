@@ -54,6 +54,22 @@ const LINK_PATTERNS = [
 const isExternal = (t) =>
   /^(https?:)?\/\//.test(t) || /^(mailto|tel|sms|data|blob|javascript):/i.test(t);
 
+/**
+ * A path with a file extension is a static asset, not a route.
+ *
+ * Routes in this app never carry one, and `public/` assets always do — so
+ * `<link rel="preload" href="/fonts/tabler-subset.woff2">` was being read as
+ * a navigation and reported as a dead link.
+ *
+ * Checked rather than skipped: the file has to exist in public/, so a
+ * preload or an <img> pointing at something that was never committed still
+ * fails. Skipping the whole class would have turned one false positive into
+ * a blind spot over every asset reference in the app.
+ */
+const STATIC_ASSET = /\.[a-z0-9]{2,5}$/i;
+const isStaticAsset = (t) => STATIC_ASSET.test(t.split("?")[0]);
+const assetExists = (t) => existsSync(join(ROOT, "public", t.split("?")[0]));
+
 const SENTINEL = "\u0000";
 
 /**
@@ -105,6 +121,12 @@ for (const file of sourceFiles) {
         if (!targets) continue;
         if (!targets[0].startsWith("/")) {
           record("warn", "links", file, lineNo, `relative ${kind} target "${raw}" — cannot be verified statically`);
+          continue;
+        }
+        if (isStaticAsset(targets[0])) {
+          if (!targets.some((t) => assetExists(t))) {
+            record("error", "links", file, lineNo, `${kind} points at "${raw}" — no such file in public/`, targets[0]);
+          }
           continue;
         }
         if (!targets.some((t) => routeExists(t, routes))) {
