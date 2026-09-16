@@ -34,6 +34,27 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      // The desktop project owns the full route sweep. The mobile one below
+      // does not repeat it — see its testMatch.
+      testIgnore: /mobile\.spec\.ts/,
+      dependencies: ["setup"],
+    },
+    {
+      // 390px, because that is where B7 lived: Log Out existed only in the
+      // lg:-only desktop sidebar, so nobody on a phone could sign out — and
+      // the suite passed throughout, since every project ran at desktop
+      // width on a product whose primary surface is a phone.
+      //
+      // Scoped to mobile.spec.ts rather than re-running all 48 routes at a
+      // second viewport. The sweep is already load-flaky at four workers
+      // (ISSUES.md), and doubling it would buy coverage at the price of a
+      // gate people start skipping.
+      name: "mobile",
+      testMatch: /mobile\.spec\.ts/,
+      use: {
+        ...devices["Pixel 7"],
+        viewport: { width: 390, height: 844 },
+      },
       dependencies: ["setup"],
     },
   ],
