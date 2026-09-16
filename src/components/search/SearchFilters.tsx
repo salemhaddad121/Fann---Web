@@ -1,9 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import type { CategoryGroup, SearchArtistsParams } from "@/types/artists";
 
-interface Props {
+export type ArtistFilters = Pick<
+  SearchArtistsParams,
+  "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort"
+>;
+
+/**
+ * How many of the finer filters are set.
+ *
+ * Sort is excluded on purpose: it is not a filter, it removes nothing, and
+ * counting it would put a badge on the Filters button for a control that no
+ * longer lives behind it. See item 15 — sort sits on the result row now.
+ */
+export function countActiveFilters(filters: ArtistFilters): number {
+  return (
+    (filters.city ? 1 : 0) +
+    (filters.minPrice !== undefined ? 1 : 0) +
+    (filters.maxPrice !== undefined ? 1 : 0) +
+    (filters.verifiedOnly ? 1 : 0)
+  );
+}
+
+interface TopBarProps {
   query: string;
   onQueryChange: (q: string) => void;
   groups: CategoryGroup[];
@@ -18,11 +38,20 @@ interface Props {
   // toggling each one in a loop: the selection lives in the URL, so every
   // toggle reads the same value and only the last write would survive.
   onClearSubs: () => void;
-  filters: Pick<SearchArtistsParams, "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort">;
-  onFiltersChange: (next: Props["filters"]) => void;
+  /** Opens the mobile sheet. The rail is always open at >=1024px, so this
+   *  button is hidden there rather than toggling anything. */
+  onOpenFilters: () => void;
+  activeFilterCount: number;
 }
 
-export function SearchFilters({
+/**
+ * The full-width bar above the results: text query and the category rows.
+ *
+ * The finer filters are NOT here any more — they are in the rail or the
+ * sheet (see FilterShell), because expanding them inline pushed the grid
+ * down and hid the results at the moment you were narrowing them.
+ */
+export function SearchTopBar({
   query,
   onQueryChange,
   groups,
@@ -31,37 +60,32 @@ export function SearchFilters({
   selectedSubs,
   onToggleSub,
   onClearSubs,
-  filters,
-  onFiltersChange,
-}: Props) {
+  onOpenFilters,
+  activeFilterCount,
+}: TopBarProps) {
   const activeGroup = groups.find((g) => g.slug === selectedGroup) ?? null;
-  const [panelOpen, setPanelOpen] = useState(false);
-  const activeFilterCount =
-    (filters.city ? 1 : 0) +
-    (filters.minPrice !== undefined ? 1 : 0) +
-    (filters.maxPrice !== undefined ? 1 : 0) +
-    (filters.verifiedOnly ? 1 : 0);
 
   return (
-    <div className="bg-surface border-b border-hairline">
+    <div className="border-b border-hairline bg-surface">
       <div className="flex items-center gap-2 px-4 pt-3">
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-[10px] border border-hairline bg-sand">
-          <i className="ti ti-search text-faint text-base" />
+        <div className="flex flex-1 items-center gap-2 rounded-[10px] border border-hairline bg-sand px-3 py-2">
+          <i className="ti ti-search text-base text-faint" />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search by name or keyword…"
-            className="flex-1 bg-transparent outline-none text-sm text-ink placeholder:text-faint"
+            aria-label="Search artists"
+            className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint"
           />
         </div>
         <button
-          onClick={() => setPanelOpen((v) => !v)}
-          className="relative flex items-center gap-1.5 px-3 py-2 rounded-[10px] border border-hairline text-xs font-medium text-muted"
+          onClick={onOpenFilters}
+          className="relative flex items-center gap-1.5 rounded-[10px] border border-hairline px-3 py-2 text-xs font-medium text-muted lg:hidden"
         >
           <i className="ti ti-adjustments-horizontal text-sm" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-clay-deep text-white text-[9px] flex items-center justify-center">
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-clay-deep text-[9px] text-white">
               {activeFilterCount}
             </span>
           )}
@@ -69,7 +93,7 @@ export function SearchFilters({
       </div>
 
       {/* Main categories only. Picking one reveals its sub-categories
-          below — listing all 36 leaf categories at once (what this used to
+          below — listing all 38 leaf categories at once (what this used to
           do) made the row unreadable and hid most of them off-screen.
           Single-select: browsing "Music" and "Visual" at the same time
           isn't a meaningful search. */}
@@ -78,9 +102,9 @@ export function SearchFilters({
           <button
             onClick={() => onSelectGroup(null)}
             aria-pressed={selectedGroup === null}
-            className={`px-3 py-1 rounded-2xl text-xs border ${
+            className={`rounded-2xl border px-3 py-2 text-xs ${
               selectedGroup === null
-                ? "bg-sand text-clay border-[#e0a570] font-semibold"
+                ? "border-[#e0a570] bg-sand font-semibold text-clay"
                 : "border-hairline text-muted"
             }`}
           >
@@ -93,9 +117,9 @@ export function SearchFilters({
                 key={g.id}
                 onClick={() => onSelectGroup(selected ? null : g.slug)}
                 aria-pressed={selected}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs border ${
+                className={`flex items-center gap-1.5 rounded-2xl border px-3 py-2 text-xs ${
                   selected
-                    ? "bg-sand text-clay border-[#e0a570] font-semibold"
+                    ? "border-[#e0a570] bg-sand font-semibold text-clay"
                     : "border-hairline text-muted"
                 }`}
               >
@@ -111,16 +135,13 @@ export function SearchFilters({
           "everything in this group", so the results aren't empty the moment
           a main category is picked. */}
       {activeGroup && activeGroup.categories.length > 0 && (
-        <div className="px-4 pb-3 -mt-1">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+        <div className="-mt-1 px-4 pb-3">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide text-faint">
               {activeGroup.name}
             </span>
             {selectedSubs.length > 0 && (
-              <button
-                onClick={onClearSubs}
-                className="text-[11px] font-semibold text-clay"
-              >
+              <button onClick={onClearSubs} className="px-1 py-1.5 text-xs font-semibold text-clay">
                 Clear
               </button>
             )}
@@ -133,10 +154,10 @@ export function SearchFilters({
                   key={c.id}
                   onClick={() => onToggleSub(c.slug)}
                   aria-pressed={selected}
-                  className={`px-2.5 py-1 rounded-2xl text-[11px] border ${
+                  className={`rounded-2xl border px-2.5 py-2 text-xs ${
                     selected
-                      ? "bg-clay-deep text-white border-clay font-semibold"
-                      : "border-hairline text-muted bg-surface"
+                      ? "border-clay bg-clay-deep font-semibold text-white"
+                      : "border-hairline bg-surface text-muted"
                   }`}
                 >
                   {c.name}
@@ -146,76 +167,80 @@ export function SearchFilters({
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
-      {panelOpen && (
-        <div className="px-4 pb-4 pt-1 grid grid-cols-2 gap-3 border-t border-hairline">
-          <label className="col-span-2 text-xs">
-            <span className="block font-semibold text-ink mb-1">City</span>
-            <input
-              value={filters.city ?? ""}
-              onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
-              placeholder="e.g. Beirut"
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
-            />
-          </label>
+/**
+ * The finer filters themselves, with no chrome of their own.
+ *
+ * Rendered by FilterRail at >=1024px and by FilterSheet below it, so both
+ * sizes get the same controls from one definition. Sort is not here — it is
+ * a different intent from filtering and sits on the result row instead.
+ */
+export function ArtistFilterFields({
+  filters,
+  onFiltersChange,
+}: {
+  filters: ArtistFilters;
+  onFiltersChange: (next: ArtistFilters) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <label className="block text-xs">
+        <span className="mb-1 block font-semibold text-ink">City</span>
+        <input
+          value={filters.city ?? ""}
+          onChange={(e) => onFiltersChange({ ...filters, city: e.target.value || undefined })}
+          placeholder="e.g. Beirut"
+          className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
+        />
+      </label>
 
-          <label className="text-xs">
-            <span className="block font-semibold text-ink mb-1">Min price (USD)</span>
-            <input
-              type="number"
-              min={0}
-              value={filters.minPrice ?? ""}
-              onChange={(e) =>
-                onFiltersChange({
-                  ...filters,
-                  minPrice: e.target.value ? Number(e.target.value) : undefined,
-                })
-              }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-xs">
-            <span className="block font-semibold text-ink mb-1">Max price (USD)</span>
-            <input
-              type="number"
-              min={0}
-              value={filters.maxPrice ?? ""}
-              onChange={(e) =>
-                onFiltersChange({
-                  ...filters,
-                  maxPrice: e.target.value ? Number(e.target.value) : undefined,
-                })
-              }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
-            />
-          </label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block text-xs">
+          <span className="mb-1 block font-semibold text-ink">Min price (USD)</span>
+          <input
+            type="number"
+            min={0}
+            value={filters.minPrice ?? ""}
+            onChange={(e) =>
+              onFiltersChange({
+                ...filters,
+                minPrice: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
+            className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
+          />
+        </label>
+        <label className="block text-xs">
+          <span className="mb-1 block font-semibold text-ink">Max price (USD)</span>
+          <input
+            type="number"
+            min={0}
+            value={filters.maxPrice ?? ""}
+            onChange={(e) =>
+              onFiltersChange({
+                ...filters,
+                maxPrice: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
+            className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay"
+          />
+        </label>
+      </div>
 
-          <label className="text-xs">
-            <span className="block font-semibold text-ink mb-1">Sort by</span>
-            <select
-              value={filters.sort ?? "newest"}
-              onChange={(e) =>
-                onFiltersChange({ ...filters, sort: e.target.value as SearchArtistsParams["sort"] })
-              }
-              className="w-full rounded-[10px] border border-hairline px-3 py-2 text-sm outline-none focus:border-clay bg-surface"
-            >
-              <option value="newest">Newest</option>
-              <option value="price_asc">Price: low to high</option>
-              <option value="price_desc">Price: high to low</option>
-            </select>
-          </label>
-
-          <label className="flex items-center gap-2 text-xs mt-5">
-            <input
-              type="checkbox"
-              checked={!!filters.verifiedOnly}
-              onChange={(e) => onFiltersChange({ ...filters, verifiedOnly: e.target.checked })}
-              className="w-4 h-4 accent-clay"
-            />
-            <span className="font-semibold text-ink">Verified only</span>
-          </label>
-        </div>
-      )}
+      {/* The whole row is the label, so the tap target is the text and the
+          box together rather than a 16px square. */}
+      <label className="-mx-1 flex items-center gap-2 rounded-[10px] px-1 py-2 text-xs">
+        <input
+          type="checkbox"
+          checked={!!filters.verifiedOnly}
+          onChange={(e) => onFiltersChange({ ...filters, verifiedOnly: e.target.checked })}
+          className="h-6 w-6 accent-clay"
+        />
+        <span className="font-semibold text-ink">Verified only</span>
+      </label>
     </div>
   );
 }
