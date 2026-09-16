@@ -126,7 +126,7 @@ export default function NotificationsPage() {
                   <span className={`text-[13px] ${unread ? "font-bold text-ink" : "font-semibold text-ink"}`}>
                     {n.title}
                   </span>
-                  <span className="text-[11px] text-faint shrink-0">{formatRelativeTime(n.created_at)}</span>
+                  <span className="text-[12px] text-faint shrink-0">{formatRelativeTime(n.created_at)}</span>
                 </div>
                 {(n.data?.event_name || n.data?.note || n.data?.rejection_reason) && (
                   <p className="text-xs text-muted truncate mt-0.5">

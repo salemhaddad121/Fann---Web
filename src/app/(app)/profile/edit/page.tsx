@@ -212,7 +212,7 @@ function ArtistEditForm({ accent }: { accent: string }) {
         <span className="block text-xs font-semibold text-ink mb-1.5">Categories (up to 4)</span>
         {categoryGroups.map((group) => (
           <div key={group.id} className="mb-2">
-            <p className="text-[11px] font-semibold text-faint uppercase tracking-wide mb-1">{group.name}</p>
+            <p className="text-[12px] font-semibold text-faint uppercase tracking-wide mb-1">{group.name}</p>
             <div className="flex flex-wrap gap-1.5">
               {group.categories.map((c) => (
                 <button

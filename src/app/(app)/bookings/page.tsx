@@ -137,13 +137,18 @@ export default function BookingsPage() {
                   : "bg-surface text-muted border-hairline hover:bg-sand"
               }`}
             >
-              {/* 9px below 360px keeps "Completed" from truncating on the
-                  narrowest phones still in use (iPhone SE 1st gen). */}
-              <span className="w-full truncate text-center text-[10px] leading-tight font-semibold tracking-tight max-[359px]:text-[9px] sm:text-[11px] sm:tracking-normal">
+              {/* The one documented exception to item 31's 12px floor.
+                  Five equal tabs have to fit 320px on the narrowest phones
+                  still in use (iPhone SE 1st gen), and "Completed" does not
+                  at 12px. Raised as far as it will go — 9px to 11px — rather
+                  than left where it was; truncate plus the title attribute
+                  already handle the overflow case gracefully. Above 360px
+                  the floor applies normally. */}
+              <span className="w-full truncate text-center text-[12px] leading-tight font-semibold tracking-tight max-[359px]:text-[11px] sm:tracking-normal">
                 {f.label}
               </span>
               <span
-                className={`text-[11px] font-bold leading-none ${
+                className={`text-[12px] font-bold leading-none ${
                   selected ? "text-white" : "text-ink"
                 }`}
               >
@@ -164,7 +169,7 @@ export default function BookingsPage() {
           if (items.length === 0) return null;
           return (
             <div key={group.label} className="mb-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint px-4 pt-4 pb-2">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-faint px-4 pt-4 pb-2">
                 {group.label}
               </p>
               <div className="flex flex-col gap-2 px-4">{items.map(renderCard)}</div>

@@ -172,13 +172,13 @@ export function PlanCards({
             }`}
           >
             {featured && (
-              <span className="mb-2 inline-flex w-fit items-center gap-1 rounded-full bg-clay-light/25 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-clay-light">
+              <span className="mb-2 inline-flex w-fit items-center gap-1 rounded-full bg-clay-light/25 px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-clay-light">
                 Best value
               </span>
             )}
 
             <p
-              className={`text-[11px] font-bold uppercase tracking-wide ${
+              className={`text-[12px] font-bold uppercase tracking-wide ${
                 featured ? "text-clay-light" : "text-clay-deep"
               }`}
             >
@@ -311,7 +311,7 @@ export function PlanCards({
         larger number than the one just clicked and that should not be a
         surprise. */}
     {vatRate > 0 && (
-      <p className="mt-3 text-center text-[11px] text-faint">
+      <p className="mt-3 text-center text-[12px] text-faint">
         All prices exclude VAT. VAT is added at checkout.
       </p>
     )}

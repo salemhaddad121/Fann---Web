@@ -71,7 +71,7 @@ function DocumentRow({
           </p>
         </div>
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${STATUS_STYLES[doc.status]}`}
+          className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[12px] font-bold ${STATUS_STYLES[doc.status]}`}
         >
           {STATUS_LABELS[doc.status]}
         </span>
@@ -187,7 +187,7 @@ export function VerificationChecklist() {
         ))}
       </div>
 
-      <p className="mt-3 px-1 text-[11px] leading-relaxed text-faint">
+      <p className="mt-3 px-1 text-[12px] leading-relaxed text-faint">
         These are stored privately and only ever seen by our review team. They are
         never shown on your profile and never sent to planners.
       </p>

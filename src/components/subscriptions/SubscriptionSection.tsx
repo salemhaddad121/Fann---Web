@@ -79,7 +79,7 @@ export function SubscriptionSection() {
             <span className="text-sm font-semibold capitalize text-ink">
               {planLabel(active.plan_code)}
             </span>
-            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-success">
+            <span className="rounded-full bg-success/15 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-success">
               Active
             </span>
           </div>
@@ -93,7 +93,7 @@ export function SubscriptionSection() {
 
       {queued.length > 0 && (
         <div className="mb-3">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-faint">
+          <p className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-faint">
             Queued
           </p>
           {queued.map((row) => (
@@ -112,7 +112,7 @@ export function SubscriptionSection() {
 
       {credits.available > 0 && (
         <div className="mb-3">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-faint">
+          <p className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-faint">
             Unused day passes · {credits.available}
           </p>
           {credits.rows.map((row, index) => (
@@ -136,7 +136,7 @@ export function SubscriptionSection() {
               </button>
             </div>
           ))}
-          <p className="mt-1.5 text-[11px] text-faint">
+          <p className="mt-1.5 text-[12px] text-faint">
             Passes never expire while unused. The 24 hours begins when you start one.
           </p>
         </div>
@@ -144,7 +144,7 @@ export function SubscriptionSection() {
 
       {history.length > 0 && (
         <div className="mb-3">
-          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-faint">
+          <p className="mb-1.5 text-[12px] font-bold uppercase tracking-wide text-faint">
             Past plans
           </p>
           {history.map((row) => (

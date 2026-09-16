@@ -16,7 +16,7 @@ function Row({ icon, label, value }: { icon: string; label: string; value: strin
     <div className="flex items-start gap-2.5 py-2">
       <i className={`ti ${icon} text-faint text-base mt-0.5`} />
       <div>
-        <div className="text-[11px] text-faint">{label}</div>
+        <div className="text-[12px] text-faint">{label}</div>
         <div className="text-sm text-ink font-medium">{value}</div>
       </div>
     </div>
