@@ -5,7 +5,7 @@ import type { CategoryGroup, SearchArtistsParams } from "@/types/artists";
 
 export type ArtistFilters = Pick<
   SearchArtistsParams,
-  "city" | "minPrice" | "maxPrice" | "verifiedOnly" | "sort"
+  "city" | "minPrice" | "maxPrice" | "sort"
 >;
 
 /**
@@ -19,8 +19,7 @@ export function countActiveFilters(filters: ArtistFilters): number {
   return (
     (filters.city ? 1 : 0) +
     (filters.minPrice !== undefined ? 1 : 0) +
-    (filters.maxPrice !== undefined ? 1 : 0) +
-    (filters.verifiedOnly ? 1 : 0)
+    (filters.maxPrice !== undefined ? 1 : 0)
   );
 }
 
@@ -231,17 +230,6 @@ export function ArtistFilterFields({
         </label>
       </div>
 
-      {/* The whole row is the label, so the tap target is the text and the
-          box together rather than a 16px square. */}
-      <label className="-mx-1 flex items-center gap-2 rounded-[10px] px-1 py-2 text-xs">
-        <input
-          type="checkbox"
-          checked={!!filters.verifiedOnly}
-          onChange={(e) => onFiltersChange({ ...filters, verifiedOnly: e.target.checked })}
-          className="h-6 w-6 accent-clay"
-        />
-        <span className="font-semibold text-ink">Verified only</span>
-      </label>
     </div>
   );
 }

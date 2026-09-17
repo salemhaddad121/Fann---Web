@@ -30,7 +30,6 @@ export async function searchArtists(params: SearchArtistsParams): Promise<Artist
   if (params.city) qs.set("city", params.city);
   if (params.minPrice !== undefined) qs.set("minPrice", String(params.minPrice));
   if (params.maxPrice !== undefined) qs.set("maxPrice", String(params.maxPrice));
-  if (params.verifiedOnly) qs.set("verifiedOnly", "true");
   if (params.sort) qs.set("sort", params.sort);
   if (params.page) qs.set("page", String(params.page));
   qs.set("limit", "20");

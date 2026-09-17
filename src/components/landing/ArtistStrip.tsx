@@ -28,7 +28,10 @@ const STRIP_LIMIT = 5;
  */
 async function fetchArtists(): Promise<ArtistSearchResponse | null> {
   try {
-    const qs = new URLSearchParams({ verifiedOnly: "true", page: "1" });
+    // No verifiedOnly. Every artist is ID-verified before their profile
+    // goes live, so the parameter selected nothing and the distinction it
+    // implied was never real — which is the whole of C1.
+    const qs = new URLSearchParams({ page: "1" });
     const res = await fetch(`${API_URL}/artists?${qs}`, {
       headers: { "Content-Type": "application/json" },
       // The roster changes slowly; this keeps the landing page from making a
@@ -50,11 +53,12 @@ export async function ArtistStrip() {
   return (
     <section className="pb-2">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        {/* Says only what the request guarantees. Every card below came back
-            from verifiedOnly=true, so "Verified" is load-bearing rather than
-            decorative — and there is no second claim here to keep true. */}
+        {/* "Verified artists" was accurate only because the request asked
+            for verifiedOnly=true. It no longer does, and the filter selected
+            nothing anyway — every artist is ID-verified before going live.
+            The heading now says what the strip actually is. */}
         <h2 className="font-display text-[20px] lg:text-[22px] font-bold text-ink">
-          Verified artists on Fann
+          Artists on Fann
         </h2>
         <Link href="/search" className="text-sm font-semibold text-clay-deep">
           Browse all artists →
