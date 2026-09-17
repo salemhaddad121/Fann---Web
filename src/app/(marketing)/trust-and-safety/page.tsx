@@ -5,13 +5,13 @@ import { MarketingPage, Section, Points, CallToAction } from "@/components/marke
 export const metadata: Metadata = {
   title: "Trust & safety",
   description:
-    "How Fann reviews artist profiles, what the verified badge means, how to report a problem, and what Fann is and is not responsible for in a booking.",
+    "How Fann reviews artist profiles, what identity verification means, how to report a problem, and what Fann is and is not responsible for in a booking.",
   alternates: { canonical: "/trust-and-safety" },
   openGraph: {
     url: "/trust-and-safety",
     title: "Trust & safety",
     description:
-      "How profiles are reviewed, what the verified badge means, and what Fann is and is not responsible for.",
+      "How profiles are reviewed, what identity verification means, and what Fann is and is not responsible for.",
   },
 };
 
@@ -25,12 +25,20 @@ export const metadata: Metadata = {
  *     users.status to 'pending_review' and the public artist query requires
  *     u.status = 'active', so a profile cannot be found until a person moves
  *     it across.
- *   - The verified badge is a separate admin flag (is_verified) and is NOT a
- *     gate — verifiedOnly is an optional search filter, so unverified
- *     artists do appear. Saying "all artists are verified" would be false.
- *   - Identity documents can be uploaded and reviewed, with retention rules,
- *     but they are not currently required before an artist goes live. The
- *     page does not claim they are.
+ *   - Identity verification IS a gate, and this changed. admin.service.ts
+ *     updateUserStatus() refuses to move an artist to 'active' unless every
+ *     document their profile requires is approved — an ID document and a
+ *     selfie for a performer, a trade licence for a venue. So "verified
+ *     before a profile goes live" is now true where it was not before, and
+ *     this page says so.
+ *   - There is no longer a verified BADGE. Every artist passes the same
+ *     gate, so a badge distinguished nothing and the filter selected
+ *     nothing; both are gone (C1). Do not reintroduce copy describing a
+ *     badge, and do not describe verification as optional or partial.
+ *   - ONE CAVEAT, and it is why this page must not ship before B2: the gate
+ *     was added after some accounts were already live, and those were not
+ *     retroactively checked. The seeded demo artists are among them. Purge
+ *     them (B2) and audit any pre-gate account before publishing this.
  *   - There is no per-profile report button. No user-facing flag endpoint
  *     exists — only /admin/flags. Reporting genuinely happens through the
  *     support form, so that is what this describes.
@@ -56,20 +64,29 @@ export default function TrustAndSafetyPage() {
         </p>
       </Section>
 
-      <Section title="What the verified badge means">
+      <Section title="What identity verification means">
         <p>
-          Some profiles carry a verified badge. It is applied by an
-          administrator and means Fann has done additional checking on that
-          specific artist beyond the initial review.
+          Every artist on Fann is identity-checked before their profile can be
+          found. A performer sends a government identity document — a
+          passport, a national ID card or a driving licence — and a selfie we
+          match against it. A venue sends its trade licence instead; there is
+          no face behind a room to check. An administrator reviews the
+          documents by hand, and the account cannot be made live until they
+          are approved.
         </p>
         <p>
-          Two things worth being clear about. The badge is not automatic and
-          not universal — most artists on Fann are legitimately listed without
-          one, and its absence is not a warning. And it is not a guarantee of
-          performance, insurance, or anything about a booking; it is a
-          statement about identity and standing, not about outcome. You can
-          filter search to verified artists only if you would rather start
-          there.
+          There is no verified badge, and that is deliberate. A badge is only
+          meaningful if some profiles lack it. Every artist here passes the
+          same check, so a badge would have marked nothing and its absence
+          would have implied something untrue.
+        </p>
+        <p>
+          Be clear about what this is and is not. It confirms that the person
+          you are speaking to is who they say they are. It is not a guarantee
+          of their performance, their punctuality, their insurance or the
+          outcome of your booking — for that, read the profile, the
+          portfolio, the reviews and the terms, and put the important things
+          in writing.
         </p>
       </Section>
 

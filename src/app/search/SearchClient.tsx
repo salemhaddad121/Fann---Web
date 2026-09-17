@@ -325,13 +325,6 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
           onRemove: () => updateFilters({ ...filters, minPrice: undefined, maxPrice: undefined }),
         }
       : null,
-    filters.verifiedOnly
-      ? {
-          key: "verified",
-          label: "Verified",
-          onRemove: () => updateFilters({ ...filters, verifiedOnly: undefined }),
-        }
-      : null,
   ].filter((c): c is ActiveChip => c !== null);
 
   const resultLabel = loading
@@ -352,6 +345,16 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
         onOpenFilters={() => setSheetOpen(true)}
         activeFilterCount={countActiveFilters(filters)}
       />
+
+      {/* Says once, plainly, what the Verified badge used to say on every
+          card. The badge and the "Verified only" filter are gone because
+          every artist passes the same check before going live, so neither
+          distinguished anything — but the assurance itself is real and a
+          booker deciding whether to spend money should still see it. */}
+      <p className="mx-auto max-w-[1440px] px-4 pt-3 text-xs text-muted lg:px-5">
+        <i className="ti ti-discount-check mr-1 text-clay" aria-hidden />
+        Every artist on Fann is ID-verified before their profile goes live.
+      </p>
 
       {/* The rail and the grid are siblings, so the grid holds its position
           while filters change instead of being pushed down by a panel. */}

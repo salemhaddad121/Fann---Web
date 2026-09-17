@@ -105,7 +105,6 @@ export interface SearchArtistsParams {
   city?: string;
   minPrice?: number;
   maxPrice?: number;
-  verifiedOnly?: boolean;
   sort?: "price_asc" | "price_desc" | "newest";
   page?: number;
 }

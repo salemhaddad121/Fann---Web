@@ -89,12 +89,6 @@ export function ArtistCard({
             ) : (
               <LockedName onDark />
             )}
-            {artist.is_verified && (
-              <>
-                <i className="ti ti-discount-check text-sm shrink-0" aria-hidden="true" />
-                <span className="sr-only">Verified</span>
-              </>
-            )}
           </div>
           <div className="text-[12px] opacity-90 mt-0.5 truncate">{subtitle}</div>
         </div>
