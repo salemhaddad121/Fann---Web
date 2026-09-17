@@ -34,6 +34,18 @@ export const BOOKER_INTERESTS: BookerInterest[] = [
   "djs_and_services",
 ];
 
+/**
+ * The buckets with the words a person reads, for the signup form and the
+ * admin category picker. One list so the two cannot drift into describing
+ * the same bucket differently.
+ */
+export const BOOKER_INTEREST_OPTIONS: { value: BookerInterest; label: string }[] = [
+  { value: "musical_acts", label: "Musical acts" },
+  { value: "performance_acts", label: "Performance acts" },
+  { value: "photo_video", label: "Photo & video" },
+  { value: "djs_and_services", label: "DJs, bartenders & event services" },
+];
+
 export interface SafeUser {
   id: string;
   email: string;
