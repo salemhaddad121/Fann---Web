@@ -178,14 +178,14 @@ export async function listAdminCategories(): Promise<AdminCategory[]> {
 export async function createCategory(payload: {
   name: string;
   /**
-   * Which of the four booker buckets this answers. Required by the API —
-   * a category with none is in nothing a booker picked at signup, and
+   * Which of the five booker buckets this answers. Required by the API — a
+   * category with none is in nothing a booker picked at signup, and
    * nothing at creation time would have said so.
    *
-   * null is a real answer: it means "show this to no booker", which is
-   * what Venue is.
+   * No longer nullable: 'venues' is a bucket in its own right now, so
+   * nothing legitimately belongs to none.
    */
-  bookerInterest: BookerInterest | null;
+  bookerInterest: BookerInterest;
   groupId: string;
 }): Promise<AdminCategory> {
   return apiFetch<AdminCategory>("/admin/categories", { method: "POST", body: payload });

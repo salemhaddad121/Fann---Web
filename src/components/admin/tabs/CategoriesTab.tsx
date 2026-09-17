@@ -26,9 +26,11 @@ export function CategoriesTab() {
   // has to be a decision, because the failure mode of getting it wrong is
   // a category that simply never appears for a booker and says nothing
   // about it at the time.
-  const [newCategoryInterest, setNewCategoryInterest] = useState<
-    BookerInterest | "none" | ""
-  >("");
+  //
+  // There is no "none" any more. It existed for the Venue category, which
+  // answered none of the four performer buckets — but venues are a bucket
+  // of their own now, so nothing legitimately belongs to none.
+  const [newCategoryInterest, setNewCategoryInterest] = useState<BookerInterest | "">("");
   const [busy, setBusy] = useState(false);
   // Deleting a group or a category is irreversible, so both go through a
   // confirmation step. Holding the pending target here keeps the dialog a
@@ -96,9 +98,7 @@ export function CategoriesTab() {
       await createCategory({
         name: newCategoryName.trim(),
         groupId,
-        // "none" is the explicit Venue-style answer and has to reach the
-        // API as null, not as the empty string the placeholder uses.
-        bookerInterest: newCategoryInterest === "none" ? null : (newCategoryInterest as BookerInterest),
+        bookerInterest: newCategoryInterest,
       });
       setNewCategoryName("");
       setNewCategoryInterest("");
@@ -215,7 +215,7 @@ export function CategoriesTab() {
                     <select
                       value={newCategoryInterest}
                       onChange={(e) =>
-                        setNewCategoryInterest(e.target.value as BookerInterest | "none" | "")
+                        setNewCategoryInterest(e.target.value as BookerInterest | "")
                       }
                       className="w-full rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-clay"
                     >
@@ -225,15 +225,6 @@ export function CategoriesTab() {
                           {o.label}
                         </option>
                       ))}
-                      {/* "Venue" is two different things in this product and
-                          the old label did not say which: a booker_type, and
-                          a CATEGORY where a venue lists its room for hire.
-                          This option is about the second — supply, not
-                          demand — so it names what the thing IS rather than
-                          borrowing a word that also means a kind of buyer. */}
-                      <option value="none">
-                        None — this is a space or service, not talent to book
-                      </option>
                     </select>
                   </label>
                 </div>
