@@ -4,6 +4,36 @@
 
 export type UserRole = "artist" | "planner" | "admin";
 
+/**
+ * Individual vs company, for a booker. Mirrors the planner_kind enum from
+ * the API's migration 028.
+ *
+ * It decides more than a label: the artist-facing planner directory lists
+ * companies only, so a booker who says "just me" is never listed anywhere.
+ */
+export type PlannerKind = "individual" | "company";
+
+/**
+ * What a booker said they came for. Mirrors booker_interest from the same
+ * migration.
+ *
+ * A booker-facing axis, deliberately not the artist-facing category groups:
+ * artists classify by craft and bookers search by need, so a DJ is a
+ * musician to himself and a service to a venue.
+ */
+export type BookerInterest =
+  | "musical_acts"
+  | "performance_acts"
+  | "photo_video"
+  | "djs_and_services";
+
+export const BOOKER_INTERESTS: BookerInterest[] = [
+  "musical_acts",
+  "performance_acts",
+  "photo_video",
+  "djs_and_services",
+];
+
 export interface SafeUser {
   id: string;
   email: string;
@@ -38,6 +68,14 @@ export interface RegisterPayload {
   // a valid signup. §24.2 requires marketing consent to be separable from
   // accepting the Terms, so refusing it must never block an account.
   acceptedMarketing?: boolean;
+
+  // The booker questionnaire. Required by the API for role 'planner' and
+  // rejected for an artist, so these are sent only on the booker branch.
+  plannerKind?: PlannerKind;
+  /** Only when plannerKind is 'company'. */
+  bookerType?: string;
+  /** Multi-select, minimum one. */
+  interests?: BookerInterest[];
 }
 
 export interface RegisterResponse {

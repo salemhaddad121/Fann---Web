@@ -11,7 +11,8 @@ import { RoleToggle } from "@/components/auth/RoleToggle";
 import { SocialButtons } from "@/components/auth/SocialButtons";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
-import type { RegisterPayload } from "@/types/auth";
+import { BookerQuestions } from "@/components/auth/BookerQuestions";
+import type { BookerInterest, PlannerKind, RegisterPayload } from "@/types/auth";
 
 const PASSWORD_HINT = "At least 8 characters, with an uppercase letter, a lowercase letter, and a number.";
 
@@ -34,6 +35,12 @@ function RegisterForm() {
   // consent to be a positive act and to be separable from the Terms, so
   // this one never blocks the form — there is no validation for it below.
   const [acceptedMarketing, setAcceptedMarketing] = useState(false);
+  // The booker questionnaire. Null rather than a default for plannerKind:
+  // guessing "individual" would quietly file a venue as a private person,
+  // and that decides whether artists can ever find them.
+  const [plannerKind, setPlannerKind] = useState<PlannerKind | null>(null);
+  const [bookerType, setBookerType] = useState("");
+  const [interests, setInterests] = useState<BookerInterest[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -52,6 +59,22 @@ function RegisterForm() {
     }
     if (!acceptedTerms) errors.acceptedTerms = "You must accept the Terms of Service to sign up.";
     if (!acceptedPrivacy) errors.acceptedPrivacy = "You must accept the Privacy Policy to sign up.";
+
+    // Mirrors the API's rules rather than replacing them — it validates the
+    // same three things and would reject a request that skipped this.
+    // Checking here as well is what turns a 400 into a message beside the
+    // field that caused it.
+    if (role === "planner") {
+      if (!plannerKind) {
+        errors.plannerKind = "Tell us whether you are booking as an individual or a company.";
+      }
+      if (plannerKind === "company" && !bookerType) {
+        errors.bookerType = "Choose the kind of organisation you book for.";
+      }
+      if (interests.length === 0) {
+        errors.interests = "Choose at least one thing you are looking for.";
+      }
+    }
     if (Object.keys(errors).length) {
       setFieldErrors(errors);
       return;
@@ -67,6 +90,17 @@ function RegisterForm() {
         acceptedTerms,
         acceptedPrivacy,
         acceptedMarketing,
+        // Booker only. The API rejects these on an artist registration, and
+        // the artist branch must stay exactly one step.
+        ...(role === "planner"
+          ? {
+              plannerKind: plannerKind ?? undefined,
+              // Only a company has one; sending an empty string would fail
+              // the enum check rather than read as "not applicable".
+              ...(plannerKind === "company" ? { bookerType } : {}),
+              interests,
+            }
+          : {}),
       });
       setSubmitted(true);
     } catch (err) {
@@ -112,6 +146,21 @@ function RegisterForm() {
         {formError && <Banner kind="error">{formError}</Banner>}
 
         <RoleToggle value={role} onChange={setRole} />
+
+        {/* Revealed only for a booker, and progressively within that: the
+            organisation question appears once "a company" is chosen. An
+            artist sees none of it. */}
+        {role === "planner" && (
+          <BookerQuestions
+            plannerKind={plannerKind}
+            onPlannerKindChange={setPlannerKind}
+            bookerType={bookerType}
+            onBookerTypeChange={setBookerType}
+            interests={interests}
+            onInterestsChange={setInterests}
+            errors={fieldErrors}
+          />
+        )}
 
         <FormField
           label="Email"
