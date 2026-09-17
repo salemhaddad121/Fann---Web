@@ -55,6 +55,36 @@ function MessageRequestCta({ planner }: { planner: PlannerDetail }) {
   );
 }
 
+/**
+ * What to say when a booker profile will not load.
+ *
+ * C5 gave this route three failure modes it did not have before, and the
+ * API's own wording is not what any of them should show a person:
+ *
+ *   401  no session. Handled before this by useRequireAuth, which
+ *        redirects — so it is here only as a backstop.
+ *   403  a booker trying to read another booker. The directory is for
+ *        artists; one customer does not get to read the customer list.
+ *   404  an individual, or a profile that does not exist. Deliberately
+ *        indistinguishable: telling the caller which would confirm that a
+ *        particular id names a real private person, which is the fact the
+ *        404 exists to protect.
+ */
+function describeLoadFailure(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 403) {
+      return "Booker profiles are only visible to artists.";
+    }
+    if (err.status === 404) {
+      return "This profile isn't available.";
+    }
+    if (err.status === 401) {
+      return "Sign in to view this profile.";
+    }
+  }
+  return "Couldn't load this profile.";
+}
+
 function Content({ id }: { id: string }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -69,9 +99,7 @@ function Content({ id }: { id: string }) {
         if (!cancelled) setPlanner(data);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : "Couldn't load this profile.");
-        }
+        if (!cancelled) setError(describeLoadFailure(err));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -85,7 +113,7 @@ function Content({ id }: { id: string }) {
   if (error || !planner) {
     return (
       <div className="px-4 py-10">
-        <p className="text-sm text-danger mb-3">{error ?? "Planner not found."}</p>
+        <p className="text-sm text-danger mb-3">{error ?? "This profile isn't available."}</p>
         <Link href="/search" className="text-sm font-semibold text-teal">
           ← Back to search
         </Link>
