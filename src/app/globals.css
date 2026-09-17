@@ -1,25 +1,37 @@
 @import "tailwindcss";
 
 /*
-  Fann brand tokens — the "Maqam" direction from the Claude Design
-  handoff (Fann Branding Concepts.dc.html, concept 1a): a warm Levantine
-  palette of brown ink on cream paper, with a terracotta artist accent
-  and a deep teal planner accent.
+  Fann brand tokens — the "mango on mint" direction.
 
-  Naming note: the previous token set was color-named (--indigo, --sky,
-  --mist), which stopped being true the moment the palette changed. These
-  are named by role instead — --clay and --teal are the two role accents,
-  --sand is the soft fill — so a future palette change is a value edit
-  here and nothing else.
+  Near-black ink on a mint page, white cards, and mango as the one hot
+  accent, with three deep card fills (teal, plum, indigo) carrying white.
+
+  This replaced the earlier warm "Maqam" palette (brown ink on cream, a
+  terracotta accent) as a VALUE EDIT ONLY. The names are role names, not
+  colour names, precisely so that could happen: --clay and --teal are the
+  role accents, --sand is the soft fill. That is why ~1,240 utility usages
+  across the app kept working without being touched.
+
+  A consequence of that, worth knowing before you read a diff: some names
+  no longer describe their value. --clay-deep is ink, --clay-light and
+  --sand-deep are both mango, and --clay is amber. Renaming them would be
+  a 1,240-site change to fix a cosmetic mismatch, so they stay. Use --mango
+  for new work.
+
+  THE ONE RULE: never put white text on mango. White on #FFA62B is 1.96:1;
+  ink on it is 9.05:1. Mango is a fill that carries near-black text, in
+  every context, with no exceptions.
 */
 :root {
   /* Base — shared by both roles */
-  --ink: #3a2317;      /* primary text, dark brand panels */
-  --paper: #fbf3e9;    /* warm page background */
-  --surface: #fffaf3;  /* cards and panels sitting on paper */
-  --sand: #f7ede0;      /* soft fill — inputs, inactive chips */
-  --sand-deep: #f3e2c8; /* the auth brand panel */
-  --hairline: #e9d9c1;  /* borders */
+  --ink: #1E1712;      /* primary text, dark panels — 14.20:1 on mint */
+  --paper: #CFEDE1;    /* mint page ground */
+  --surface: #FFFFFF;  /* cards and panels sitting on mint */
+  --sand: #E9F6F0;      /* soft fill — inputs, inactive chips */
+  --sand-deep: #FFA62B; /* the auth brand panel, now mango — ink text only */
+  /* Borders, and the reason white cards do not float: white on mint is
+     1.25:1, so a white card with no hairline has no perceivable edge. */
+  --hairline: #AFD9C7;
 
   /* Both of these were set by eye and both failed WCAG AA on every general
      background. Measured against --paper / --surface / --sand, the old
@@ -28,24 +40,33 @@
      usages, i.e. most of the secondary text in the product. Darkened to
      clear the floor without changing hue: --muted now runs 5.15-5.74:1 and
      --faint 4.66-5.19:1. Value edits only; no component changed. */
-  --muted: #775f4c;     /* secondary text */
-  --faint: #7d6653;     /* placeholder / tertiary text */
+  --muted: #44615A;     /* secondary text — 5.43:1 on mint, 6.77 on white */
+  --faint: #4F6B60;     /* placeholder / tertiary — 4.68:1 on mint, 5.83 on white */
 
-  /* Secondary text sitting on --sand-deep, which is darker than the three
-     general backgrounds and so fails them all a step earlier. --faint still
-     does not clear AA there even after the darkening above (4.24:1); this
-     does, at 6.24:1. Hence the standing rule: never put --muted or --faint
-     on --sand-deep, use --ink-soft. The auth panel already follows it. */
-  --ink-soft: #6b4a30;
+  /* Secondary text on --sand-deep, which is now mango. Same standing rule
+     as before and for the same reason: --muted and --faint do not clear AA
+     on it, so secondary text on the auth panel uses this instead. 5.55:1
+     on mango. The auth panel already follows it. */
+  --ink-soft: #4A3B1E;
 
-  /* Role accents. The design keeps one base for both sides and swaps only
-     the accent, so the product reads as a single brand with a subtle role
-     cue rather than two separate themes. */
-  --clay: #c07a3f;       /* artist accent — wordmark, line art, highlights */
-  --clay-deep: #8a3b2a;  /* artist primary action — buttons, active tabs */
-  --clay-light: #e0a570; /* artist accent legible on --ink */
-  --teal: #0d6e6e;       /* planner accent */
-  --teal-deep: #0a5555;  /* planner line art, pressed states */
+  /* Role accents. One base for both sides with only the accent swapped, so
+     the product reads as a single brand with a role cue rather than two
+     themes. */
+  --clay: #7A4A06;       /* amber — text and links on light grounds, 6.00:1 on mint */
+
+  /* Ink, NOT mango, and this is the one mapping worth explaining.
+     bg-clay-deep appears 32 times across 26 files and every one of them
+     pairs it with text-white. Mapping it to mango would drop all 32 to
+     1.96:1 in a single value edit, and nothing in `npm run verify` would
+     catch it — a page that renders perfectly and is wrong, which is the
+     failure CLAUDE.md exists to prevent. As ink it keeps white at 17.70:1
+     and all 32 stay correct untouched. Mango is introduced deliberately
+     where it belongs instead. */
+  --clay-deep: #1E1712;
+
+  --clay-light: #FFA62B; /* mango — 9.05:1 on ink, which is what this was always for */
+  --teal: #0F4F4C;       /* deep teal card fill — white on it is 9.36:1 */
+  --teal-deep: #0B3A38;  /* pressed */
 
   /* Status colors are deliberately left cool/semantic. They signal state,
      not brand, and reading "success" as green is worth more than palette
@@ -63,6 +84,17 @@
      rail pinned at 16px and slid its heading under that bar for every
      signed-out visitor, which is most of /search's audience. */
   --sticky-header-h: 0px;
+
+  /* The hot accent, and the three deep card fills.
+
+     --mango is the name to reach for in new work; --clay-light and
+     --sand-deep happen to hold the same value for backwards compatibility
+     (see the note at the top) but say nothing useful about it.
+
+     There is no --card-teal: --teal IS the third card fill. */
+  --mango: #FFA62B;      /* fill only, ink label, never white */
+  --card-plum: #5F2352;  /* white on it is 11.36:1 */
+  --card-indigo: #1F2F6B;/* white on it is 12.52:1 */
 
   /* System font stacks — no external fetch required. The display stack
      leans on whatever serif ships with the OS (Georgia on Windows/macOS,
@@ -87,6 +119,9 @@
   --color-clay-light: var(--clay-light);
   --color-teal: var(--teal);
   --color-teal-deep: var(--teal-deep);
+  --color-mango: var(--mango);
+  --color-card-plum: var(--card-plum);
+  --color-card-indigo: var(--card-indigo);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
   --color-success: var(--success);
