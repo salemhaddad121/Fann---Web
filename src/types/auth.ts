@@ -25,13 +25,17 @@ export type BookerInterest =
   | "musical_acts"
   | "performance_acts"
   | "photo_video"
-  | "djs_and_services";
+  | "djs_and_services"
+  // A booker looking for a room is looking for something. Venues register
+  // free on the artist side precisely so bookers can find them.
+  | "venues";
 
 export const BOOKER_INTERESTS: BookerInterest[] = [
   "musical_acts",
   "performance_acts",
   "photo_video",
   "djs_and_services",
+  "venues",
 ];
 
 /**
@@ -44,6 +48,7 @@ export const BOOKER_INTEREST_OPTIONS: { value: BookerInterest; label: string }[]
   { value: "performance_acts", label: "Performance acts" },
   { value: "photo_video", label: "Photo & video" },
   { value: "djs_and_services", label: "DJs, bartenders & event services" },
+  { value: "venues", label: "Venues & spaces" },
 ];
 
 export interface SafeUser {

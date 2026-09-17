@@ -43,6 +43,7 @@ const INTEREST_LABELS: Record<BookerInterest, { label: string; blurb: string }> 
     label: "DJs, bartenders & event services",
     blurb: "DJs, bar service, catering, sound & lighting",
   },
+  venues: { label: "Venues & spaces", blurb: "Rooms and spaces to hire for the event" },
 };
 
 export function BookerQuestions({
