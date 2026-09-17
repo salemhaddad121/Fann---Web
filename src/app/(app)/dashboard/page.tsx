@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { SubscriptionBanner } from "@/components/subscriptions/SubscriptionBanner";
+import { CompanyProfilePrompt } from "@/components/planners/CompanyProfilePrompt";
 import { VerificationBanner } from "@/components/verification/VerificationBanner";
 
 function greeting(): string {
@@ -54,6 +55,11 @@ export default function DashboardPage() {
 
       {/* Bookers only — artists don't subscribe, they're what's subscribed to. */}
       {user.role === "planner" && <SubscriptionBanner />}
+      {/* Company bookers only, once, and only until they have a profile —
+          the component decides all three. An individual is never listed in
+          the artist-facing directory, so there is nothing to prompt them
+          for. */}
+      {user.role === "planner" && <CompanyProfilePrompt />}
 
       {/* Artists only. Renders nothing once verification is complete. */}
       {user.role === "artist" && <VerificationBanner />}

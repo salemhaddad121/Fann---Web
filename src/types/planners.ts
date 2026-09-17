@@ -10,6 +10,15 @@ export interface PlannerCard {
   location_country: string | null;
   event_types: string[];
   booker_type: string | null;
+  /**
+   * Individual or company. Null for a booker who registered before the
+   * question existed and has not been prompted yet.
+   *
+   * Load-bearing rather than descriptive: the artist-facing directory
+   * lists companies and only companies, so this decides whether a booker
+   * is findable at all.
+   */
+  planner_kind: "individual" | "company" | null;
   social_links: Record<string, string> | null;
   thumbnail_url: string | null;
   created_at: string;
