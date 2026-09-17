@@ -13,6 +13,7 @@ import { Button } from "@/components/auth/Button";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import type { AdminCategoryGroup, AdminCategory } from "@/types/admin";
 import { categoryIcon } from "@/lib/category-icons";
+import { BOOKER_INTEREST_OPTIONS, type BookerInterest } from "@/types/auth";
 
 export function CategoriesTab() {
   const [groups, setGroups] = useState<AdminCategoryGroup[] | null>(null);
@@ -21,6 +22,13 @@ export function CategoriesTab() {
   const [newGroupName, setNewGroupName] = useState("");
   const [addingCategoryTo, setAddingCategoryTo] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
+  // Which booker bucket the new category answers. No default: picking one
+  // has to be a decision, because the failure mode of getting it wrong is
+  // a category that simply never appears for a booker and says nothing
+  // about it at the time.
+  const [newCategoryInterest, setNewCategoryInterest] = useState<
+    BookerInterest | "none" | ""
+  >("");
   const [busy, setBusy] = useState(false);
   // Deleting a group or a category is irreversible, so both go through a
   // confirmation step. Holding the pending target here keeps the dialog a
@@ -78,10 +86,22 @@ export function CategoriesTab() {
 
   async function handleAddCategory(groupId: string) {
     if (!newCategoryName.trim()) return;
+    if (!newCategoryInterest) {
+      setError("Choose what bookers should find this under.");
+      return;
+    }
+    setError(null);
     setBusy(true);
     try {
-      await createCategory({ name: newCategoryName.trim(), groupId });
+      await createCategory({
+        name: newCategoryName.trim(),
+        groupId,
+        // "none" is the explicit Venue-style answer and has to reach the
+        // API as null, not as the empty string the placeholder uses.
+        bookerInterest: newCategoryInterest === "none" ? null : (newCategoryInterest as BookerInterest),
+      });
       setNewCategoryName("");
+      setNewCategoryInterest("");
       setAddingCategoryTo(null);
       load();
     } catch (err) {
@@ -154,27 +174,62 @@ export function CategoriesTab() {
               </div>
 
               {addingCategoryTo === g.id ? (
-                <div className="flex gap-2">
-                  <input
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    placeholder="Category name…"
-                    autoFocus
-                    className="flex-1 rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-clay"
-                  />
-                  <button
-                    onClick={() => handleAddCategory(g.id)}
-                    disabled={busy}
-                    className="text-xs font-semibold text-clay px-2.5"
-                  >
-                    Add
-                  </button>
-                  <button
-                    onClick={() => setAddingCategoryTo(null)}
-                    className="text-xs font-semibold text-faint px-2.5"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Category name…"
+                      autoFocus
+                      className="flex-1 rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-clay"
+                    />
+                    <button
+                      onClick={() => handleAddCategory(g.id)}
+                      disabled={busy}
+                      className="text-xs font-semibold text-clay px-2.5"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAddingCategoryTo(null);
+                        setNewCategoryInterest("");
+                      }}
+                      className="text-xs font-semibold text-faint px-2.5"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  {/* The group above is the ARTIST's taxonomy — how a
+                      performer thinks of their craft. This is the BOOKER's
+                      — what someone planning an event went looking for.
+                      They genuinely differ: a DJ is a musician to himself
+                      and a service to a venue, which is why the two are
+                      separate columns and why this cannot be inferred from
+                      the group. */}
+                  <label className="block">
+                    <span className="mb-1 block text-[11px] font-semibold text-muted">
+                      Bookers find this under
+                    </span>
+                    <select
+                      value={newCategoryInterest}
+                      onChange={(e) =>
+                        setNewCategoryInterest(e.target.value as BookerInterest | "none" | "")
+                      }
+                      className="w-full rounded-[10px] border border-hairline px-2.5 py-1.5 text-xs outline-none focus:border-clay"
+                    >
+                      <option value="">Choose one…</option>
+                      {BOOKER_INTEREST_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                      <option value="none">
+                        Nothing — don&apos;t show this to bookers (like Venue)
+                      </option>
+                    </select>
+                  </label>
                 </div>
               ) : (
                 <button

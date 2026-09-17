@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import type { BookerInterest } from "@/types/auth";
 import type {
   AdminUserRow,
   AdminUserDetail,
@@ -176,6 +177,15 @@ export async function listAdminCategories(): Promise<AdminCategory[]> {
 
 export async function createCategory(payload: {
   name: string;
+  /**
+   * Which of the four booker buckets this answers. Required by the API —
+   * a category with none is in nothing a booker picked at signup, and
+   * nothing at creation time would have said so.
+   *
+   * null is a real answer: it means "show this to no booker", which is
+   * what Venue is.
+   */
+  bookerInterest: BookerInterest | null;
   groupId: string;
 }): Promise<AdminCategory> {
   return apiFetch<AdminCategory>("/admin/categories", { method: "POST", body: payload });
