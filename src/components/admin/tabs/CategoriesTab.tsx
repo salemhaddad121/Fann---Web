@@ -210,7 +210,7 @@ export function CategoriesTab() {
                       the group. */}
                   <label className="block">
                     <span className="mb-1 block text-[11px] font-semibold text-muted">
-                      Bookers find this under
+                      When a booker searches, show this under
                     </span>
                     <select
                       value={newCategoryInterest}
@@ -225,8 +225,14 @@ export function CategoriesTab() {
                           {o.label}
                         </option>
                       ))}
+                      {/* "Venue" is two different things in this product and
+                          the old label did not say which: a booker_type, and
+                          a CATEGORY where a venue lists its room for hire.
+                          This option is about the second — supply, not
+                          demand — so it names what the thing IS rather than
+                          borrowing a word that also means a kind of buyer. */}
                       <option value="none">
-                        Nothing — don&apos;t show this to bookers (like Venue)
+                        None — this is a space or service, not talent to book
                       </option>
                     </select>
                   </label>
