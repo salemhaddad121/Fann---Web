@@ -139,7 +139,9 @@ function InterestBreakdown({ stats }: { stats: BookerInterestStats }) {
                 <div className="h-full bg-faint" style={{ width: width(r.unknownKind) }} />
               )}
             </div>
-            <span className="text-xs text-faint w-14 text-right shrink-0 tabular-nums">
+            {/* Wide enough, and nowrap, for three-digit counts — "120 · 75%"
+                wrapping to two lines would break the row's height. */}
+            <span className="text-xs text-faint w-[4.5rem] text-right shrink-0 tabular-nums whitespace-nowrap">
               {r.total} · {Math.round(r.share * 100)}%
             </span>
           </div>
