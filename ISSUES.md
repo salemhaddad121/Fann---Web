@@ -3,6 +3,13 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `src/components/brand/FannMark.tsx` (as used by `AuthShell.tsx:31`) — the
+  wordmark's accent "n" is `--clay` (amber) and the auth brand panel is now
+  `--sand-deep`, which the mango redesign made #FFA62B. Amber on mango is
+  **3.82:1**. It is 24px so it clears the 3:1 large-text floor and is
+  technically AA, but it is the weakest pairing on that panel and the only
+  place amber sits on mango anywhere. Either ink both letters on that panel
+  or give the mark a panel-aware accent. A judgement call, not a defect.
 - `playwright.config.ts` — the local default of 4 workers makes "links
   resolve" flaky against `next dev`. That test does a sequential
   `page.request.get()` for every internal link on a page (the footer alone
