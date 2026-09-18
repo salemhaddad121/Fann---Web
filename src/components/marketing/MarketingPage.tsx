@@ -47,7 +47,7 @@ export function Section({
 }) {
   return (
     <section className="max-w-2xl">
-      <h2 className="font-display text-[20px] lg:text-[22px] font-bold text-ink">{title}</h2>
+      <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink">{title}</h2>
       <div className="mt-3 flex flex-col gap-3 text-[14px] leading-relaxed text-muted">
         {children}
       </div>
@@ -89,7 +89,7 @@ export function CallToAction({
 }) {
   return (
     <section className="max-w-2xl rounded-[18px] border border-hairline bg-surface/85 p-6 lg:p-7">
-      <h2 className="font-display text-[20px] font-bold text-ink">{heading}</h2>
+      <h2 className="font-display text-[24px] font-bold text-ink">{heading}</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
       <Link
         href={href}

@@ -57,7 +57,7 @@ export async function ArtistStrip() {
             for verifiedOnly=true. It no longer does, and the filter selected
             nothing anyway — every artist is ID-verified before going live.
             The heading now says what the strip actually is. */}
-        <h2 className="font-display text-[20px] lg:text-[22px] font-bold text-ink">
+        <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink">
           Artists on Fann
         </h2>
         <Link href="/search" className="text-sm font-semibold text-clay-deep">

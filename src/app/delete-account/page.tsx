@@ -54,7 +54,7 @@ export default function DeleteAccountPage() {
         </p>
 
         <section className="mt-8">
-          <h2 className="font-display text-[20px] font-bold text-ink">
+          <h2 className="font-display text-[24px] font-bold text-ink">
             If you can sign in
           </h2>
           <div className="mt-3 flex flex-col gap-3 text-[14px] leading-relaxed text-muted">
@@ -71,7 +71,7 @@ export default function DeleteAccountPage() {
         </section>
 
         <section className="mt-8">
-          <h2 className="font-display text-[20px] font-bold text-ink">
+          <h2 className="font-display text-[24px] font-bold text-ink">
             What gets deleted
           </h2>
           <div className="mt-3 flex flex-col gap-3 text-[14px] leading-relaxed text-muted">
@@ -98,7 +98,7 @@ export default function DeleteAccountPage() {
         </section>
 
         <section className="mt-8">
-          <h2 className="font-display text-[20px] font-bold text-ink">
+          <h2 className="font-display text-[24px] font-bold text-ink">
             If you cannot sign in
           </h2>
           <p className="mt-3 text-[14px] leading-relaxed text-muted">

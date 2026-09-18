@@ -64,7 +64,7 @@ export async function LandingPlans() {
 
   return (
     <section className="mt-8">
-      <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink">
+      <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink">
         Plans &amp; pricing
       </h2>
       <p className="mt-3 max-w-2xl text-sm text-ink/80 leading-relaxed">
