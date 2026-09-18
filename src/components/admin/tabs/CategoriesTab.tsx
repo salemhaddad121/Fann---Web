@@ -209,7 +209,7 @@ export function CategoriesTab() {
                       separate columns and why this cannot be inferred from
                       the group. */}
                   <label className="block">
-                    <span className="mb-1 block text-[11px] font-semibold text-muted">
+                    <span className="mb-1 block text-[12px] font-semibold text-muted">
                       When a booker searches, show this under
                     </span>
                     <select

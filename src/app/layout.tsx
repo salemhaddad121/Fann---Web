@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Instrument_Serif, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 // The icon font, self-hosted and subset to what this app uses. Imported here
 // rather than <link>ed, so Next bundles it (and keeps eslint's no-css-tags
@@ -15,6 +16,44 @@ import {
   SITE_DESCRIPTION,
   DEFAULT_OG_IMAGE,
 } from "@/lib/site-config";
+
+/*
+ * Loaded through next/font, NOT a <link> to fonts.googleapis.com.
+ *
+ * next/font self-hosts the files at build time, which keeps the "no
+ * external fetch required" property the old system-font stack was chosen
+ * for, and avoids adding a second render-blocking stylesheet from a third
+ * party — the exact problem the Tabler icon font was self-hosted to fix.
+ * It also emits the @font-face with font-display: swap and preloads, so
+ * there is no flash of invisible text.
+ *
+ * Both expose a CSS variable rather than a class, so globals.css can point
+ * the existing --font-display / --font-body at them and every component
+ * keeps working untouched.
+ */
+
+// Display only, and never below 24px — the strokes are thin enough to
+// disappear at small sizes. One weight is all it ships.
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-instrument-serif",
+});
+
+// Everything else. Four weights, because the design steps by weight rather
+// than by size below 15px.
+//
+// Chosen partly for two things that are not about this redesign: IBM Plex
+// Sans Arabic is the same family, so the Arabic surface later needs no
+// type-system change, and Plex has tabular figures, which is what keeps
+// price columns aligned.
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-ibm-plex-sans",
+});
 
 export const metadata: Metadata = {
   // Lets every page below give openGraph.images and canonical URLs as plain
@@ -70,7 +109,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+      lang="en"
+      className={`h-full antialiased ${instrumentSerif.variable} ${ibmPlexSans.variable}`}
+    >
       <head>
         {/* Self-hosted, and subset to the icons this app actually uses.
 
