@@ -33,7 +33,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1
 function Pills({ items }: { items: { label: string; href?: string }[] }) {
   if (items.length === 0) return null;
   const chip =
-    "font-display text-[13px] text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-2";
+    "text-[13px] font-semibold text-ink/80 bg-surface/70 border border-hairline rounded-full px-3 py-2";
   return (
     <ul className="flex flex-wrap gap-1.5 mt-4">
       {items.map(({ label, href }) => (
@@ -265,7 +265,7 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <span className="text-[12px] font-semibold uppercase tracking-wide text-clay">
                 For Artists
               </span>
-              <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
+              <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
                 A home online for your talent.
               </h2>
               <p className="mt-3 text-sm text-ink/80 leading-relaxed">
@@ -290,7 +290,7 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
               <span className="text-[12px] font-semibold uppercase tracking-wide text-teal">
                 For Planners
               </span>
-              <h2 className="font-display text-[22px] lg:text-[26px] font-bold text-ink mt-1.5">
+              <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
                 Beyond your own network.
               </h2>
               <p className="mt-3 text-sm text-ink/80 leading-relaxed">

@@ -28,7 +28,7 @@ function Guide({
       href={href}
       className="block rounded-[14px] border border-hairline bg-surface/85 p-5 transition-colors hover:border-clay"
     >
-      <span className="flex items-center gap-1.5 font-display text-[17px] font-bold text-ink">
+      <span className="flex items-center gap-1.5 text-[17px] font-bold text-ink">
         {title} <i className="ti ti-arrow-right text-base text-clay" aria-hidden />
       </span>
       <span className="mt-1.5 block text-[13px] leading-relaxed text-muted">{blurb}</span>

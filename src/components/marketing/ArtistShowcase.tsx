@@ -53,7 +53,7 @@ export async function ArtistShowcase({
   return (
     <section>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="font-display text-[20px] lg:text-[22px] font-bold text-ink">{heading}</h2>
+        <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink">{heading}</h2>
         {total > 0 && (
           <Link href={searchHref} className="text-sm font-semibold text-clay-deep">
             See all {total} →
