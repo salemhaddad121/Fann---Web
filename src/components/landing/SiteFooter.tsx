@@ -58,7 +58,7 @@ export function SiteFooter() {
 
         <div className="mt-6 flex flex-col gap-4 border-t border-hairline pt-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <FannLockup size={20} textClassName="text-[15px]" />
+            <FannLockup size={56} />
             <p className="mt-1.5 text-xs text-faint">
               Connecting artists and event planners across Lebanon.
             </p>

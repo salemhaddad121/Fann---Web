@@ -5,7 +5,7 @@ export function PublicHeader() {
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-surface border-b border-hairline">
       <Link href="/">
-        <FannLockup size={26} textClassName="text-lg" />
+        <FannLockup size={40} />
       </Link>
       <div className="flex items-center gap-2">
         <Link href="/auth/login" className="text-sm font-semibold text-ink px-3 py-1.5">
