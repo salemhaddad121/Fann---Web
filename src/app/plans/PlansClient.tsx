@@ -331,7 +331,7 @@ export function PlansClient() {
       <header className="border-b border-hairline bg-surface/85 px-5 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link href="/">
-            <FannLockup size={22} textClassName="text-base" />
+            <FannLockup size={40} />
           </Link>
           {user ? (
             <Link href="/dashboard" className="text-sm font-semibold text-clay-deep">

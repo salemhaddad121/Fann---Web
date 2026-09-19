@@ -140,7 +140,7 @@ export default function PaymentReturnPage() {
       <header className="border-b border-hairline bg-surface/85 px-5 py-4">
         <div className="mx-auto max-w-5xl">
           <Link href="/">
-            <FannLockup size={22} textClassName="text-base" />
+            <FannLockup size={40} />
           </Link>
         </div>
       </header>

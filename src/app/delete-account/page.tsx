@@ -39,7 +39,7 @@ export default function DeleteAccountPage() {
       <header className="border-b border-hairline bg-surface/85 px-5 py-4">
         <div className="mx-auto max-w-2xl">
           <Link href="/">
-            <FannLockup size={22} textClassName="text-base" />
+            <FannLockup size={40} />
           </Link>
         </div>
       </header>

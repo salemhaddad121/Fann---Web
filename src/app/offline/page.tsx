@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function OfflinePage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">
-      <FannLockup size={26} textClassName="text-lg" />
+      <FannLockup size={40} />
 
       <i className="ti ti-wifi-off mt-8 text-3xl text-faint" aria-hidden />
       <h1 className="mt-3 font-display text-[24px] font-bold text-ink">You&apos;re offline</h1>
