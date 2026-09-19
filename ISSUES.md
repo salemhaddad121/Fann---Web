@@ -10,6 +10,18 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   or soften the pill to something the whole roster satisfies. It is a public
   claim about verification, so it is Salem's call, not a code fix.
 
+- The six pale pastel pairs that Phase 9 took out of `badge-colors.ts` are
+  still written inline in about eighteen places — `bg-[#FEF3C7]
+  text-[#92400E]` and `bg-[#dfeceb] text-teal` most of all. They are in
+  StatusBadge, UserStatusBadge, VerificationChecklist, LiveStatusBanner,
+  SupportTab, TopNav's role chip, PlannerFilters and the admin dashboard.
+
+  Deliberately NOT changed with the category palette: those six were a hash
+  with no meaning, and these encode state — amber is pending, teal is
+  planner. Recolouring them is a semantic decision, not a token swap, and the
+  rebrand plan only asked for badge-colors.ts. Worth doing as its own pass so
+  status colour is decided once instead of eighteen times.
+
 - Four places still set type below the repo's 12px floor, all of them count
   badges, all found by the rebrand plan's own Phase 11 grep
   (`text-\[1[01]px\]|text-\[9px\]`), which is supposed to come back empty:

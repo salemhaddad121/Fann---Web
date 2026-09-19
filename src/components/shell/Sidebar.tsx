@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { homePathFor, type NavItem } from "@/lib/nav-config";
+import { FannLockup } from "@/components/brand/FannMark";
 import type { SafeUser } from "@/types/auth";
 
 // Hoisted out of Sidebar rather than declared in its body: a component
@@ -65,8 +66,13 @@ export function Sidebar({
 
   return (
     <aside className="hidden lg:flex flex-col w-60 flex-none sticky top-0 h-screen bg-surface border-r border-hairline px-4 py-5">
-      <Link href={homePathFor(user.role)} className="font-display text-2xl font-bold text-ink px-2 mb-7">
-        fan<span className="text-clay">n</span>
+      {/* The retired text wordmark — fan + a clay "n" — survived the rebrand
+          here because it was hand-rolled markup rather than a FannMark call, so
+          no grep for the component found it. It shipped on every signed-in
+          desktop page. 40px is the lockup floor and the 240px rail holds the
+          78px it comes out at with room to spare. */}
+      <Link href={homePathFor(user.role)} className="mb-7 px-2">
+        <FannLockup size={40} />
       </Link>
 
       <nav className="flex flex-col gap-1">
