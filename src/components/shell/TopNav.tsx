@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FannLockup } from "@/components/brand/FannMark";
 import { homePathFor } from "@/lib/nav-config";
 import type { SafeUser } from "@/types/auth";
 
@@ -18,9 +19,9 @@ export function TopNav({ user, unreadNotifications }: { user: SafeUser; unreadNo
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-surface border-b border-hairline">
       <Link href={homePathFor(user.role)} className="flex items-center gap-2">
-        <span className="font-display text-base font-bold text-ink">
-          fan<span className="text-clay">n</span>
-        </span>
+        {/* The row already stands 40px tall for its icon buttons, so the
+            lockup's 40px floor fits here with no change to the header. */}
+        <FannLockup size={40} />
         {user.role === "admin" && (
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]">
             Admin

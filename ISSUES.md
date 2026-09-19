@@ -3,22 +3,11 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
-- `src/components/brand/FannMark.tsx` (as used by `AuthShell.tsx:31`) — the
-  wordmark's accent "n" is `--clay` (amber) and the auth brand panel is now
-  `--sand-deep`, which the mango redesign made #FFA62B. Amber on mango is
-  **3.82:1**. It is 24px so it clears the 3:1 large-text floor and is
-  technically AA, but it is the weakest pairing on that panel and the only
-  place amber sits on mango anywhere. Either ink both letters on that panel
-  or give the mark a panel-aware accent. A judgement call, not a defect.
-- `src/components/brand/FannMark.tsx`, `shell/TopNav.tsx:21`,
-  `legal/LegalDocument.tsx:56`, `unsubscribe/UnsubscribeClient.tsx:46` — the
-  "fann" wordmark is `font-display`, which is now Instrument Serif, and it
-  renders at 15-20px in the nav, the footers and the legal pages. Instrument
-  Serif is a display face: side by side at those sizes it is visibly thinner
-  and harder to read than bold IBM Plex. Every other sub-24px display usage
-  was fixed; these were left because changing a logotype's typeface is a
-  brand decision. Either set the wordmark in Plex bold, or raise every
-  lockup to >=24px. Evidence: a rendered specimen at 15/16/18/24px.
+- `src/components/brand/FannMark.tsx` — `FannMark` and `FannWordmark` are now
+  thin aliases of `FannLockup`, and `textClassName` / `withDots` / `onInk`
+  are accepted and ignored. Nothing passes them any more and nothing imports
+  the two aliases, so all five can be deleted. Left in place so the wordmark
+  swap did not also have to be an API change; delete when convenient.
 - `playwright.config.ts` — the local default of 4 workers makes "links
   resolve" flaky against `next dev`. That test does a sequential
   `page.request.get()` for every internal link on a page (the footer alone

@@ -32,7 +32,7 @@ export function AuthShell({
         <ArabesqueMotif role={background} className="absolute inset-0 w-full h-full" opacity={0.5} />
 
         <Link href="/" className="relative z-10 w-fit">
-          <FannLockup size={30} withDots textClassName="text-2xl" />
+          <FannLockup size={56} variant="on-mango" />
         </Link>
 
         <div className="relative z-10 max-w-sm">
@@ -58,7 +58,7 @@ export function AuthShell({
       <div className="flex flex-col justify-center items-center p-6 sm:p-10 bg-surface">
         <div className="w-full max-w-sm">
           <div className="lg:hidden mb-8">
-            <FannLockup size={24} textClassName="text-xl" />
+            <FannLockup size={40} />
           </div>
 
           <h1 className="font-display text-2xl font-bold text-ink mb-1">{title}</h1>
