@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FannLockup } from "@/components/brand/FannMark";
 
@@ -20,17 +21,48 @@ export function GuestChrome({
   children: React.ReactNode;
   showSearchLink?: boolean;
 }) {
+  /*
+   * --sticky-header-h tells anything pinning inside this shell how far down
+   * to start. The header below is sticky at EVERY width (unlike AppShell's
+   * TopNav, which is lg:hidden), so a child pinning at top-0 sits under it —
+   * that is what put the search filter rail's heading behind this bar once
+   * already.
+   *
+   * MEASURED, not hardcoded. It was 65px, derived by hand from the padding
+   * plus the Sign in button. Then the wordmark went to 40px, the lockup
+   * became the tallest thing in the row, the header grew to 69px, and the
+   * number was silently wrong again. It would also be wrong at any width
+   * where the nav wraps. So the header reports its own height instead.
+   */
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerH, setHeaderH] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setHeaderH(Math.round(entry.contentRect.height + 1)); // +1 for the border
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    // --sticky-header-h tells anything that pins inside this shell how far
-    // down to start. The header below is sticky at EVERY width (unlike
-    // AppShell's TopNav, which is lg:hidden), so a child pinning at top-0
-    // would sit underneath it. 65px = py-3.5 (28) + the Sign in button (36)
-    // + the 1px bottom border; keep it in step with that row.
-    <div className="min-h-dvh bg-paper" style={{ "--sticky-header-h": "65px" } as React.CSSProperties}>
-      <header className="sticky top-0 z-30 border-b border-hairline bg-surface/90 px-5 py-3.5 backdrop-blur">
+    <div
+      className="min-h-dvh bg-paper"
+      // Falls back to 69px for the server render and the first paint, which
+      // is the current desktop height — so the rail is right immediately and
+      // the observer only corrects it if the header is actually a different
+      // size.
+      style={{ "--sticky-header-h": `${headerH ?? 69}px` } as React.CSSProperties}
+    >
+      <header
+        ref={headerRef}
+        className="sticky top-0 z-30 border-b border-hairline bg-surface/90 px-5 py-3.5 backdrop-blur"
+      >
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <Link href="/" aria-label="Fann home">
-            <FannLockup size={20} textClassName="text-[15px]" />
+            <FannLockup size={40} />
           </Link>
           <nav className="flex items-center gap-4">
             {showSearchLink && (
