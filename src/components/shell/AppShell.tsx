@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { TopNav } from "@/components/shell/TopNav";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { Sidebar } from "@/components/shell/Sidebar";
-import { PageBackground } from "@/components/shell/PageBackground";
 import { PageTiming } from "@/components/shell/PageTiming";
 import { FloatingLogout } from "@/components/shell/FloatingLogout";
 import { getNavItems } from "@/lib/nav-config";
@@ -15,16 +14,15 @@ import type { SafeUser } from "@/types/auth";
 export function AppShell({
   user,
   children,
-  background,
   chrome = "full",
 }: {
   user: SafeUser;
   children: ReactNode;
-  // Which side's background to show. Defaults to the logged-in user's own
-  // role — a planner viewing their own dashboard gets the booker
-  // background. Pages about a *specific* profile (e.g. an artist's public
-  // page) pass this explicitly instead, so it stays tied to whose profile
-  // is being viewed rather than who's currently logged in.
+  // DEAD, accepted and ignored. It chose which role's line-art backdrop to
+  // draw; the backdrop is gone and the ground is flat mint everywhere. Two
+  // call sites still pass it (ArtistDetailClient, PlannerDetailClient) and
+  // both lose it in Phase 8, which edits one of them anyway. Deliberately
+  // not destructured, so it raises no unused-variable warning.
   background?: "artist" | "planner";
   // "sidebar-only" keeps the desktop sidebar but drops the mobile top and
   // bottom bars. For full-height pages that own the bottom of the screen —
@@ -39,11 +37,9 @@ export function AppShell({
   // fallback stands down there. Without this the two land on top of each
   // other at 390px — literally overlapping rectangles saying the same word.
   const pageHasOwnLogout = usePathname() === "/account";
-  const resolvedBackground = background ?? (user.role === "planner" ? "planner" : "artist");
 
   return (
     <div className="min-h-screen relative">
-      <PageBackground role={resolvedBackground} />
       {/* Engagement telemetry — logged-in pages only, so every event has a
           role attached. Renders nothing. */}
       <PageTiming />

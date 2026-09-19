@@ -1,4 +1,3 @@
-import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 
@@ -13,7 +12,6 @@ import { SiteFooter } from "@/components/landing/SiteFooter";
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen">
-      <PageBackground role="artist" />
       <div className="relative z-10 flex min-h-screen flex-col">
         <PublicHeader />
         <div className="flex-1">{children}</div>

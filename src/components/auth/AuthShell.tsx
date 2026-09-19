@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { Waveform } from "@/components/auth/Waveform";
 import { FannLockup } from "@/components/brand/FannMark";
-import { ArabesqueMotif } from "@/components/brand/ArabesqueMotif";
 
 export function AuthShell({
   title,
@@ -24,13 +23,11 @@ export function AuthShell({
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Brand panel — hidden on small screens to keep mobile focused on the
-          form. Maqam turns this from a dark photographic wash into warm paper
-          with line art, which removes the contrast problem the old panel had:
-          there is no longer any light-text-over-busy-artwork to defend, since
-          everything here is now dark ink on a light ground. */}
+          form. It is a flat mango field now: it used to carry line art over
+          warm paper, and before that a dark photographic wash. Nothing here
+          is light text over busy artwork any more, so there is no contrast
+          problem left for a background to create or solve. */}
       <div className="hidden lg:flex flex-col justify-between relative overflow-hidden p-12 bg-sand-deep text-ink">
-        <ArabesqueMotif role={background} className="absolute inset-0 w-full h-full" opacity={0.5} />
-
         <Link href="/" className="relative z-10 w-fit">
           <FannLockup size={56} variant="on-mango" />
         </Link>
