@@ -3,6 +3,34 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `src/components/landing/BrowseCategories.tsx` — the Event Services card
+  links to `/search?categories=food-beverage`, which returns **0 artists** on
+  the current roster. Measured per-group totals today: music 4, visual 1,
+  performance-entertainment 1, production-technical 1, and venues-spaces,
+  food-beverage, speciality and other all 0, out of 7 artists. The card is
+  shipped as the plan specifies it — the categories are real and the plan
+  accepts the group search as the destination ("they would be empty at the
+  current roster") — but on a marketing page a door onto an empty room is
+  worth a decision: either seed a caterer/bartender, or repoint the card at
+  `visual` (Photographers, Videographers, Photo Booth, 360 Video Booth, Drone
+  Operator), which has an artist and covers two of the plan's own six tags for
+  that card. One line either way. The bartender thumbnail belongs to the
+  food-beverage reading of the card, so repointing it needs a new image.
+
+- `src/lib/search-url.ts` — `resolveCategorySelection` returns `{group, subs}`
+  and so can hold exactly ONE group. A URL naming leaves from several groups
+  silently keeps the first group's leaves and drops the rest: twelve leaves
+  across food-beverage, visual and production-technical resolve to Food &
+  Beverage alone and render "0 artists match your filters" with no hint that
+  nine of the twelve filters were discarded. That is a deliberate model (it is
+  what the chip UI can express, and it is unit-tested), but it is silent —
+  either document it at the function or drop unrepresentable slugs loudly.
+  It is why each browse card links to one group rather than to a set.
+
+- `src/app/search/SearchClient.tsx` — the result count does not pluralise its
+  verb: a single match reads "1 artist match your filters". The noun is
+  handled, the verb is not.
+
 - `src/components/brand/FannMark.tsx` — `FannMark` and `FannWordmark` are now
   thin aliases of `FannLockup`, and `textClassName` / `withDots` / `onInk`
   are accepted and ignored. Nothing passes them any more and nothing imports

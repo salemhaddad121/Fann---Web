@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/landing/SiteFooter";
 import { LandingPlans } from "@/components/landing/LandingPlans";
 import { ArtistStrip } from "@/components/landing/ArtistStrip";
 import { StoreBadges } from "@/components/landing/StoreBadges";
+import { BrowseCategories } from "@/components/landing/BrowseCategories";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
@@ -138,7 +139,10 @@ async function loadTaxonomy() {
     .flatMap((g) => g.categories)
     .filter((c) => !c.name.toLowerCase().startsWith("other"));
 
-  return { artistCategories, eventTypes };
+  // `groups` goes out alongside the flattened list because BrowseCategories
+  // needs the grouping itself — its cards link to a GROUP slug, and the
+  // search page can only hold one group at a time.
+  return { groups, artistCategories, eventTypes };
 }
 
 /**
@@ -179,7 +183,7 @@ interface LandingPageProps {
 }
 
 export async function LandingPage({ showPricing = true }: LandingPageProps) {
-  const [{ artistCategories, eventTypes }, artistCount] = await Promise.all([
+  const [{ groups, artistCategories, eventTypes }, artistCount] = await Promise.all([
     loadTaxonomy(),
     loadArtistCount(),
   ]);
@@ -254,6 +258,11 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
           {/* The proof that there is anybody here, directly under the hero
               and above every word of explanation. */}
           <ArtistStrip />
+
+          {/* Three doors into the search, above the two role pitches: a
+              visitor who already knows what they want should not have to
+              read either of them first. */}
+          <BrowseCategories groups={groups} />
 
           <div className="pt-10" />
 
