@@ -7,15 +7,18 @@ import {
   getTopBookedCategories,
   getTopBookerTypes,
   getEngagement,
+  getBookerInterests,
 } from "@/lib/admin-api";
 import type {
   SignupTrendPoint,
   GeographyRow,
   BookedCategoryRow,
   BookerTypeRow,
+  BookerInterestStats,
   EngagementStats,
   EngagementRow,
 } from "@/types/admin";
+import { buildInterestRows } from "@/lib/booker-interests";
 
 function SignupChart({ data }: { data: SignupTrendPoint[] }) {
   const max = Math.max(1, ...data.map((d) => d.artists + d.planners));
@@ -99,6 +102,68 @@ function RankedBars({
   );
 }
 
+// What bookers said they came for, at signup — the only reader of the
+// interest buckets. They filter nobody's search; a booker picks filters on
+// the search page like everyone else. This is here so there is an answer to
+// "what are people actually coming here to book", which the roster and the
+// advertising both depend on.
+//
+// Bars are scaled to the number of bookers who ANSWERED, not to the biggest
+// bucket, so the bar and the percentage beside it say the same thing. Max
+// scaling would draw the top bucket as a full bar whatever its real share.
+function InterestBreakdown({ stats }: { stats: BookerInterestStats }) {
+  const rows = buildInterestRows(stats.interests);
+
+  if (stats.answering === 0) {
+    return <p className="text-sm text-faint">No bookers have answered this yet.</p>;
+  }
+
+  const width = (n: number) => `${(n / stats.answering) * 100}%`;
+
+  return (
+    <div>
+      <div className="flex flex-col gap-2">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-center gap-2.5">
+            <span className="text-xs text-ink w-28 truncate shrink-0" title={r.label}>
+              {r.label}
+            </span>
+            <div className="flex-1 h-2 bg-sand rounded-full overflow-hidden flex">
+              {r.individual > 0 && (
+                <div className="h-full bg-clay" style={{ width: width(r.individual) }} />
+              )}
+              {r.company > 0 && (
+                <div className="h-full bg-teal" style={{ width: width(r.company) }} />
+              )}
+              {r.unknownKind > 0 && (
+                <div className="h-full bg-faint" style={{ width: width(r.unknownKind) }} />
+              )}
+            </div>
+            {/* Wide enough, and nowrap, for three-digit counts — "120 · 75%"
+                wrapping to two lines would break the row's height. */}
+            <span className="text-xs text-faint w-[4.5rem] text-right shrink-0 tabular-nums whitespace-nowrap">
+              {r.total} · {Math.round(r.share * 100)}%
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-4 text-[12px] text-muted mt-2">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-clay" /> Individual
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-teal" /> Company
+        </span>
+        {rows.some((r) => r.unknownKind > 0) && (
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-faint" /> Not stated
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function formatDuration(ms: number): string {
   if (ms <= 0) return "—";
   const totalSeconds = Math.round(ms / 1000);
@@ -136,6 +201,7 @@ export function AnalyticsTab() {
   const [geography, setGeography] = useState<GeographyRow[] | null>(null);
   const [bookedCategories, setBookedCategories] = useState<BookedCategoryRow[] | null>(null);
   const [bookerTypes, setBookerTypes] = useState<BookerTypeRow[] | null>(null);
+  const [interests, setInterests] = useState<BookerInterestStats | null>(null);
   const [engagement, setEngagement] = useState<EngagementStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,14 +213,16 @@ export function AnalyticsTab() {
       getTopBookedCategories(),
       getTopBookerTypes(),
       getEngagement(),
+      getBookerInterests(),
     ])
-      .then(([t, g, c, b, e]) => {
+      .then(([t, g, c, b, e, i]) => {
         if (cancelled) return;
         setTrend(t);
         setGeography(g);
         setBookedCategories(c);
         setBookerTypes(b);
         setEngagement(e);
+        setInterests(i);
       })
       .catch(() => {
         if (!cancelled) setError("Couldn't load analytics.");
@@ -165,7 +233,7 @@ export function AnalyticsTab() {
   }, []);
 
   if (error) return <p className="px-4 py-4 text-sm text-danger">{error}</p>;
-  if (!trend || !geography || !bookedCategories || !bookerTypes || !engagement) {
+  if (!trend || !geography || !bookedCategories || !bookerTypes || !engagement || !interests) {
     return <p className="px-4 py-10 text-sm text-muted">Loading…</p>;
   }
 
@@ -199,6 +267,16 @@ export function AnalyticsTab() {
           <span className="text-xs text-faint">last {engagement.windowDays} days</span>
         </div>
         <EngagementGrid rows={engagement.search} label="search activity" />
+      </div>
+
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[13px] font-bold text-ink">What bookers came for</p>
+          <span className="text-xs text-faint">
+            {interests.answering} of {interests.totalBookers} answered
+          </span>
+        </div>
+        <InterestBreakdown stats={interests} />
       </div>
 
       <div className="mb-6">
@@ -246,6 +324,14 @@ export function AnalyticsTab() {
         <br />
         <br />
         Page views and conversion rate still aren&apos;t shown — nothing records a funnel step.
+        <br />
+        <br />
+        &ldquo;What bookers came for&rdquo; is what they picked at signup, not what they
+        searched for or booked — the buckets steer nothing, bookers filter the search page
+        themselves. The question allows several answers, so the counts sum to more than the
+        number of bookers; each percentage is the share of bookers who ANSWERED, which is why
+        that count is shown rather than the total. Bookers who signed up before the question
+        existed are left out of it instead of counted as wanting nothing.
         <br />
         <br />
         Booking figures count confirmed bookings only (accepted and completed) — a declined or

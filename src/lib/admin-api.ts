@@ -15,6 +15,7 @@ import type {
   GeographyRow,
   BookedCategoryRow,
   BookerTypeRow,
+  BookerInterestStats,
   EngagementStats,
   UserStatus,
   PaginatedResponse,
@@ -40,6 +41,10 @@ export async function getGeographyBreakdown(): Promise<GeographyRow[]> {
 
 export async function getTopBookedCategories(): Promise<BookedCategoryRow[]> {
   return apiFetch<BookedCategoryRow[]>("/admin/analytics/booked-categories");
+}
+
+export async function getBookerInterests(): Promise<BookerInterestStats> {
+  return apiFetch<BookerInterestStats>("/admin/analytics/booker-interests");
 }
 
 export async function getTopBookerTypes(): Promise<BookerTypeRow[]> {

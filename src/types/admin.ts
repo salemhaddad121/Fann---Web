@@ -174,6 +174,35 @@ export interface BookerTypeRow {
   count: number;
 }
 
+// What bookers said they came for, at signup.
+//
+// This does NOT filter anybody's search — a booker picks filters on the
+// search page like everyone else. It exists so admin has an honest answer
+// to "what are people actually coming here to book".
+export interface BookerInterestRow {
+  /** The bucket slug, e.g. "photo_video". */
+  interest: string;
+  /** Bookers who picked this bucket. */
+  total: number;
+  individual: number;
+  company: number;
+  /**
+   * Fraction of ANSWERING bookers who picked it — not of all picks. The
+   * question is multi-select, so the totals sum to more than the number of
+   * bookers and a share against that sum would mean nothing.
+   */
+  share: number;
+}
+
+export interface BookerInterestStats {
+  interests: BookerInterestRow[];
+  /** Bookers who answered. The denominator for `share`. */
+  answering: number;
+  totalBookers: number;
+  /** Bookers who predate the question and have not been asked. */
+  unanswered: number;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: { total: number; page: number; limit: number; pages: number };
