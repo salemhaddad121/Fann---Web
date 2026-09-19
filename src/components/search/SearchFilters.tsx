@@ -68,7 +68,15 @@ export function SearchTopBar({
   return (
     <div className="border-b border-hairline bg-surface">
       <div className="flex items-center gap-2 px-4 pt-3">
-        <div className="flex flex-1 items-center gap-2 rounded-[10px] border border-hairline bg-sand px-3 py-2">
+        {/* The ring goes on the WRAPPER, not the input: the input is
+            bg-transparent inside this box, so a ring on it would draw around
+            the text and leave the search icon outside the focused thing. The
+            input itself carries outline-none and had nothing restoring it —
+            keyboard focus on the one control this page is built around was
+            invisible. has-[:focus-visible] rather than focus-within so the
+            ring answers the keyboard and not every click; clay is 6.73 on the
+            sand fill and 6.00 on the mint page ground, so it reads on both. */}
+        <div className="flex flex-1 items-center gap-2 rounded-[10px] border border-hairline bg-sand px-3 py-2 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-clay">
           <i className="ti ti-search text-base text-faint" />
           <input
             value={query}
