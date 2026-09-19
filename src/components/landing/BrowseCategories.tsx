@@ -132,9 +132,6 @@ export function BrowseCategories({ groups }: { groups: CategoryGroup[] }) {
                 </p>
               )}
 
-              {/* Decorative: the card already names its category in text, so
-                  an alt describing the photo would only lengthen a link name
-                  that is a heading plus seven tags plus a footer already. */}
               {/* The tag lines wrap to one, two or three lines depending on
                   the category, so the image carries the auto margin: the
                   images bottom-align, the footer rules line up across all
@@ -142,6 +139,9 @@ export function BrowseCategories({ groups }: { groups: CategoryGroup[] }) {
                   it reads as breathing room instead of as a hole beneath
                   the shortest card. */}
               <div className="mt-auto pt-5">
+                {/* alt="" is deliberate: the card already names its category in
+                    text, so describing the photo would only lengthen a link name
+                    that is a heading plus seven tags plus a footer already. */}
                 {/* eslint-disable-next-line @next/next/no-img-element -- local
                     static asset, already emitted at exactly 2x its slot and
                     lazy; next/image would add an optimizer round trip for it */}
