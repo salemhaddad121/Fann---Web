@@ -169,7 +169,7 @@ export function PlannerDetailClient({ id }: { id: string }) {
   if (isLoading || !user) return null;
 
   return (
-    <AppShell user={user} background="planner">
+    <AppShell user={user}>
       <Content id={id} />
     </AppShell>
   );

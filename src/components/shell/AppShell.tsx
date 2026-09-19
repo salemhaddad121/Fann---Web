@@ -18,12 +18,6 @@ export function AppShell({
 }: {
   user: SafeUser;
   children: ReactNode;
-  // DEAD, accepted and ignored. It chose which role's line-art backdrop to
-  // draw; the backdrop is gone and the ground is flat mint everywhere. Two
-  // call sites still pass it (ArtistDetailClient, PlannerDetailClient) and
-  // both lose it in Phase 8, which edits one of them anyway. Deliberately
-  // not destructured, so it raises no unused-variable warning.
-  background?: "artist" | "planner";
   // "sidebar-only" keeps the desktop sidebar but drops the mobile top and
   // bottom bars. For full-height pages that own the bottom of the screen —
   // the message thread's composer sits exactly where BottomNav would.

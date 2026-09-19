@@ -12,6 +12,7 @@ import { createBooking } from "@/lib/bookings-api";
 import { listSavedArtistIds, saveArtist, unsaveArtist } from "@/lib/saved-api";
 import { AppShell } from "@/components/shell/AppShell";
 import { ArtistProfileView } from "@/components/profile/ArtistProfileView";
+import { BookingRail } from "@/components/profile/BookingRail";
 import { ProposeBookingForm } from "@/components/bookings/ProposeBookingForm";
 import { ReportDialog } from "@/components/support/ReportDialog";
 import { formatDateLong } from "@/lib/calendar";
@@ -161,6 +162,11 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
 
   const isOwnProfile = user?.id === artist.user_id;
 
+  // The rail and the sticky UnlockCta are the same ask in two places, so
+  // they share one condition and the bar is lg:hidden. Change this and you
+  // change both — which is the point: on desktop there must be exactly one.
+  const showRail = !isOwnProfile && artist.viewer_tier !== "subscribed";
+
   return (
     <div>
       <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
@@ -185,26 +191,51 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
         </div>
       )}
 
-      <ArtistProfileView
-        artist={artist}
-        isOwnProfile={isOwnProfile}
-        accountStatus={isOwnProfile ? user?.status : undefined}
-        // Subscribed planners only, matching the Message button below.
-        // POST /bookings sits behind Paid Access, so handing a free
-        // planner the calendar would open a form that can only 402 on
-        // submit. UnlockCta at the foot of the page is their way in.
-        onPickDate={
-          user?.role === "planner" &&
-          !isOwnProfile &&
-          artist.viewer_tier === "subscribed"
-            ? (dateKey) => {
-                setBookingNotice(null);
-                setPickedDate(dateKey);
-              }
-            : undefined
-        }
-      />
+      {/* Two columns from lg: the profile keeps its 512px measure and the
+          rail takes the empty page beside it. Below lg this collapses to the
+          single column it has always been, and the sticky bar comes back. */}
+      <div className="lg:mx-auto lg:flex lg:max-w-4xl lg:items-start lg:gap-8 lg:px-4 lg:pt-4">
+        <div className="lg:min-w-0 lg:flex-1">
+          <ArtistProfileView
+            artist={artist}
+            isOwnProfile={isOwnProfile}
+            accountStatus={isOwnProfile ? user?.status : undefined}
+            // Subscribed planners only, matching the Message button below.
+            // POST /bookings sits behind Paid Access, so handing a free
+            // planner the calendar would open a form that can only 402 on
+            // submit. UnlockCta at the foot of the page is their way in.
+            onPickDate={
+              user?.role === "planner" &&
+              !isOwnProfile &&
+              artist.viewer_tier === "subscribed"
+                ? (dateKey) => {
+                    setBookingNotice(null);
+                    setPickedDate(dateKey);
+                  }
+                : undefined
+            }
+          />
+          {/* Below the profile and above the CTA: reachable after reading, and
+              never on your own profile, where it would be nonsense. Guests see it
+              too — an artist page is public, so a stranger can be the one who
+              notices something wrong. */}
+          {!isOwnProfile && (
+            <div className="px-4 pb-3 pt-1">
+              <ReportDialog
+                kind="artist"
+                targetId={artist.user_id}
+                targetName={artist.display_name}
+              />
+            </div>
+          )}
+        </div>
 
+        {showRail && (
+          <aside className="sticky top-4 hidden w-[328px] shrink-0 lg:block">
+            <BookingRail artist={artist} />
+          </aside>
+        )}
+      </div>
       {pickedDate && (
         <div className="fixed inset-0 z-[70] bg-ink/40 flex items-end sm:items-center justify-center">
           <div className="w-full sm:max-w-lg sm:rounded-2xl bg-surface overflow-hidden max-h-[90vh] flex flex-col">
@@ -215,20 +246,6 @@ function Content({ id, initialArtist }: { id: string; initialArtist: ArtistDetai
               onSubmit={handleProposeBooking}
             />
           </div>
-        </div>
-      )}
-
-      {/* Below the profile and above the CTA: reachable after reading, and
-          never on your own profile, where it would be nonsense. Guests see it
-          too — an artist page is public, so a stranger can be the one who
-          notices something wrong. */}
-      {!isOwnProfile && (
-        <div className="px-4 pb-3 pt-1">
-          <ReportDialog
-            kind="artist"
-            targetId={artist.user_id}
-            targetName={artist.display_name}
-          />
         </div>
       )}
 
@@ -279,7 +296,7 @@ export function ArtistDetailClient({
   }
 
   return (
-    <AppShell user={user} background="artist">
+    <AppShell user={user}>
       <Content id={id} initialArtist={initialArtist} />
     </AppShell>
   );

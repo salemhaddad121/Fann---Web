@@ -129,7 +129,10 @@ export function UnlockCta({ tier }: { tier?: ViewerTier }) {
    * moves, this string has to move with it. Logged in ISSUES.md.
    */
   return (
-    <div className="sticky bottom-0 z-20 border-t border-hairline bg-surface/95 px-4 py-3 backdrop-blur">
+    // lg:hidden — BookingRail replaces this on desktop. A sticky bar plus a
+    // rail is two competing asks for one click, and they are gated on the
+    // same condition (showRail in ArtistDetailClient) so exactly one shows.
+    <div className="sticky bottom-0 z-20 border-t border-hairline bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
         <p className="text-[13px] leading-snug text-muted">
           A plan unlocks the full name, contact details and messaging.
