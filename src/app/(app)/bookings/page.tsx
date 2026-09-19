@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { listMyBookings } from "@/lib/bookings-api";
 import { usePublicInfoMap } from "@/lib/use-public-info-map";
 import { StatusBadge } from "@/components/bookings/StatusBadge";
+import { MascotDoodle } from "@/components/brand/MascotDoodle";
 import { formatDateLong } from "@/lib/calendar";
 import type { Booking, BookingStatus } from "@/types/bookings";
 
@@ -86,6 +87,19 @@ export default function BookingsPage() {
   const active = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
   const visible = bookings.filter((b) => active.statuses.includes(b.status));
 
+  /*
+   * Which card the doodle hangs off.
+   *
+   * One per page, so it is the first card actually RENDERED — which in the
+   * grouped view is the first card of the first non-empty group, not
+   * visible[0]. Resolved here rather than with a flag flipped inside
+   * renderCard, so the answer does not depend on render order.
+   */
+  const firstRendered =
+    filter === "all"
+      ? GROUPS.flatMap((g) => bookings.filter((b) => g.statuses.includes(b.status)))[0]
+      : visible[0];
+
   function renderCard(b: Booking) {
     const otherId = isArtist ? b.planner_id : b.artist_id;
     const other = directory[otherId];
@@ -93,8 +107,28 @@ export default function BookingsPage() {
       <button
         key={b.id}
         onClick={() => router.push(`/bookings/${b.id}`)}
-        className="w-full text-left border border-hairline rounded-xl p-3.5"
+        className="relative w-full text-left border border-hairline rounded-xl p-3.5"
       >
+        {/* Peeking round the outer edge of the first card, into the page
+            gutter — mint, and empty.
+
+            34px wide, not the plan's ~58. This pose is 101x325, so width is
+            what sets height: 58 gives a 187px dog against a 95px card and it
+            dangles past the card into nothing, which is the floating look
+            hard rule 2 forbids. 34 gives 109px, so it stands 15px proud of
+            the bottom edge and reads as leaning round it.
+
+            It cannot reach the status badge. The badge sits inside the
+            card's 14px right padding and the doodle starts 3px OUTSIDE that
+            content edge, measured identical at 1024, 1280 and 1440 — so no
+            length of badge label can close the gap.
+
+            hideBelow lg because there is no gutter on a phone: the column is
+            the viewport, and a doodle at left:100% there is sideways scroll.
+            Confirmed hidden and no overflow at 360/390/768/1023. */}
+        {b.id === firstRendered?.id && (
+          <MascotDoodle variant="peek" offset="0px" width={34} hideBelow="lg" />
+        )}
         <div className="flex items-start justify-between gap-2 mb-1">
           <span className="text-sm font-semibold text-ink">{b.event_name}</span>
           <StatusBadge status={b.status} />
