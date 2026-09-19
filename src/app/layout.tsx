@@ -9,6 +9,7 @@ import "@/styles/tabler-subset.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { TwaContextProbe } from "@/components/pwa/TwaContextProbe";
+import { MascotSprite } from "@/components/brand/MascotSprite";
 import {
   SITE_URL,
   SITE_NAME,
@@ -145,6 +146,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-surface">
         <ServiceWorkerRegister />
         <TwaContextProbe />
+        {/* The four mascot poses, defined once. Every MascotDoodle on any
+            page is a <use> referencing these — see MascotSprite. */}
+        <MascotSprite />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

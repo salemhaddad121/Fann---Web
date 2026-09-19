@@ -3,7 +3,6 @@ import { unstable_cache } from "next/cache";
 import { getCategories } from "@/lib/artists-api";
 import type { ArtistSearchResponse } from "@/types/artists";
 import { getEventTypes } from "@/lib/planners-api";
-import { PageBackground } from "@/components/shell/PageBackground";
 import { PublicHeader } from "@/components/search/PublicHeader";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { LandingPlans } from "@/components/landing/LandingPlans";
@@ -197,7 +196,6 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
 
   return (
     <div className="min-h-screen relative">
-      <PageBackground role="artist" />
       <div className="relative z-10">
         <PublicHeader />
 
