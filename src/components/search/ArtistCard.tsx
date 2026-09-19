@@ -10,7 +10,8 @@ function formatPrice(value: ArtistCardType["base_price_usd"]) {
 }
 
 // Fades the photo out into the brand ink so white text stays legible over any
-// image. Kept as an inline style — same approach as PageBackground/AuthShell.
+// image. Kept as an inline style rather than a Tailwind arbitrary value,
+// because the stops carry alpha and read better spelled out.
 //
 // Ink, not navy. The old rgba(11,29,81) was the retired navy brand colour and
 // read as a blue cast over every thumbnail; 16,10,6 is --ink #1E1712, so the

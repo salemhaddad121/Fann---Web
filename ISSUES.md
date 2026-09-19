@@ -10,6 +10,21 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   or soften the pill to something the whole roster satisfies. It is a public
   claim about verification, so it is Salem's call, not a code fix.
 
+- Four places still set type below the repo's 12px floor, all of them count
+  badges, all found by the rebrand plan's own Phase 11 grep
+  (`text-\[1[01]px\]|text-\[9px\]`), which is supposed to come back empty:
+
+    - `src/components/search/SearchFilters.tsx:96` — 9px, in a 16x16 bubble
+    - `src/components/search/PlannerFilters.tsx:57` — 9px, same bubble
+    - `src/components/shell/BottomNav.tsx:38` — 9px unread count
+    - `src/app/(app)/bookings/page.tsx:147` — 11px, but only under 360px, as a
+      deliberate fallback so six filter tabs fit; arguably fine as it stands
+
+  The three 9px ones are not fine. Raising them to 12px needs the bubbles to
+  grow with them (h-4 w-4 will not hold a 12px numeral), which is a geometry
+  change across the filter row and the bottom nav, so it is not something to
+  do inside a rebrand batch. Phase 11 is reported as NOT clean on this grep.
+
 - `src/components/brand/doodle-art.ts` — the `peek` pose has nowhere to go.
   The rebrand plan's fourth doodle placement is "outer side edge of the first
   or last card in a row, wherever a row has gutter room", and it was tried on
