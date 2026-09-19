@@ -3,6 +3,13 @@
 Found during other work and deliberately not fixed inline — see CLAUDE.md §2.
 Each line: `file:line` — what is wrong. Delete a line when it is fixed.
 
+- `src/components/landing/LandingPage.tsx` — the hero pill reads "Every artist
+  ID-checked". The ID + selfie gate is real and is enforced on activation, so
+  the claim holds for every artist activated since it landed; the artists who
+  were already active when it did were never put through it. Either check them
+  or soften the pill to something the whole roster satisfies. It is a public
+  claim about verification, so it is Salem's call, not a code fix.
+
 - `src/components/landing/BrowseCategories.tsx` — the Event Services card
   links to `/search?categories=food-beverage`, which returns **0 artists** on
   the current roster. Measured per-group totals today: music 4, visual 1,
@@ -45,6 +52,10 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   passes in isolation. `--workers=2` (what CI already uses) is reliably
   green: 146/146. Either lower the local default or raise the timeout for
   that test.
+  Second symptom, same cause: the four `mobile — signed in ... offers a way
+  to log out` tests fail as "element(s) not found" after 5s on a full run and
+  all four pass on a re-run. Worth knowing before going hunting in the mobile
+  nav, which is where that message points and where the bug is not.
 - `src/components/profile/LockedField.tsx:~130` — UnlockCta's button says
   "from $5" as a literal. It renders on every locked profile view, so it is
   not worth a plan-list request for one number, but it will be wrong the day

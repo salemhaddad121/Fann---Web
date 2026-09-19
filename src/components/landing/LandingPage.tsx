@@ -9,6 +9,7 @@ import { LandingPlans } from "@/components/landing/LandingPlans";
 import { ArtistStrip } from "@/components/landing/ArtistStrip";
 import { StoreBadges } from "@/components/landing/StoreBadges";
 import { BrowseCategories } from "@/components/landing/BrowseCategories";
+import { FannIcon } from "@/components/brand/FannMark";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
@@ -174,6 +175,120 @@ const HEADLINE_CATEGORY_SLUGS = [
   "photo-booth",
 ];
 
+/**
+ * The hero band.
+ *
+ * Full-bleed mango, and full-bleed on purpose: mango on the mint page ground
+ * is 1.57:1, which is nothing. Make the viewport its edge and there is no
+ * adjacency left to fail — the block is bounded by the browser rather than by
+ * a line of mango sitting on mint. This is why it lives OUTSIDE the page's
+ * max-w-5xl container instead of breaking out of it with a 100vw width: on
+ * desktop 100vw includes the scrollbar, so that trick buys a horizontal
+ * scrollbar on every page it touches. Do not give this section a max-width,
+ * a margin or a radius; each one puts the seam back.
+ *
+ * Contrast inside it, measured against #FFA62B:
+ *
+ *   ink #1E1712             9.05   headline, pill, button
+ *   ink at 82%              6.25   the sentence, and "No account needed."
+ *   mango on the ink pill   9.05   pill and button labels
+ *
+ * 46/54 is the plan's split and the copy takes the smaller half: at 68px the
+ * headline wants a narrow measure, and the art wants the room.
+ */
+function HeroBand({ artistCount }: { artistCount: number }) {
+  return (
+    <section className="bg-mango">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 px-5 py-12 lg:min-h-[512px] lg:grid-cols-[46fr_54fr] lg:gap-10 lg:py-0">
+        <div>
+          {/* The ID check is enforced on activation — see ISSUES.md for the
+              one caveat this sentence does not carry. */}
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide text-mango">
+            <i className="ti ti-discount-check text-sm" aria-hidden="true" />
+            Every artist ID-checked
+          </span>
+
+          <h1 className="mt-5 font-display text-[38px] leading-[1.05] font-bold text-ink lg:text-[68px]">
+            Book Lebanon&apos;s live talent.
+          </h1>
+
+          <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-ink/[0.82] lg:text-base">
+            DJs, photographers, bands, MCs and more — browse verified profiles,
+            compare portfolios and availability, and book direct.
+          </p>
+
+          {/* "No account needed." sits beside the button rather than under it:
+              it is a caption on the action, not a step after it, and below the
+              button it pushed everything past it down a line for no reason. It
+              is also the only copy on the page telling a stranger they can look
+              around without signing up, which is the whole point of the guest
+              tier.
+
+              This stays the ONLY filled button in the hero. The performer ask
+              that used to sit under it has moved to PerformerCta at the foot of
+              the page — one primary action per screen. Do not put a second one
+              back here. */}
+          <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link
+              href="/search"
+              className="inline-flex h-14 items-center rounded-[10px] bg-ink px-6 text-[15px] font-semibold text-mango"
+            >
+              {artistCount > 0 ? `Browse all ${artistCount} artists` : "Browse artists"}
+            </Link>
+            <p className="text-sm text-ink/[0.82]">No account needed.</p>
+          </div>
+        </div>
+
+        {/* The plan asks for one photograph here and there is not one to use.
+            The only landscape event photo in the repo is public/seed/cedar-and-
+            smoke.jpg — a seed artist's cover, and the same rooftop band that is
+            already in the artist strip and on the Musical Acts card, so a third
+            copy of it would read as a mistake rather than as a hero. The dog is
+            the brand's own art, it is ink on mango at 9.05, and it costs no
+            asset. Dropping a photograph in later is this div and nothing else.
+
+            Hidden below lg deliberately: stacked on a phone the copy is the
+            whole point, and 236px of dog above it only pushes the button down. */}
+        <div className="hidden items-center justify-center lg:flex">
+          <FannIcon variant="on-mango" size={236} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The closing band — the artist half of the pitch, once.
+ *
+ * This is what replaced "Are you a performer? List free →" in the hero. The
+ * hero gets one action (browse); the performer ask gets a band of its own at
+ * the foot of the page instead of a text link competing with it at the top.
+ *
+ * Same mango, same reason, same rule: no max-width on the section itself.
+ */
+function PerformerCta() {
+  return (
+    <section className="bg-mango">
+      <div className="mx-auto flex max-w-5xl flex-col gap-5 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-display text-[30px] leading-tight font-bold text-ink lg:text-[38px]">
+            Are you a performer?
+          </h2>
+          <p className="mt-1.5 text-sm text-ink/[0.82]">
+            List free. No booking commissions, no hidden fees.
+          </p>
+        </div>
+        <Link
+          href="/auth/register?role=artist"
+          className="inline-flex h-14 shrink-0 items-center gap-1.5 self-start rounded-[10px] bg-ink px-6 text-[15px] font-semibold text-mango sm:self-auto"
+        >
+          LIST FREE <i className="ti ti-arrow-right text-base" aria-hidden="true" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 interface LandingPageProps {
   /**
    * False inside the Play app. Decided at the route so the prices are never
@@ -203,141 +318,97 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
       <div className="relative z-10">
         <PublicHeader />
 
-        <main className="px-5 pb-16 max-w-5xl mx-auto">
-          {/* Banner.
+        <main>
+          <HeroBand artistCount={artistCount} />
 
-              One sentence and one action. This previously ran headline, a
-              five-line paragraph, a trust-badge row, a second four-line
-              paragraph, and only then the CTA at roughly 510px down — with
-              "Join as an Artist" and "Join as a Planner" immediately under
-              it. Nine lines of prose and, counting Log in / Sign up, five
-              competing actions before a visitor saw a single artist.
+          <div className="mx-auto max-w-5xl px-5 pt-10 pb-16">
 
-              What is left: the headline, one sentence, one filled button.
-              The two role CTAs are demoted to the text link below, because
-              both roles already get a full JOIN NOW section further down
-              this page — they were competing with the browse action for the
-              first screen and winning on colour while losing on relevance.
+            {/* The proof that there is anybody here, directly under the hero
+                and above every word of explanation. */}
+            <ArtistStrip />
 
-              The button stays the ONLY filled button in the hero. It used to
-              be bg-ink next to a saturated clay and a saturated teal, which
-              made the no-commitment action the least prominent thing on the
-              page. Do not reintroduce a second filled button here. */}
-          <section className="pt-10 pb-8 lg:pt-16 lg:pb-10 max-w-3xl">
-            <h1 className="font-display text-[30px] leading-[1.15] lg:text-[44px] font-bold text-ink">
-              Book Lebanon&apos;s live talent.
-            </h1>
-            <p className="mt-4 text-[15px] lg:text-base text-ink/80 leading-relaxed">
-              DJs, photographers, bands, MCs and more — browse verified profiles,
-              compare portfolios and availability, and book direct.
-            </p>
+            {/* Three doors into the search, above the two role pitches: a
+                visitor who already knows what they want should not have to
+                read either of them first. */}
+            <BrowseCategories groups={groups} />
 
-            {/* "No account needed." sits beside the button rather than under
-                it: it is a caption on the action, not a step after it, and
-                below the button it pushed everything past it down a line for
-                no reason. It is also the only copy on the page telling a
-                stranger they can look around without signing up, which is
-                the entire point of the guest tier. */}
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <Link
-                href="/search"
-                className="inline-flex h-14 items-center rounded-[10px] bg-ink px-6 text-[15px] font-semibold text-white"
-              >
-                {artistCount > 0 ? `Browse all ${artistCount} artists` : "Browse artists"}
-              </Link>
-              <p className="text-sm text-muted">No account needed.</p>
+            <div className="pt-10" />
+
+            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+              {/* For Artists */}
+              <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-clay">
+                  For Artists
+                </span>
+                <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
+                  A home online for your talent.
+                </h2>
+                <p className="mt-3 text-sm text-ink/80 leading-relaxed">
+                  Fann gives you a home online to showcase your talent and get booked. Create a
+                  profile with your portfolio, set your availability, and let event planners across
+                  Lebanon find and book you directly.
+                </p>
+                <p className="mt-3 text-sm text-ink/80 leading-relaxed">
+                  Fann puts your work in front of the people who need it, when they need it.
+                </p>
+                <NoFees freeToUse />
+                <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
+                  Get booked for
+                </p>
+                {/* No href — see Pills. */}
+                <Pills items={eventTypes.map((label) => ({ label }))} />
+                <JoinNow role="artist" />
+              </section>
+
+              {/* For Planners */}
+              <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-teal">
+                  For Planners
+                </span>
+                <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
+                  Beyond your own network.
+                </h2>
+                <p className="mt-3 text-sm text-ink/80 leading-relaxed">
+                  Fann takes you out of your immediate network of talent and provides you with a
+                  vast directory of performing artists and event services.
+                </p>
+                <p className="mt-3 text-sm text-ink/80 leading-relaxed">
+                  Search verified artists — DJs, photographers, bands, MCs, and much more — compare
+                  portfolios and availability, and book with confidence, all in one place. From
+                  weddings to corporate events.
+                </p>
+                <p className="mt-3 text-sm text-ink/80 leading-relaxed">
+                  Find the right performer without endless phone calls, referrals, and endless
+                  searching on Instagram.
+                </p>
+                <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
+                  Hire from
+                </p>
+                <Pills items={headlineCategories} />
+                {artistCategories.length > headlineCategories.length && (
+                  <p className="mt-3 text-[13px]">
+                    <Link href="/search" className="font-semibold text-clay-deep">
+                      See all {artistCategories.length} categories →
+                    </Link>
+                  </p>
+                )}
+                <JoinNow role="planner" />
+              </section>
             </div>
 
-            <p className="mt-4 text-sm">
-              <Link href="/auth/register?role=artist" className="font-semibold text-clay-deep">
-                Are you a performer? List free →
-              </Link>
-            </p>
-          </section>
+            {/* Pricing. Sits after both role sections because it only applies
+                to one of them — an artist reading down the page is told twice
+                that listing is free before a price appears. */}
+            {showPricing && <LandingPlans />}
 
-          {/* The proof that there is anybody here, directly under the hero
-              and above every word of explanation. */}
-          <ArtistStrip />
-
-          {/* Three doors into the search, above the two role pitches: a
-              visitor who already knows what they want should not have to
-              read either of them first. */}
-          <BrowseCategories groups={groups} />
-
-          <div className="pt-10" />
-
-          <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-            {/* For Artists */}
-            <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-clay">
-                For Artists
-              </span>
-              <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
-                A home online for your talent.
-              </h2>
-              <p className="mt-3 text-sm text-ink/80 leading-relaxed">
-                Fann gives you a home online to showcase your talent and get booked. Create a
-                profile with your portfolio, set your availability, and let event planners across
-                Lebanon find and book you directly.
-              </p>
-              <p className="mt-3 text-sm text-ink/80 leading-relaxed">
-                Fann puts your work in front of the people who need it, when they need it.
-              </p>
-              <NoFees freeToUse />
-              <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
-                Get booked for
-              </p>
-              {/* No href — see Pills. */}
-              <Pills items={eventTypes.map((label) => ({ label }))} />
-              <JoinNow role="artist" />
-            </section>
-
-            {/* For Planners */}
-            <section className="bg-surface/85 border border-hairline rounded-[18px] p-6 lg:p-7">
-              <span className="text-[12px] font-semibold uppercase tracking-wide text-teal">
-                For Planners
-              </span>
-              <h2 className="font-display text-[24px] lg:text-[26px] font-bold text-ink mt-1.5">
-                Beyond your own network.
-              </h2>
-              <p className="mt-3 text-sm text-ink/80 leading-relaxed">
-                Fann takes you out of your immediate network of talent and provides you with a
-                vast directory of performing artists and event services.
-              </p>
-              <p className="mt-3 text-sm text-ink/80 leading-relaxed">
-                Search verified artists — DJs, photographers, bands, MCs, and much more — compare
-                portfolios and availability, and book with confidence, all in one place. From
-                weddings to corporate events.
-              </p>
-              <p className="mt-3 text-sm text-ink/80 leading-relaxed">
-                Find the right performer without endless phone calls, referrals, and endless
-                searching on Instagram.
-              </p>
-              <p className="mt-5 text-xs font-semibold text-faint uppercase tracking-wide">
-                Hire from
-              </p>
-              <Pills items={headlineCategories} />
-              {artistCategories.length > headlineCategories.length && (
-                <p className="mt-3 text-[13px]">
-                  <Link href="/search" className="font-semibold text-clay-deep">
-                    See all {artistCategories.length} categories →
-                  </Link>
-                </p>
-              )}
-              <JoinNow role="planner" />
+            {/* Mid-page store badges, driven by the same config as the footer
+                so there is one place to fill in the URLs when the apps ship. */}
+            <section className="mt-5 rounded-[18px] border border-hairline bg-surface/85 p-6 lg:p-7">
+              <StoreBadges heading="Fann on mobile" />
             </section>
           </div>
 
-          {/* Pricing. Sits after both role sections because it only applies
-              to one of them — an artist reading down the page is told twice
-              that listing is free before a price appears. */}
-          {showPricing && <LandingPlans />}
-
-          {/* Mid-page store badges, driven by the same config as the footer
-              so there is one place to fill in the URLs when the apps ship. */}
-          <section className="mt-5 rounded-[18px] border border-hairline bg-surface/85 p-6 lg:p-7">
-            <StoreBadges heading="Fann on mobile" />
-          </section>
+          <PerformerCta />
         </main>
 
         <SiteFooter />
