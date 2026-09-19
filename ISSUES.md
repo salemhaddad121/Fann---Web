@@ -37,19 +37,6 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   change across the filter row and the bottom nav, so it is not something to
   do inside a rebrand batch. Phase 11 is reported as NOT clean on this grep.
 
-- `src/components/brand/doodle-art.ts` — the `peek` pose has nowhere to go.
-  The rebrand plan's fourth doodle placement is "outer side edge of the first
-  or last card in a row, wherever a row has gutter room", and it was tried on
-  /bookings and dropped. The pose is 101x325 — very tall, very thin — and its
-  19-29% overhang is meant to be HIDDEN behind the edge it peeks round. A
-  booking card is ~100px tall and has no background at all (border-hairline on
-  mint), so nothing hides anything: the whole dog draws, half of it dangling
-  below the card into empty mint. That is the floating-in-the-middle look the
-  plan's own hard rule 2 exists to prevent. It needs a tall OPAQUE edge with a
-  gutter beside it, and no page has one today — the rail is taken by `rest`,
-  the browse cards are too dark for a grey line, and the filter rail's gutter
-  is 20px. Revisit when a page grows one; the other three placements shipped.
-
 - `src/components/landing/BrowseCategories.tsx` — the Event Services card
   links to `/search?categories=food-beverage`, which returns **0 artists** on
   the current roster. Measured per-group totals today: music 4, visual 1,
