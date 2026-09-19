@@ -10,6 +10,46 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   or soften the pill to something the whole roster satisfies. It is a public
   claim about verification, so it is Salem's call, not a code fix.
 
+- The six pale pastel pairs that Phase 9 took out of `badge-colors.ts` are
+  still written inline in about eighteen places — `bg-[#FEF3C7]
+  text-[#92400E]` and `bg-[#dfeceb] text-teal` most of all. They are in
+  StatusBadge, UserStatusBadge, VerificationChecklist, LiveStatusBanner,
+  SupportTab, TopNav's role chip, PlannerFilters and the admin dashboard.
+
+  Deliberately NOT changed with the category palette: those six were a hash
+  with no meaning, and these encode state — amber is pending, teal is
+  planner. Recolouring them is a semantic decision, not a token swap, and the
+  rebrand plan only asked for badge-colors.ts. Worth doing as its own pass so
+  status colour is decided once instead of eighteen times.
+
+- Four places still set type below the repo's 12px floor, all of them count
+  badges, all found by the rebrand plan's own Phase 11 grep
+  (`text-\[1[01]px\]|text-\[9px\]`), which is supposed to come back empty:
+
+    - `src/components/search/SearchFilters.tsx:96` — 9px, in a 16x16 bubble
+    - `src/components/search/PlannerFilters.tsx:57` — 9px, same bubble
+    - `src/components/shell/BottomNav.tsx:38` — 9px unread count
+    - `src/app/(app)/bookings/page.tsx:147` — 11px, but only under 360px, as a
+      deliberate fallback so six filter tabs fit; arguably fine as it stands
+
+  The three 9px ones are not fine. Raising them to 12px needs the bubbles to
+  grow with them (h-4 w-4 will not hold a 12px numeral), which is a geometry
+  change across the filter row and the bottom nav, so it is not something to
+  do inside a rebrand batch. Phase 11 is reported as NOT clean on this grep.
+
+- `src/components/brand/doodle-art.ts` — the `peek` pose has nowhere to go.
+  The rebrand plan's fourth doodle placement is "outer side edge of the first
+  or last card in a row, wherever a row has gutter room", and it was tried on
+  /bookings and dropped. The pose is 101x325 — very tall, very thin — and its
+  19-29% overhang is meant to be HIDDEN behind the edge it peeks round. A
+  booking card is ~100px tall and has no background at all (border-hairline on
+  mint), so nothing hides anything: the whole dog draws, half of it dangling
+  below the card into empty mint. That is the floating-in-the-middle look the
+  plan's own hard rule 2 exists to prevent. It needs a tall OPAQUE edge with a
+  gutter beside it, and no page has one today — the rail is taken by `rest`,
+  the browse cards are too dark for a grey line, and the filter rail's gutter
+  is 20px. Revisit when a page grows one; the other three placements shipped.
+
 - `src/components/landing/BrowseCategories.tsx` — the Event Services card
   links to `/search?categories=food-beverage`, which returns **0 artists** on
   the current roster. Measured per-group totals today: music 4, visual 1,
@@ -34,7 +74,7 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   either document it at the function or drop unrepresentable slugs loudly.
   It is why each browse card links to one group rather than to a set.
 
-- `src/app/search/SearchClient.tsx` — the result count does not pluralise its
+- `src/components/search/ResultBar.tsx:92` — the result count does not pluralise its
   verb: a single match reads "1 artist match your filters". The noun is
   handled, the verb is not.
 

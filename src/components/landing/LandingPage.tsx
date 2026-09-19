@@ -10,6 +10,7 @@ import { ArtistStrip } from "@/components/landing/ArtistStrip";
 import { StoreBadges } from "@/components/landing/StoreBadges";
 import { BrowseCategories } from "@/components/landing/BrowseCategories";
 import { FannIcon } from "@/components/brand/FannMark";
+import { MascotDoodle } from "@/components/brand/MascotDoodle";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
@@ -325,7 +326,23 @@ export async function LandingPage({ showPricing = true }: LandingPageProps) {
 
             {/* The proof that there is anybody here, directly under the hero
                 and above every word of explanation. */}
-            <ArtistStrip />
+            {/* The doodle hangs off the BOTTOM of this block, which is the
+                mint gap above the browse panel — so the dog stands on mint
+                and only its legs cross onto the white card, which is what
+                keeps it off the "on white it competes" side of the rule.
+                z-10 because the panel is a later sibling and would
+                otherwise paint over the legs. Offset puts it clear of the
+                panel heading, which is left-aligned. */}
+            <div className="relative">
+              <ArtistStrip />
+              <MascotDoodle
+                variant="walk"
+                offset="77%"
+                width={168}
+                hideBelow="lg"
+                className="z-10"
+              />
+            </div>
 
             {/* Three doors into the search, above the two role pitches: a
                 visitor who already knows what they want should not have to

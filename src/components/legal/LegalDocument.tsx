@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FannLockup } from "@/components/brand/FannMark";
 import { LEGAL_ENTITY } from "@/lib/legal-entity";
 
 // Shared shell for /terms and /privacy.
@@ -53,8 +54,8 @@ export function LegalDocument({
 }) {
   return (
     <div className="max-w-2xl mx-auto px-5 py-10">
-      <Link href="/" className="font-display text-xl font-bold text-ink">
-        fan<span className="text-clay">n</span>
+      <Link href="/" className="inline-block">
+        <FannLockup size={40} />
       </Link>
 
       <h1 className="mt-8 text-2xl font-bold text-ink">{title}</h1>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { FannLockup } from "@/components/brand/FannMark";
 import { useSearchParams } from "next/navigation";
 import { unsubscribe } from "@/lib/account-api";
 
@@ -43,8 +44,8 @@ export function UnsubscribeClient() {
 
   return (
     <div className="mx-auto max-w-md px-5 py-14">
-      <Link href="/" className="font-display text-xl font-bold text-ink">
-        fan<span className="text-clay">n</span>
+      <Link href="/" className="inline-block">
+        <FannLockup size={40} />
       </Link>
 
       {!token ? (

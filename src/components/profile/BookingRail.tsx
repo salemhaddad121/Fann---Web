@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ArtistDetail } from "@/types/artists";
+import { MascotDoodle } from "@/components/brand/MascotDoodle";
 
 /**
  * The desktop booking rail.
@@ -42,7 +43,7 @@ export function BookingRail({ artist }: { artist: ArtistDetail }) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-[18px] border border-hairline bg-surface">
+      <div className="relative overflow-hidden rounded-[18px] border border-hairline bg-surface">
         <div className="bg-mango px-5 py-4">
           {price ? (
             <p className="font-display text-[26px] leading-none font-bold text-ink">{price}</p>
@@ -56,7 +57,7 @@ export function BookingRail({ artist }: { artist: ArtistDetail }) {
           </p>
         </div>
 
-        <div className="px-5 py-5">
+        <div className="px-5 pb-[72px] pt-5">
           <ul className="space-y-2.5">
             {UNLOCKS.map(({ icon, text }) => (
               <li key={text} className="flex gap-2.5 text-[13px] leading-snug text-ink-soft">
@@ -77,6 +78,25 @@ export function BookingRail({ artist }: { artist: ArtistDetail }) {
             See plans — from $5
           </Link>
         </div>
+
+        {/* Chin on the bottom edge of the card, which is why the body
+            carries 72px of bottom padding rather than the 20px it needs for
+            itself — the pose is 63px tall at this width and the plan is
+            explicit that it must not land on anything. The card is
+            overflow-hidden, so this pose (the one that sits INSIDE its
+            parent rather than overhanging) is the only one that would work
+            here at all.
+
+            White ground, which is the one place the doodle rule bends: the
+            line is 3.78:1 on white against 3.03 on mint. The rule exists so
+            a doodle does not compete with content, and there is no content
+            in this strip to compete with.
+
+            Inset 20px from the right rather than the plan's -4px overhang: the
+            card is overflow-hidden, so an overhang is not an overhang here, it
+            is a clipped nose. 20px is the card's own horizontal padding, so it
+            lines up with everything above it. */}
+        <MascotDoodle variant="rest" offset="calc(100% - 166px)" width={146} />
       </div>
 
       {/* Why the name is missing.
