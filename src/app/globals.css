@@ -96,6 +96,21 @@
   --card-plum: #5F2352;  /* white on it is 11.36:1 */
   --card-indigo: #1F2F6B;/* white on it is 12.52:1 */
 
+  /* The mascot line art, and nothing else.
+
+     Measured rather than picked. Salem's own reference renders draw the dog
+     at #A8856E on cream, which is 3.06:1 — that presence is the target, not
+     a number pulled from the accessibility scale, because a doodle carries
+     no text and no control edge. This holds it across all three grounds it
+     can sit on: 3.03 on mint, 3.40 on sand, 3.78 on white.
+
+     NEVER put opacity on top of this. The token and an alpha compound, and
+     the drawing then drifts in weight depending on which ground it lands on
+     — which is the whole thing this value exists to prevent. Mango was
+     tried for the doodles and rejected: 1.57:1 on mint is half the
+     reference's presence and the drawing reads as a smudge. */
+  --doodle: #77877F;
+
   /* Type.
 
      Both families come from next/font (see app/layout.tsx), which
@@ -131,6 +146,7 @@
   --color-mango: var(--mango);
   --color-card-plum: var(--card-plum);
   --color-card-indigo: var(--card-indigo);
+  --color-doodle: var(--doodle);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
   --color-success: var(--success);
