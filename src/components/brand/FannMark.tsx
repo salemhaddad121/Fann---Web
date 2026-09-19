@@ -1,114 +1,147 @@
-// The Maqam logo mark: a crescent arc inside a thin ring. The design brief
-// describes it as reading three ways at once — an abstracted oud soundhole,
-// a welcome arc, and the curve of the "n" that the wordmark already leans on.
-//
-// Geometry is pinned to the 42x42 viewBox the design drew it at and scaled
-// via width/height, so stroke weights stay proportional at every size rather
-// than going spindly when rendered small.
+import { FANN_LOGO, FANN_DOG, type BrandArt } from "@/components/brand/brand-art";
 
-type MarkVariant = "default" | "on-ink" | "solid";
+/**
+ * The Fann brand marks.
+ *
+ * This replaced the old crescent-in-a-ring mark and the separate "fan" + "n"
+ * text wordmark. The lettering now lives INSIDE the artwork, so there is no
+ * longer a text node to colour — which is why FannWordmark is an alias here
+ * rather than a component (see below).
+ *
+ * COLOUR. The wordmark is mango on every ground, and ink only when the
+ * ground itself is mango:
+ *
+ *   mint / white / sand   --mango    1.57 / 1.96 / 1.76
+ *   ink                   --mango    9.05
+ *   mango                 --ink      9.05
+ *
+ * The three tonal ones are deliberate and allowed: WCAG 2.2 exempts
+ * logotypes from SC 1.4.3 and SC 1.4.11 outright — "text that is part of a
+ * logo or brand name has no contrast requirement". The consequence is
+ * optical rather than legal, and it is paid for with the size floor below,
+ * not with a different colour.
+ *
+ * SIZE. `size` is the rendered HEIGHT in px; the width comes from the
+ * artwork's own aspect ratio. The floor is 40px, 56px wherever the layout
+ * allows. Below 40 the lettering and the dog collapse into each other, and
+ * at 1.57:1 there is no contrast headroom to carry a mushy shape.
+ *
+ * Anywhere that cannot fit 40px — a tight sticky header, an inline badge —
+ * use `FannIcon` instead. It is the dog alone, which survives small sizes
+ * because it is one shape rather than five letters and a dog.
+ */
 
-export function FannMark({
-  size = 34,
+type MarkVariant = "default" | "on-mango" | "on-ink" | "solid";
+
+/** Every variant is one text-* class on one asset, because the art is
+ *  currentColor. `on-ink` is kept as an alias of default for call-site
+ *  compatibility — on ink, mango is already right at 9.05:1. */
+function colourFor(variant: MarkVariant): string {
+  if (variant === "on-mango") return "text-ink";
+  if (variant === "solid") return ""; // caller supplies the colour
+  return "text-mango"; // default and on-ink
+}
+
+function Art({
+  art,
+  size,
+  variant,
+  title,
+  className,
+}: {
+  art: BrandArt;
+  size: number;
+  variant: MarkVariant;
+  title?: string;
+  className: string;
+}) {
+  // Titled marks are images to assistive tech; untitled ones are decorative,
+  // because the visible brand name is almost always already in the DOM beside
+  // them and a second "Fann" is just a stutter.
+  const a11y = title
+    ? ({ role: "img" as const, "aria-label": title })
+    : ({ "aria-hidden": true as const, focusable: "false" as const });
+
+  return (
+    <svg
+      height={size}
+      width={Math.round(size * art.aspect)}
+      viewBox={art.viewBox}
+      fill="currentColor"
+      fillRule="evenodd"
+      className={`${colourFor(variant)} ${className}`.trim()}
+      {...a11y}
+    >
+      <path d={art.d} />
+    </svg>
+  );
+}
+
+/**
+ * The dachshund on its own.
+ *
+ * This is what to use below the lockup's 40px floor, and it is the shape the
+ * app icon is built from. `size` is the height, as everywhere here.
+ */
+export function FannIcon({
+  size = 28,
   variant = "default",
-  withDots = false,
   title,
   className = "",
 }: {
   size?: number;
   variant?: MarkVariant;
-  /** The two terminal dots from the design's primary lockup. Off by default —
-   *  below roughly 28px they collapse into the ring and just read as noise. */
-  withDots?: boolean;
-  /** Supply only when the mark stands alone. Paired with the wordmark it is
-   *  decorative, and a second "Fann" for screen readers is just a stutter. */
   title?: string;
   className?: string;
 }) {
-  const a11y = title
-    ? ({ role: "img" as const, "aria-label": title })
-    : ({ "aria-hidden": true as const, focusable: "false" as const });
-
-  // App and favicon mark — a filled disc with a knocked-out arc. The outlined
-  // variant's 1.6px ring vanishes at favicon sizes, so this one carries the
-  // weight instead of scaling the outline down.
-  if (variant === "solid") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 42 42" className={className} {...a11y}>
-        <circle cx="21" cy="21" r="20" fill="var(--clay-deep)" />
-        <path
-          d="M10 21 A11 11 0 0 1 32 21"
-          fill="none"
-          stroke="var(--sand)"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
-  // On the dark ink panel the two-tone treatment loses its contrast, so the
-  // design collapses ring and arc to a single light clay.
-  const onInk = variant === "on-ink";
-  const ring = onInk ? "var(--clay-light)" : "var(--clay-deep)";
-  const arc = onInk ? "var(--clay-light)" : "var(--clay)";
-
-  return (
-    <svg width={size} height={size} viewBox="0 0 42 42" className={className} {...a11y}>
-      <circle cx="21" cy="21" r="19" fill="none" stroke={ring} strokeWidth="1.6" />
-      <path
-        d="M7 21 A14 14 0 0 1 35 21"
-        fill="none"
-        stroke={arc}
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      {withDots && (
-        <>
-          <circle cx="7" cy="21" r="2" fill={ring} />
-          <circle cx="35" cy="21" r="2" fill={arc} />
-        </>
-      )}
-    </svg>
-  );
+  return <Art art={FANN_DOG} size={size} variant={variant} title={title} className={className} />;
 }
 
-// The "fan" + accented "n" wordmark the product already used, kept as a
-// component so the accent color follows the role rather than being retyped
-// at each call site.
-export function FannWordmark({
-  onInk = false,
-  className = "",
-}: {
-  onInk?: boolean;
-  className?: string;
-}) {
-  return (
-    <span className={`font-display font-bold ${onInk ? "text-surface" : "text-ink"} ${className}`}>
-      fan<span className={onInk ? "text-clay-light" : "text-clay"}>n</span>
-    </span>
-  );
-}
-
-// Mark + wordmark, the horizontal lockup used in the auth panel and the
-// landing nav.
+/**
+ * The full lockup — lettering and dog, one piece of artwork.
+ *
+ * `size` is its HEIGHT. 40 is the floor, 56 where there is room. If a 40px
+ * lockup does not fit its container, raise the container; if that is not
+ * reasonable, use FannIcon instead. Do not shrink this below 40.
+ */
 export function FannLockup({
-  size = 28,
-  onInk = false,
-  withDots = false,
+  size = 40,
+  variant = "default",
+  title,
   className = "",
-  textClassName = "text-2xl",
 }: {
   size?: number;
-  onInk?: boolean;
-  withDots?: boolean;
+  variant?: MarkVariant;
+  title?: string;
   className?: string;
+  /**
+   * Accepted and ignored, all three. The old lockup was a mark beside a text
+   * node; these styled that text and the mark's terminal dots. The artwork
+   * now carries its own lettering, so there is nothing left for them to act
+   * on. They stay in the type so the call sites did not all have to change
+   * shape in the same commit — deliberately NOT destructured, so they raise
+   * no unused-variable warning. Cleanup is logged in ISSUES.md.
+   */
   textClassName?: string;
+  withDots?: boolean;
+  onInk?: boolean;
 }) {
-  return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <FannMark size={size} variant={onInk ? "on-ink" : "default"} withDots={withDots} />
-      <FannWordmark onInk={onInk} className={textClassName} />
-    </span>
-  );
+  return <Art art={FANN_LOGO} size={size} variant={variant} title={title} className={className} />;
+}
+
+/**
+ * Was the mark half of the old lockup. The artwork is now one piece, so this
+ * renders the full lockup and exists only so nothing breaks.
+ * @deprecated Use FannLockup, or FannIcon below 40px.
+ */
+export function FannMark(props: Parameters<typeof FannLockup>[0]) {
+  return <FannLockup {...props} />;
+}
+
+/**
+ * Was the text half. The lettering is inside the artwork now.
+ * @deprecated Use FannLockup, or FannIcon below 40px.
+ */
+export function FannWordmark(props: Parameters<typeof FannLockup>[0]) {
+  return <FannLockup {...props} />;
 }
