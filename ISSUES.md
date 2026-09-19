@@ -10,6 +10,19 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   or soften the pill to something the whole roster satisfies. It is a public
   claim about verification, so it is Salem's call, not a code fix.
 
+- `src/components/brand/doodle-art.ts` — the `peek` pose has nowhere to go.
+  The rebrand plan's fourth doodle placement is "outer side edge of the first
+  or last card in a row, wherever a row has gutter room", and it was tried on
+  /bookings and dropped. The pose is 101x325 — very tall, very thin — and its
+  19-29% overhang is meant to be HIDDEN behind the edge it peeks round. A
+  booking card is ~100px tall and has no background at all (border-hairline on
+  mint), so nothing hides anything: the whole dog draws, half of it dangling
+  below the card into empty mint. That is the floating-in-the-middle look the
+  plan's own hard rule 2 exists to prevent. It needs a tall OPAQUE edge with a
+  gutter beside it, and no page has one today — the rail is taken by `rest`,
+  the browse cards are too dark for a grey line, and the filter rail's gutter
+  is 20px. Revisit when a page grows one; the other three placements shipped.
+
 - `src/components/landing/BrowseCategories.tsx` — the Event Services card
   links to `/search?categories=food-beverage`, which returns **0 artists** on
   the current roster. Measured per-group totals today: music 4, visual 1,
@@ -34,7 +47,7 @@ Each line: `file:line` — what is wrong. Delete a line when it is fixed.
   either document it at the function or drop unrepresentable slugs loudly.
   It is why each browse card links to one group rather than to a set.
 
-- `src/app/search/SearchClient.tsx` — the result count does not pluralise its
+- `src/components/search/ResultBar.tsx:92` — the result count does not pluralise its
   verb: a single match reads "1 artist match your filters". The noun is
   handled, the verb is not.
 

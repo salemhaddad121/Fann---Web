@@ -24,6 +24,7 @@ import { FilterRail, FilterSheet } from "@/components/search/FilterShell";
 import { ResultBar, type ActiveChip } from "@/components/search/ResultBar";
 import { CardSkeletonGrid } from "@/components/search/CardSkeleton";
 import { ArtistCard } from "@/components/search/ArtistCard";
+import { MascotDoodle } from "@/components/brand/MascotDoodle";
 import { PlannerCard } from "@/components/search/PlannerCard";
 import {
   readArtistSearchUrl,
@@ -404,7 +405,20 @@ function ArtistDirectory({ isPlanner }: { isPlanner: boolean }) {
             </div>
           )}
 
-          <div className={GRID_CLASS}>
+          {/* One doodle, on the top edge of the results grid.
+
+              The plan put it at "offset right 6px", which is where the Sort
+              control is: measured, there are 6px between that select and the
+              grid, not the ~58px the pose needs, so a right-aligned mic dog
+              would sit on a form field. Hard rule 1 beats the suggested
+              offset, so it goes in the empty middle of that row instead —
+              ~625px of nothing between the result count and the sort — which
+              is a real edge, on mint, over neither text nor a control.
+
+              hideBelow lg because that empty middle is what disappears
+              first as the row narrows. */}
+          <div className={`relative ${GRID_CLASS}`}>
+            <MascotDoodle variant="mic" offset="35%" width={188} hideBelow="lg" />
             {loading ? (
               <CardSkeletonGrid count={Math.min(PAGE_SIZE, 8)} />
             ) : (
