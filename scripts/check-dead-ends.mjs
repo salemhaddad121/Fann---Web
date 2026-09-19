@@ -116,7 +116,13 @@ for (const file of sourceFiles) {
       let m;
       while ((m = re.exec(text)) !== null) {
         const raw = m[1].trim();
-        if (!raw || raw === "#") continue;
+        // A fragment-only href is never a route. Bare "#" is caught as an
+        // error by the MARKERS pass below (a link that goes nowhere); "#id"
+        // is a same-document reference — an in-page anchor, or an SVG
+        // <use href="#sprite-id">, which is how the mascot doodles are
+        // drawn. Neither is navigation, and reporting them as unverifiable
+        // relative targets buried the real warnings in noise.
+        if (!raw || raw.startsWith("#")) continue;
         const targets = expand(raw);
         if (!targets) continue;
         if (!targets[0].startsWith("/")) {
